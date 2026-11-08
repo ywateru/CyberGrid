@@ -53,7 +53,7 @@ jobs:
           retention-days: 1
 
   macos:
-    runs-on: macos-15-arm64
+    runs-on: macos-15
     timeout-minutes: 90
     env:
       CARGO_TARGET_DIR: ${{ github.workspace }}/target/ci-macos
