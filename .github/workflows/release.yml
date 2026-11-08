@@ -8,7 +8,7 @@ on:
       release_tag:
         description: 'Project release tag (SDK series keep their own versions)'
         required: true
-        default: 'v0.5.0'
+        default: 'v0.5.1'
         type: string
 
 permissions:
@@ -119,7 +119,7 @@ jobs:
           rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal --target aarch64-linux-android
           rustup default "$RUST_TOOLCHAIN"
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37" "build-tools;37.0.0" "ndk;$NDK_VERSION"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" "ndk;$NDK_VERSION"
           echo "NDK_HOME=$ANDROID_HOME/ndk/$NDK_VERSION" >> "$GITHUB_ENV"
       - name: Build Go Android arm64 CLI with bionic DNS
         working-directory: sdk

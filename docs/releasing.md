@@ -1,6 +1,6 @@
 # Building and publishing a release
 
-CyberGrid uses a project release tag, such as `v0.5.0`, while the components retain their own versions: Go SDK/CLI 0.4.0, Rust SDK 0.2.0 and CyberGrid Lab 0.2.0. Publishing source does not grant an additional open-source license. See the root and component `LICENSE` files; third-party grants remain separately effective.
+CyberGrid uses a project release tag, such as `v0.5.1`, while the components retain their own versions: Go SDK/CLI 0.4.0, Rust SDK 0.2.0 and CyberGrid Lab 0.2.0. Publishing source does not grant an additional open-source license. See the root and component `LICENSE` files; third-party grants remain separately effective.
 
 ## Workflow
 
@@ -10,7 +10,7 @@ The workflow has three required build jobs:
 
 - **sources**, on Linux: build the website and typecheck the coordinator/middleware, verify both fixed provider resources, then package committed Go/Rust/App source and original license texts.
 - **macos**, on a native macOS arm64 runner: fixed Node 22.23.4, Go 1.27.0 and Rust 1.97.1; build the Go CLI and Tauri 2 debug-test app.
-- **android**, on Linux: the same language toolchains, JDK 17, Android SDK 37 and NDK 27.2.12479018; build the Go arm64 CLI with the API28 NDK compiler and bionic DNS, plus the arm64 API28+ Tauri debug-test APK with `adb-test-control` enabled.
+- **android**, on Linux: the same language toolchains, JDK 17, Android SDK Platform 37.0, Build-Tools 36.0.0 and NDK 27.2.12479018; build the Go arm64 CLI with the API28 NDK compiler and bionic DNS, plus the arm64 API28+ Tauri debug-test APK with `adb-test-control` enabled.
 
 Actions are referenced by full commit hashes. npm uses `npm ci`; Cargo and Go dependencies have committed lock/checksum files. The fixed platform provider bytes are already in the repository. `scripts/prepare-android-provider.sh` copies the verified resource into the app's generated `jniLibs` directory; the APK contains one `libcloudflared.so`. No cloudflared binary is downloaded at runtime.
 
@@ -23,13 +23,11 @@ Actions stores only one copy of the APK between jobs; the convenience ZIP is cre
 From the reviewed, clean repository:
 
 ```sh
-git tag -a v0.5.0 -m 'CyberGrid v0.5.0'
-git tag -a sdk/v0.4.0 -m 'Go SDK v0.4.0'
 git push origin main
-git push origin sdk/v0.4.0 v0.5.0
+gh workflow run release.yml --ref main -f release_tag=v0.5.1
 ```
 
-Alternatively, dispatch the workflow from the exact reviewed commit and supply a new project release tag. The Release is bound to that commit. Do not reuse a version for changed assets: choose a new project tag and update component versions when their public API changes.
+Dispatch from the exact reviewed source revision. The publishing job creates the project tag only after all required builds have passed, and binds the Release to that job's `GITHUB_SHA`. Do not create or move a release tag during build iteration. Existing tags remain unchanged. The Go submodule uses its independent `sdk/v0.4.0` tag; create a new submodule tag only for a new Go SDK version.
 
 Check that all required jobs succeeded and the Release is published at [GitHub Releases](https://github.com/ywateru/CyberGrid/releases). Download `SHA256SUMS` with the desired asset and verify it:
 
@@ -53,7 +51,7 @@ Release packaging reads the committed source list through `git ls-files`. It doe
 python3 scripts/release/package.py sources
 python3 scripts/release/package.py macos --app '/absolute/path/to/CyberGrid Lab.app' --go-binary sdk/bin/cybergrid-macos
 python3 scripts/release/package.py android --apk /absolute/path/to/app-universal-debug.apk --go-binary sdk/bin/cybergrid-android-arm64
-RELEASE_TAG=v0.5.0 python3 scripts/release/package.py finalize
+RELEASE_TAG=v0.5.1 python3 scripts/release/package.py finalize
 ```
 
 Output is under `dist/release/`, which is not committed. `finalize` requires all three platform/source job metadata files. Source archives contain the offline SDK provider resources and licenses. Platform packages include full notices; the macOS CLI embeds its provider, while Android requires the OS-installed native library directory.

@@ -137,7 +137,7 @@ def package_android(apk, binary, manifest):
         raise RuntimeError('Build Android app and CLI first')
     fixed = manifest['platforms']['android-arm64']
     if os.environ.get('CI'):
-        aapt = Path(os.environ['ANDROID_HOME']) / 'build-tools/37.0.0/aapt2'
+        aapt = Path(os.environ['ANDROID_HOME']) / 'build-tools/36.0.0/aapt2'
         badging = subprocess.check_output([str(aapt), 'dump', 'badging', str(apk)]).decode()
         if "sdkVersion:'28'" not in badging or 'application-debuggable' not in badging or "native-code: 'arm64-v8a'" not in badging:
             raise RuntimeError('APK must be API28 debug-test arm64 only')
