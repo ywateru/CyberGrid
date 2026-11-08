@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "7b5f8eb2ad728638ea2c7d47a21db23b7b58a72ed6a38256b8a1849f15fbbdf7",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "hkdf",
+  "repository": "https://github.com/RustCrypto/KDFs/",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "hkdf-0.12.4/LICENSE-APACHE",
+      "sha256": "59013a5c8d3a19c26a457579105915a5d51bb0c09d579f8cdedf12e4203c3018"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "hkdf-0.12.4/LICENSE-MIT",
+      "sha256": "d288f9c9b4590446ec18c22ead8f8b5a12a3d4025b68f62dc9015063eb9cca69"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "1ac16e8b9d4ee7a67613c9396c6cc1327652eaba"
+    },
+    "path_in_vcs": "hkdf"
+  },
+  "version": "0.12.4"
+}

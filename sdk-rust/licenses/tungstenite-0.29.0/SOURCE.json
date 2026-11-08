@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Alexey Galakhov",
+    "Daniel Abramov"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "6c01152af293afb9c7c2a57e4b559c5620b421f6d133261c60dd2d0cdb38e6b8",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "tungstenite",
+  "repository": "https://github.com/snapview/tungstenite-rs",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "tungstenite-0.29.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "tungstenite-0.29.0/LICENSE-MIT",
+      "sha256": "7fea0ee51a4ca5d5cea7464135fd55e8b09caf3a61da3d451ac8a22af95c033f"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "c2921718b76f0ed8c69a895397ed981e4a321f6f"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.29.0"
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "file": "cybergrid-sdk-0.3.0-android-arm64.tar.gz",
+    "sha256": "a23b1a9c74d98091a7d648ef0b1f3e79a78e20f672e065b2dc1861fb8a18909a"
+  },
+  {
+    "file": "cybergrid-sdk-0.3.0-macos-arm64.tar.gz",
+    "sha256": "049b9b89215f7a2ff80e6095a96c46bcebd783e547d4bbc71e08f4f1f09b39ad"
+  },
+  {
+    "file": "cybergrid-sdk-0.3.0-source.tar.gz",
+    "sha256": "ecc974b8fd530ec4377ad628f3ccf627346218e44f25f0b67f5063d8553ac2f5"
+  }
+]

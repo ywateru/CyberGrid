@@ -1,0 +1,27 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "chrono",
+  "repository": "https://github.com/chronotope/chrono",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE.txt",
+      "origin": "cargo-registry-cache",
+      "path": "chrono-0.4.45/LICENSE.txt",
+      "sha256": "946c9835d8034d24404f8cfec5f4654cee5dad17e944afc3d06d742cf2882831"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "170338250e836976a211e64728ec956e45e78a39"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.4.45"
+}

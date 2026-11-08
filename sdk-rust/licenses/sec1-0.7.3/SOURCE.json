@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "d3e97a565f76233a6003f9f5c54be1d9c5bdfa3eccfb189469f11ec4901c47dc",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "sec1",
+  "repository": "https://github.com/RustCrypto/formats/tree/master/sec1",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "sec1-0.7.3/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "sec1-0.7.3/LICENSE-MIT",
+      "sha256": "4a883ecc3bb1010faed542bf63d53e530fea5e5e12cf676aed588784298ba929"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "c07eecfb9565ae5268ae484f9d6f5e913959c301"
+    },
+    "path_in_vcs": "sec1"
+  },
+  "version": "0.7.3"
+}

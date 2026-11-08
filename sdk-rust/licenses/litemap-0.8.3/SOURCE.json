@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "The ICU4X Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "47d9d19d1d6efa0109d2f65ff4c85cddd50bd572e5a00127ab10987290bcefae",
+  "declaredLicense": "Unicode-3.0",
+  "name": "litemap",
+  "repository": "https://github.com/unicode-org/icu4x",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "litemap-0.8.3/LICENSE",
+      "sha256": "f367c1b8e1aa262435251e442901da4607b4650e0e63a026f5044473ecfb90f2"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a14f2dad852be26bad277ae704abf27a15cbfed1"
+    },
+    "path_in_vcs": "utils/litemap"
+  },
+  "version": "0.8.3"
+}

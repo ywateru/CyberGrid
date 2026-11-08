@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Sean McArthur <sean@seanmonstar.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "357cc3acc6a036009fd6c973ed009037c732d60d0b4f6c673e9041497482a28f",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "unicase",
+  "repository": "https://github.com/seanmonstar/unicase",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "unicase-2.10.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "unicase-2.10.0/LICENSE-MIT",
+      "sha256": "4f6bd11a0f17fe5b085ace1daaedb7b002a08316850dd9577c246c6a68a68e8c"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "1e739ff80fe2297c52efda9d05f0bea1038a7eb9"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "2.10.0"
+}

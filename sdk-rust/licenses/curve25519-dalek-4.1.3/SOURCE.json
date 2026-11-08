@@ -1,0 +1,30 @@
+{
+  "authors": [
+    "Isis Lovecruft <isis@patternsinthevoid.net>",
+    "Henry de Valence <hdevalence@hdevalence.ca>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "97fb8b7c4503de7d6ae7b42ab72a5a59857b4c937ec27a3d4539dba95b5ab2be",
+  "declaredLicense": "BSD-3-Clause",
+  "name": "curve25519-dalek",
+  "repository": "https://github.com/dalek-cryptography/curve25519-dalek/tree/main/curve25519-dalek",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "curve25519-dalek-4.1.3/LICENSE",
+      "sha256": "cca0bd3c4fcdba74145ef9d49c62337e2c9fbf9368288f11d0547f1b0273219f"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5312a0311ec40df95be953eacfa8a11b9a34bc54"
+    },
+    "path_in_vcs": "curve25519-dalek"
+  },
+  "version": "4.1.3"
+}

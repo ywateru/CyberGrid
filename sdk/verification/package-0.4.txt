@@ -1,0 +1,3 @@
+cybergrid-sdk-0.4.0-source.tar.gz 75983 bytes 8b86ee81d195f104989152d85695ca55a24a748e55a337e7fc6c21d258c08f0f
+cybergrid-sdk-0.4.0-macos-arm64.tar.gz 9735930 bytes 8002d3e5f5e71aa919d7666b4da94f21b9c78293f912a5740cba6fd8d127a7ab
+cybergrid-sdk-0.4.0-android-arm64.tar.gz 9396778 bytes de1e8d53185d3984995c6a8af756e9860008b286c59a77b657878b14009cf9ee

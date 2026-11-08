@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "The Rust Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "7ce2d95d4b3734dc35aa2f45e1aa22cd416814592a4f9d9205e11affd5b8e10b",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "num-integer",
+  "repository": "https://github.com/rust-num/num-integer",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "num-integer-0.1.47/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "num-integer-0.1.47/LICENSE-MIT",
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "765fd9b3eb9397471d41b9f613e530f6d9d6383f"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.1.47"
+}

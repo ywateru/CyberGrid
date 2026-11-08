@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "353e1ca18966c16d9deb1c69278edbc5f194139612772bd9537af60ac231e1e6",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "primeorder",
+  "repository": "https://github.com/RustCrypto/elliptic-curves/tree/master/primeorder",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "primeorder-0.13.6/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "primeorder-0.13.6/LICENSE-MIT",
+      "sha256": "233b95ccbf90dc67e32f3e8995c489f6312d9191ebd141a931c3b684f1e3be6d"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "bfd7b49d080270e4b260a6707a603c6ce8c66116"
+    },
+    "path_in_vcs": "primeorder"
+  },
+  "version": "0.13.6"
+}

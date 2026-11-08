@@ -1,0 +1,3 @@
+# Android runtime notices
+
+This directory records the 69 external Maven artifacts resolved by the application's universalDebugRuntimeClasspath. The original AAR/JAR archive checksum and upstream coordinate are recorded in dependency-index.json. Embedded license/copyright/notice files are copied unchanged. Where the binary archive does not embed its license text, upstream.pom (and parent.pom where applicable) records the exact version's published license declaration. Apache-2.0 declarations reference the complete official Apache license text in common/Apache-2.0.txt with its source URL and SHA256. No application data or credentials are part of this collection.

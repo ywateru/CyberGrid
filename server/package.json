@@ -1,0 +1,25 @@
+{
+  "name": "cybergrid-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/local.ts",
+    "build": "tsc --noEmit && tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --skipLibCheck middleware.ts && node release/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "owner": "tsx src/owner.ts"
+  },
+  "dependencies": {
+    "@vercel/functions": "3.11.0",
+    "jose": "^6.2.15",
+    "tsx": "4.23.15"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

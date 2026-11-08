@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Alex Crichton <alex@alexcrichton.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "cfg-if",
+  "repository": "https://github.com/rust-lang/cfg-if",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "cfg-if-1.0.5/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "cfg-if-1.0.5/LICENSE-MIT",
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "8b0a2b0fc1fa3b3741b9e72895f390cf499fe36f"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.0.5"
+}

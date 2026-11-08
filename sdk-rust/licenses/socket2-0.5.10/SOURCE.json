@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Alex Crichton <alex@alexcrichton.com>",
+    "Thomas de Zeeuw <thomasdezeeuw@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "e22376abed350d73dd1cd119b57ffccad95b4e585a7cda43e286245ce23c0678",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "socket2",
+  "repository": "https://github.com/rust-lang/socket2",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "socket2-0.5.10/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "socket2-0.5.10/LICENSE-MIT",
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "97fb0ab8001d34318eeb3ed3830bc656b06eb8df"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.5.10"
+}

@@ -1,0 +1,41 @@
+{
+  "authors": [
+    "The Rand Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "caa0f4137e1c0a72f4c651489402276c8e8e1cf081f3b0ba156d2cbeef09e86a",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "rand_pcg",
+  "repository": "https://github.com/rust-random/rngs",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "COPYRIGHT",
+      "origin": "cargo-registry-cache",
+      "path": "rand_pcg-0.10.2/COPYRIGHT",
+      "sha256": "90eb64f0279b0d9432accfa6023ff803bc4965212383697eee27a0f426d5f8d5"
+    },
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "rand_pcg-0.10.2/LICENSE-APACHE",
+      "sha256": "6df43f6f4b5d4587f3d8d71e45532c688fd168afa5fe89d571cb32fa09c4ef51"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "rand_pcg-0.10.2/LICENSE-MIT",
+      "sha256": "2234e3cefee876aeb686ad89e978bdb07bf118a1186ab1cf161bcdf69d4b4f57"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "cc285e994b4dc236f138fafe2a59377ef63cdcfa"
+    },
+    "path_in_vcs": "rand_pcg"
+  },
+  "version": "0.10.2"
+}

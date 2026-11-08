@@ -1,0 +1,10 @@
+# Preserve the exact reviewed source and third-party notice bytes on every host.
+# In particular, do not normalize license CRLF or fixed provider build metadata.
+* -text
+*.png binary
+*.ico binary
+*.icns binary
+*.jar binary
+*.so binary
+**/cloudflared binary
+tools/cloudflared/bin/* binary

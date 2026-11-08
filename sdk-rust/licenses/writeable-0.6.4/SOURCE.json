@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "The ICU4X Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc",
+  "declaredLicense": "Unicode-3.0",
+  "name": "writeable",
+  "repository": "https://github.com/unicode-org/icu4x",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "writeable-0.6.4/LICENSE",
+      "sha256": "f367c1b8e1aa262435251e442901da4607b4650e0e63a026f5044473ecfb90f2"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a14f2dad852be26bad277ae704abf27a15cbfed1"
+    },
+    "path_in_vcs": "utils/writeable"
+  },
+  "version": "0.6.4"
+}

@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Rain Liu <yliu@webrtc.rs>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "69cb13fd1a373e68addc4bba0c8ca058627518e54342583d024bdcbb8ae5d97d",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "webrtc-ice",
+  "repository": "https://github.com/webrtc-rs/webrtc/tree/master/ice",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "webrtc-ice-0.14.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "webrtc-ice-0.14.0/LICENSE-MIT",
+      "sha256": "56cc6c08157f4faf70d351b3a7ceac143399d5359a78c180e06dcd0390784f4d"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a1f8f1919235d8452835852e018efd654f2f8366"
+    },
+    "path_in_vcs": "ice"
+  },
+  "version": "0.14.0"
+}

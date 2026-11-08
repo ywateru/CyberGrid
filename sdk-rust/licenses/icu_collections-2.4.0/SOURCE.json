@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "The ICU4X Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "fe090a42a0d3140fed8c63263ed1fecc02422cb2f4bfe55cd8de2de1b8e105dd",
+  "declaredLicense": "Unicode-3.0",
+  "name": "icu_collections",
+  "repository": "https://github.com/unicode-org/icu4x",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "icu_collections-2.4.0/LICENSE",
+      "sha256": "f367c1b8e1aa262435251e442901da4607b4650e0e63a026f5044473ecfb90f2"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "031d9e89f6a3fd26a14491e090729d46094328fd"
+    },
+    "path_in_vcs": "components/collections"
+  },
+  "version": "2.4.0"
+}

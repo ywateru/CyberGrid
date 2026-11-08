@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Sean McArthur <sean@seanmonstar.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "httparse",
+  "repository": "https://github.com/seanmonstar/httparse",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "httparse-1.10.1/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "httparse-1.10.1/LICENSE-MIT",
+      "sha256": "391a5396cec6230bfabd4ef4eb2350eb895bc5efce377a2218f5702ed020d3e3"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "9f29e79f9832dbd0ae5220acb17c1866745bdecd"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.10.1"
+}

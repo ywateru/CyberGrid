@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "The RustCrypto Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "zeroize",
+  "repository": "https://github.com/RustCrypto/utils",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "zeroize-1.9.1/LICENSE-APACHE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "zeroize-1.9.1/LICENSE-MIT",
+      "sha256": "8c7516d4b27b1e495be5e38b612298b63de48d05f49cdac94f70f3cd70f8864b"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "34a6ebcb9b920ec7ae5809e470fce94fe7c0cb55"
+    },
+    "path_in_vcs": "zeroize"
+  },
+  "version": "1.9.1"
+}

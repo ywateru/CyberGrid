@@ -1,0 +1,58 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "a4689e6c2294d81e88dc6261c768b63bc4fcdb852be6d1352498b114f61383b7",
+  "declaredLicense": "Apache-2.0 AND ISC",
+  "name": "ring",
+  "repository": "https://github.com/briansmith/ring",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "ring-0.17.14/LICENSE",
+      "sha256": "b3d734001a94efff3579978d953391aa7115f877657d25eb54037a43875d078a"
+    },
+    {
+      "cratePath": "LICENSE-BoringSSL",
+      "origin": "cargo-registry-cache",
+      "path": "ring-0.17.14/LICENSE-BoringSSL",
+      "sha256": "005fc765ddc5115da796cca915baa9557abae13ff35e0a47c47affc56f6c414d"
+    },
+    {
+      "cratePath": "LICENSE-other-bits",
+      "origin": "cargo-registry-cache",
+      "path": "ring-0.17.14/LICENSE-other-bits",
+      "sha256": "f025ccfb7dfb6bdfedc75ca0f67acc69e6fb4998143d834f7c2f38a29989680f"
+    },
+    {
+      "cratePath": "src/polyfill/once_cell/LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "ring-0.17.14/src/polyfill/once_cell/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "src/polyfill/once_cell/LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "ring-0.17.14/src/polyfill/once_cell/LICENSE-MIT",
+      "sha256": "6ee2ed6c77710de911761acd5fc1ad1da00f476beb1a7ef27e78c2d1858deafc"
+    },
+    {
+      "cratePath": "third_party/fiat/LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "ring-0.17.14/third_party/fiat/LICENSE",
+      "sha256": "9eacbcb81be660840c714a560a9d65ba07913db98dd4baf969f78dd499fdd60f"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "dirty": true,
+      "sha1": "2723abbca9e83347d82b056d5b239c6604f786df"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.17.14"
+}

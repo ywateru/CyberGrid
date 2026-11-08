@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Masaki Hara <ackie.h.gmai@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "b5f6765e852b9b4dc8e2a76843e4d64d1cea8e79bcde0b6901aea8e7c7f08282",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "yasna",
+  "repository": "https://github.com/qnighy/yasna.rs",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "yasna-0.6.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "yasna-0.6.0/LICENSE-MIT",
+      "sha256": "2a7df90e60fd5512b8bca35d3ce90e068f21c52d962855053fd1d9e2e7ca0f16"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "3c7f2ba61cfb59c478137051a7e79ad8af0e2247"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.6.0"
+}

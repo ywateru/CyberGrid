@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "9ae3c82e4355234767756212c570e29833699ab63e6ffd161887314cc5b43847",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "ccm",
+  "repository": "https://github.com/RustCrypto/AEADs/tree/master/ccm",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "ccm-0.5.0/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "ccm-0.5.0/LICENSE-MIT",
+      "sha256": "904801faf3f1850328af8e1aa1047b9190cc22ed40df5c87f2d93d17f847ef67"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "88a559c46206c7df2aee5c6e6300373ab1341e40"
+    },
+    "path_in_vcs": "ccm"
+  },
+  "version": "0.5.0"
+}

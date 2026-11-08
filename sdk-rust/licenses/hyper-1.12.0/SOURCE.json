@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Sean McArthur <sean@seanmonstar.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "2c3e324da4c95177d6291d4c8730197c0d1822f8a9766814a4a44fa5ab797c9c",
+  "declaredLicense": "MIT",
+  "name": "hyper",
+  "repository": "https://github.com/hyperium/hyper",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "hyper-1.12.0/LICENSE",
+      "sha256": "2d01890414494742ba4a509fcec8efa40f6d8be22cbd72be7cff08d6fda4ec89"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "7f67699ce32d717081deb7018b4da7d679277ac0"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.12.0"
+}

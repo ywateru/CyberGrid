@@ -1,0 +1,27 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "521bc38abb08001b01866da9f51eb7c5d647a19260e00054a8c7fd5f9e57f7a9",
+  "declaredLicense": "CDLA-Permissive-2.0",
+  "name": "webpki-roots",
+  "repository": "https://github.com/rustls/webpki-roots",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "webpki-roots-0.26.11/LICENSE",
+      "sha256": "e271993808fec50ab29350b39539cdec611a9103f827e0aa26d61da70e2d33f8"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "65a47ac297fb378a602472d447b1260439253bd4"
+    },
+    "path_in_vcs": "webpki-roots"
+  },
+  "version": "0.26.11"
+}

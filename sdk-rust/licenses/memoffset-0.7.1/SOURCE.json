@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Gilad Naaman <gilad.naaman@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "5de893c32cde5f383baa4c04c5d6dbdd735cfd4a794b0debdb2bb1b421da5ff4",
+  "declaredLicense": "MIT",
+  "name": "memoffset",
+  "repository": "https://github.com/Gilnaa/memoffset",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "memoffset-0.7.1/LICENSE",
+      "sha256": "3234ac55816264ee7b6c7ee27efd61cf0a1fe775806870e3d9b4c41ea73c5cb1"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "d8accb76712984e2ab069193f392e5a7b6c5e78c"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.7.1"
+}

@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Masaki Hara <ackie.h.gmai@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "e17bb3549cc1321ae1296b9cdc2698e2b6cb1992adfa19a8c72e5b7a738f44cd",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "yasna",
+  "repository": "https://github.com/qnighy/yasna.rs",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "yasna-0.5.2/upstream-repository-root/LICENSE-MIT",
+      "sha256": "2a7df90e60fd5512b8bca35d3ce90e068f21c52d962855053fd1d9e2e7ca0f16",
+      "url": "https://raw.githubusercontent.com/qnighy/yasna.rs/b7e65f9a4c317494cce2d18ea02b3d6eaaea7985/LICENSE-MIT"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "yasna-0.5.2/upstream-repository-root/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "url": "https://raw.githubusercontent.com/qnighy/yasna.rs/b7e65f9a4c317494cce2d18ea02b3d6eaaea7985/LICENSE-APACHE"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "b7e65f9a4c317494cce2d18ea02b3d6eaaea7985"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.5.2"
+}

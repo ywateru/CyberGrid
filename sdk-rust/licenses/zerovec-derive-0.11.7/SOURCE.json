@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Manish Goregaokar <manishsmail@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "c3743ddbf47738d929cd1ae2e199d40d0162979dfe31aef8ae646d2bf00bf97a",
+  "declaredLicense": "Unicode-3.0",
+  "name": "zerovec-derive",
+  "repository": "https://github.com/unicode-org/icu4x",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "zerovec-derive-0.11.7/LICENSE",
+      "sha256": "f367c1b8e1aa262435251e442901da4607b4650e0e63a026f5044473ecfb90f2"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "031d9e89f6a3fd26a14491e090729d46094328fd"
+    },
+    "path_in_vcs": "utils/zerovec/derive"
+  },
+  "version": "0.11.7"
+}

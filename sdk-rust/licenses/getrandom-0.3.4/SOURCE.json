@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "The Rand Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "899def5c37c4fd7b2664648c28120ecec138e4d395b459e5ca34f9cce2dd77fd",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "getrandom",
+  "repository": "https://github.com/rust-random/getrandom",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "getrandom-0.3.4/LICENSE-APACHE",
+      "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "getrandom-0.3.4/LICENSE-MIT",
+      "sha256": "29e9fe5074bd27e0e5d5d110394fbbcd841baee2651a3c4b4560a632702cede4"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "38e4ad38309a85b56eef4fc759535ccfc322ba9a"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.3.4"
+}

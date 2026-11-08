@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Michal 'vorner' Vaner <vorner@vorner.cz>",
+    "Masaki Hara <ackie.h.gmai@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "c4db69cba1110affc0e9f7bcd48bbf87b3f4fc7c61fc9155afd4c469eb3d6c1b",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "signal-hook-registry",
+  "repository": "https://github.com/vorner/signal-hook",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "signal-hook-registry-1.4.8/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "signal-hook-registry-1.4.8/LICENSE-MIT",
+      "sha256": "503558bfefe66ca15e4e3f7955b3cb0ec87fd52f29bf24b336af7bd00e946d5c"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "4d5fd6a6663be38e70774e4ac733d65916c70951"
+    },
+    "path_in_vcs": "signal-hook-registry"
+  },
+  "version": "1.4.8"
+}

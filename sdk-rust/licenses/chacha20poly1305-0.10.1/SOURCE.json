@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "10cd79432192d1c0f4e1a0fef9527696cc039165d729fb41b3f4f4f354c2dc35",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "chacha20poly1305",
+  "repository": "https://github.com/RustCrypto/AEADs/tree/master/chacha20poly1305",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "chacha20poly1305-0.10.1/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "chacha20poly1305-0.10.1/LICENSE-MIT",
+      "sha256": "3c0dfa33fd2e6976038555b52095699452653b1fcabe113074f14e0848a6b11e"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "746f70a5f6c7371e723dc64e04f2115b56f24d27"
+    },
+    "path_in_vcs": "chacha20poly1305"
+  },
+  "version": "0.10.1"
+}

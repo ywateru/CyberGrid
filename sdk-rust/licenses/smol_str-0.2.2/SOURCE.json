@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Aleksey Kladov <aleksey.kladov@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "dd538fb6910ac1099850255cf94a94df6551fbdd602454387d0adb2d1ca6dead",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "smol_str",
+  "repository": "https://github.com/rust-analyzer/smol_str",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "smol_str-0.2.2/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "smol_str-0.2.2/LICENSE-MIT",
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "aea39b4974f55e9380556272b1335e2f6fd13cc7"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.2.2"
+}

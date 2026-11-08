@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Nika Layzell <nika@thelayzells.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "901704edd0dfe137f1987838ee4f259e4e063c31371bdb423f7ae38ec6f77f02",
+  "declaredLicense": "MIT",
+  "name": "synstructure",
+  "repository": "https://github.com/mystor/synstructure",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "synstructure-0.14.0/LICENSE",
+      "sha256": "219920e865eee70b7dcfc948a86b099e7f4fe2de01bcca2ca9a20c0a033f2b59"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "30cfafe36e42405e717a8e55da042a2835a698d7"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.14.0"
+}

@@ -1,0 +1,27 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "31b698c5f9a010f6573133b09e0de5408834d0c82f8d7475a89fc1867a71cd90",
+  "declaredLicense": "MIT",
+  "name": "axum",
+  "repository": "https://github.com/tokio-rs/axum",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "axum-0.8.9/LICENSE",
+      "sha256": "6a13bc24a100a6812f053879ec51b126b103af7cda6dbf48c4188722da44da9f"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "c59208c86fded335cd85e388030ad59347b0e5ae"
+    },
+    "path_in_vcs": "axum"
+  },
+  "version": "0.8.9"
+}

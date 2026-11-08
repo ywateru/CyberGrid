@@ -1,0 +1,3 @@
+ok  	github.com/cybergrid/sdk	57.345s
+ok  	github.com/cybergrid/sdk/cmd/cybergrid	4.782s
+?   	github.com/cybergrid/sdk/examples/embed	[no test files]

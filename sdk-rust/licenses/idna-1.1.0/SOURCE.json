@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "The rust-url developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "3b0875f23caa03898994f6ddc501886a45c7d3d62d04d2d90788d47be1b1e4de",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "idna",
+  "repository": "https://github.com/servo/rust-url/",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "idna-1.1.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "idna-1.1.0/LICENSE-MIT",
+      "sha256": "b38f11f6096706e6de553dabe2a7ed142d59b6fa8c97e290c67496154745cdd5"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "dirty": true,
+      "sha1": "91377f48bf35011d042aa5abef9e7f2a0a625aaa"
+    },
+    "path_in_vcs": "idna"
+  },
+  "version": "1.1.0"
+}

@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "c3613f74bd2eac03dad61bd53dbe620703d4371614fe0bc3b9f04dd36fe4e818",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "chacha20",
+  "repository": "https://github.com/RustCrypto/stream-ciphers",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "chacha20-0.9.1/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "chacha20-0.9.1/LICENSE-MIT",
+      "sha256": "b6f6f01b03ee7e93c0ae96d62ed39527e98a120fb951afc9de456a741ef3f204"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "b5d39c45c45df97335f4b6effb853cde97810de1"
+    },
+    "path_in_vcs": "chacha20"
+  },
+  "version": "0.9.1"
+}

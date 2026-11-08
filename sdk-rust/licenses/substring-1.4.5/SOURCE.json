@@ -1,0 +1,34 @@
+{
+  "authors": [
+    "Anders Evensen"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "42ee6433ecef213b2e72f587ef64a2f5943e7cd16fbd82dbe8bc07486c534c86",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "substring",
+  "repository": "https://github.com/Anders429/substring",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "substring-1.4.5/LICENSE-APACHE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "substring-1.4.5/LICENSE-MIT",
+      "sha256": "106653ff1a44c315af35725d5bbc88a3c9e5d83ecdd9ae7c76bb32312e1f4979"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "d111228777c05132ab6f8b6ddca6347165386175"
+    }
+  },
+  "version": "1.4.5"
+}

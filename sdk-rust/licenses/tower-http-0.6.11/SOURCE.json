@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Tower Maintainers <team@tower-rs.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "4cfcf7e2740e6fc6d4d688b4ef00650406bb94adf4731e43c096c3a19fe40840",
+  "declaredLicense": "MIT",
+  "name": "tower-http",
+  "repository": "https://github.com/tower-rs/tower-http",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "tower-http-0.6.11/LICENSE",
+      "sha256": "5049cf464977eff4b4fcfa7988d84e74116956a3eb9d5f1d451b3f828f945233"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "1d082ef7bdb6d80a2964698804a46c338b4c6a99"
+    },
+    "path_in_vcs": "tower-http"
+  },
+  "version": "0.6.11"
+}

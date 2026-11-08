@@ -1,0 +1,6 @@
+bin/
+*.test
+credentials*.json
+dist/
+*.lock
+archive/

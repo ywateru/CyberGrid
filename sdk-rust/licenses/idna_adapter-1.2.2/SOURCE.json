@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "The rust-url developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "cb68373c0d6620ef8105e855e7745e18b0d00d3bdb07fb532e434244cdb9a714",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "idna_adapter",
+  "repository": "https://github.com/hsivonen/idna_adapter",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "idna_adapter-1.2.2/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "idna_adapter-1.2.2/LICENSE-MIT",
+      "sha256": "8b43ce8accd61e9d370b5ca9e9c4f953279b5c239926c62315b40e24df51b726"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "1d9782f32c9e29218542b4a9411a82b35ec5c8cb"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.2.2"
+}

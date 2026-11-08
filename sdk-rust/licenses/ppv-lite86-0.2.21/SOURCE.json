@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "The CryptoCorrosion Contributors"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "85eae3c4ed2f50dcfe72643da4befc30deadb458a9b590d720cde2f2b1e97da9",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "ppv-lite86",
+  "repository": "https://github.com/cryptocorrosion/cryptocorrosion",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "ppv-lite86-0.2.21/LICENSE-APACHE",
+      "sha256": "0218327e7a480793ffdd4eb792379a9709e5c135c7ba267f709d6f6d4d70af0a"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "ppv-lite86-0.2.21/LICENSE-MIT",
+      "sha256": "4cada0bd02ea3692eee6f16400d86c6508bbd3bafb2b65fed0419f36d4f83e8f"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "000a6cd6bbcb0b091381dc5f8fe6d6efa480b818"
+    },
+    "path_in_vcs": "utils-simd/ppv-lite86"
+  },
+  "version": "0.2.21"
+}

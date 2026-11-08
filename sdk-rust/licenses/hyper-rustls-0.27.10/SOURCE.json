@@ -1,0 +1,39 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "dfa8e654703247911e29c23fbeaa261834bd9bb74efba2f9acddc37bfb127f53",
+  "declaredLicense": "Apache-2.0 OR ISC OR MIT",
+  "name": "hyper-rustls",
+  "repository": "https://github.com/rustls/hyper-rustls",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "hyper-rustls-0.27.10/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-ISC",
+      "origin": "cargo-registry-cache",
+      "path": "hyper-rustls-0.27.10/LICENSE-ISC",
+      "sha256": "7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "hyper-rustls-0.27.10/LICENSE-MIT",
+      "sha256": "709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "ce45b6b0dfdf238f9058b89feb1e3b8eaebbc5b0"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.27.10"
+}

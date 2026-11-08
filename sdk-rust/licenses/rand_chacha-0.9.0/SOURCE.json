@@ -1,0 +1,43 @@
+{
+  "authors": [
+    "The Rand Project Developers",
+    "The Rust Project Developers",
+    "The CryptoCorrosion Contributors"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "d3022b5f1df60f26e1ffddd6c66e8aa15de382ae63b3a0c1bfc0e4d3e3f325cb",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "rand_chacha",
+  "repository": "https://github.com/rust-random/rand",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "COPYRIGHT",
+      "origin": "cargo-registry-cache",
+      "path": "rand_chacha-0.9.0/COPYRIGHT",
+      "sha256": "90eb64f0279b0d9432accfa6023ff803bc4965212383697eee27a0f426d5f8d5"
+    },
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "rand_chacha-0.9.0/LICENSE-APACHE",
+      "sha256": "35242e7a83f69875e6edeff02291e688c97caafe2f8902e4e19b49d3e78b4cab"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "rand_chacha-0.9.0/LICENSE-MIT",
+      "sha256": "209fbbe0ad52d9235e37badf9cadfe4dbdc87203179c0899e738b39ade42177b"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "96f8df65ee6b4368d91a006f9c5b4a8050abae49"
+    },
+    "path_in_vcs": "rand_chacha"
+  },
+  "version": "0.9.0"
+}

@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Alexis Beingessner <a.beingessner@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "b71798fca2c1fe1086445a7258a4bc81e6e49dcd24c8d0dd9a1e57395b603f51",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "bit-vec",
+  "repository": "https://github.com/contain-rs/bit-vec",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "bit-vec-0.9.1/LICENSE-APACHE",
+      "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "bit-vec-0.9.1/LICENSE-MIT",
+      "sha256": "f51ac2c59a222f7476ce507ca879960e2b64ea64bb2786eefdbeb7b0b538d1b7"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "2fb0305422ff7fd915a107b91209abbff9fce50f"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.9.1"
+}

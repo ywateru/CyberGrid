@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "ee27f32b5c5292967d2d4a9d7f1e0b0aed2c15daded5a60300e4abb9d8020bca",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "ecdsa",
+  "repository": "https://github.com/RustCrypto/signatures/tree/master/ecdsa",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "ecdsa-0.16.9/LICENSE-APACHE",
+      "sha256": "78779d420019e6b4630376af8e86b6b335ee8a2f89ede6e0411e0469a326aaa4"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "ecdsa-0.16.9/LICENSE-MIT",
+      "sha256": "bdebaf9156a298f8fdab56dd26cb5144673de522d80f4c0d88e0039145f147f9"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "abd0175f3ae2dc4b118fa914e94c1fc4b0182ba9"
+    },
+    "path_in_vcs": "ecdsa"
+  },
+  "version": "0.16.9"
+}

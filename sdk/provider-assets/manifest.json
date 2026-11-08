@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "version": "2026.9.0",
+  "repository": "https://github.com/cloudflare/cloudflared",
+  "commit": "b749dfd998f4bced81f48727b9c971cfc3056865",
+  "runtimeDownload": false,
+  "platforms": {
+    "darwin-arm64": {
+      "binary": "darwin-arm64/cloudflared",
+      "bytes": 38893120,
+      "sha256": "2d67b7315f96799123e19442580ce7c7616d6d7f322686fa829dd4e3fddfe715",
+      "sourceModified": true,
+      "archive": {
+        "url": "https://github.com/cloudflare/cloudflared/releases/download/2026.9.0/cloudflared-darwin-arm64.tgz",
+        "bytes": 19217242,
+        "sha256": "c0eccb3758420d1f4e46cbf2b8ecde01d9802a154232a817f25133340009fcc7"
+      },
+      "cybergridModified": false,
+      "upstreamBuildReportsDirty": true,
+      "buildInfo": "build-modules-darwin-arm64.txt",
+      "go": "go1.26.2",
+      "codeSignature": "codesign --verify succeeds for upstream bytes; not a CyberGrid notarization claim"
+    },
+    "android-arm64": {
+      "binary": "android-arm64/jniLibs/arm64-v8a/libcloudflared.so",
+      "bytes": 28812032,
+      "sha256": "c1f6fc493bef37eb530022a1598e689c0d50073680192616aa7aea4e732cdd3c",
+      "sourceModified": true,
+      "patches": [
+        {
+          "path": "patches/0001-android-explicit-dns.patch",
+          "sha256": "c09b6a9264b9fe1bb6014b9a2802da5cdc485eec3d3ad9acd43908749206286d"
+        }
+      ],
+      "androidAPI": 28,
+      "buildInformation": {
+        "sha256": "8d82e177e73c4ac6d9ee83346b91ed9429984f5690869033fe898386a6f9e15f",
+        "normalization": "Build-host filename removed from first line; module pins/settings unchanged; original binary bytes preserved"
+      }
+    }
+  },
+  "license": "Apache-2.0",
+  "supportedTargets": [
+    "darwin/arm64",
+    "android/arm64"
+  ]
+}

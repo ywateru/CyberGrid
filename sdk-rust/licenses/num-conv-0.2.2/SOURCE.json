@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Jacob Pratt <jacob@jhpratt.dev>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "521739c6d2bac4aa25192232afe6841231376b2b26d4d9fae5ecf8ca5772e441",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "num-conv",
+  "repository": "https://github.com/jhpratt/num-conv",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-Apache",
+      "origin": "cargo-registry-cache",
+      "path": "num-conv-0.2.2/LICENSE-Apache",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "num-conv-0.2.2/LICENSE-MIT",
+      "sha256": "e2e245f2b566d0bfafb0f6a04c16b82d710c4e6e7d799e39bb4ef6e541b85b98"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "b022fe87ac3ad5b0d7606ea7465549eaa92efe97"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.2.2"
+}

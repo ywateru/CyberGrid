@@ -1,0 +1,7 @@
+{
+  "gitCommit": "49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25",
+  "sources": {
+    "upstream-repository-root/LICENSE-APACHE": "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-APACHE",
+    "upstream-repository-root/LICENSE-MIT": "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-MIT"
+  }
+}

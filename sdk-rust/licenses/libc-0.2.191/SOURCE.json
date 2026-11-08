@@ -1,0 +1,33 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "libc",
+  "repository": "https://github.com/rust-lang/libc",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "libc-0.2.191/LICENSE-APACHE",
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "libc-0.2.191/LICENSE-MIT",
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "ccc2ff4aaab962f7fde7b8edda7379c045b1ca12"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.2.191"
+}

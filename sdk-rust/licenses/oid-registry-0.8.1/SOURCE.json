@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Pierre Chifflier <chifflier@wzdftpd.net>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "12f40cff3dde1b6087cc5d5f5d4d65712f34016a03ed60e9c08dcc392736b5b7",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "oid-registry",
+  "repository": "https://github.com/rusticata/oid-registry.git",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "oid-registry-0.8.1/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "oid-registry-0.8.1/LICENSE-MIT",
+      "sha256": "a5c61b93b6ee1d104af9920cf020ff3c7efe818e31fe562c72261847a728f513"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "33b20513b73ce04e1de48232beba3fa89df33b1d"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.8.1"
+}

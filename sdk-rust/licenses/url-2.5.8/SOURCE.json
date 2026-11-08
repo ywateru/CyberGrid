@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "The rust-url developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "ff67a8a4397373c3ef660812acab3268222035010ab8680ec4215f38ba3d0eed",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "url",
+  "repository": "https://github.com/servo/rust-url",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "url-2.5.8/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "url-2.5.8/LICENSE-MIT",
+      "sha256": "b38f11f6096706e6de553dabe2a7ed142d59b6fa8c97e290c67496154745cdd5"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "d6ea13c5f8e7e6e627f6390161b3e185bda5e5ce"
+    },
+    "path_in_vcs": "url"
+  },
+  "version": "2.5.8"
+}

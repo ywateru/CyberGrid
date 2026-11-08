@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "b5e6043086bf7973472e0c7dff2142ea0b680d30e18d9cc40f267efbf222bd47",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "elliptic-curve",
+  "repository": "https://github.com/RustCrypto/traits/tree/master/elliptic-curve",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "elliptic-curve-0.13.8/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "elliptic-curve-0.13.8/LICENSE-MIT",
+      "sha256": "d27687b51f2874822c1530976b7e837eac4f308d94bf3dd42047011b7d437b47"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5ddf0f52f07f65f319ffd423c52e696406924d90"
+    },
+    "path_in_vcs": "elliptic-curve"
+  },
+  "version": "0.13.8"
+}

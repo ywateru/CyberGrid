@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Pierre Chifflier <chifflier@wzdftpd.net>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "b7f43a50ac4fdca5df8e885c21b835997f0a1cdee65494a6847694a98652d9d8",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "asn1-rs",
+  "repository": "https://github.com/rusticata/asn1-rs.git",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "asn1-rs-0.7.2/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "asn1-rs-0.7.2/LICENSE-MIT",
+      "sha256": "a5c61b93b6ee1d104af9920cf020ff3c7efe818e31fe562c72261847a728f513"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "84c7ac4cc40616497d922c7e5730fb75cff59256"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.7.2"
+}

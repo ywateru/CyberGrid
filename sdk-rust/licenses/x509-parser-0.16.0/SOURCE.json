@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Pierre Chifflier <chifflier@wzdftpd.net>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "fcbc162f30700d6f3f82a24bf7cc62ffe7caea42c0b2cba8bf7f3ae50cf51f69",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "x509-parser",
+  "repository": "https://github.com/rusticata/x509-parser.git",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "x509-parser-0.16.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "x509-parser-0.16.0/LICENSE-MIT",
+      "sha256": "a5c61b93b6ee1d104af9920cf020ff3c7efe818e31fe562c72261847a728f513"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "6f4a7322961e58af078910917c569c7e80705b81"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.16.0"
+}

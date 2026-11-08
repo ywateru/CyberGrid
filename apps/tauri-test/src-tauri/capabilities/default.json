@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Only the Lab window and explicit user-triggered browser opening.",
+  "windows": ["main"],
+  "permissions": ["core:default", { "identifier": "opener:allow-open-url", "allow": [{ "url": "https://kn3wnj.logto.app/*" }] }]
+}

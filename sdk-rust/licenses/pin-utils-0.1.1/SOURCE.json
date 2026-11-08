@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Josef Brandl <mail@josefbrandl.de>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "13bee6c73da26345c729282832b60b0363cf3dd9f4bfd81d8551b7a1c889a113",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "pin-utils",
+  "repository": "https://github.com/rust-lang/pin-utils",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "pin-utils-0.1.1/LICENSE-APACHE",
+      "sha256": "a4db788775cb25f2da419a7ccd3f1f89c3d2cfa8748fb25257596b88183b4c77"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "pin-utils-0.1.1/LICENSE-MIT",
+      "sha256": "28802412d2bfbafe432b305634413b41a984d30fba0df41d30aa2c8a2077c5b1"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "1c8fe452e3f22c76cb35f4b171f090bf2d50890c"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.1.1"
+}

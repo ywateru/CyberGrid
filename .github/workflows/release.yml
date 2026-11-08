@@ -1,0 +1,181 @@
+name: Build and publish native SDKs
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Project release tag (SDK series keep their own versions)'
+        required: true
+        default: 'v0.5.0'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}-${{ inputs.release_tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  CARGO_INCREMENTAL: '0'
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  RUST_TOOLCHAIN: '1.97.1'
+  NODE_VERSION: '22.23.4'
+  GO_VERSION: '1.27.0'
+  NDK_VERSION: '27.2.12479018'
+
+jobs:
+  sources:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Build website and typecheck coordinator plus middleware
+        working-directory: server
+        run: |
+          npm ci --include=dev
+          npm run build
+      - name: Verify fixed resources and package committed source and licenses
+        run: python3 scripts/release/package.py sources
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-sources
+          path: dist/release/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+
+  macos:
+    runs-on: macos-15-arm64
+    timeout-minutes: 90
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/target/ci-macos
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+      - name: Install fixed Rust toolchain
+        run: |
+          test "$(uname -m)" = arm64
+          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal
+          rustup default "$RUST_TOOLCHAIN"
+      - name: Build Go macOS arm64 CLI
+        working-directory: sdk
+        run: |
+          mkdir -p bin
+          GOOS=darwin GOARCH=arm64 go build -mod=readonly -trimpath -o bin/cybergrid-macos ./cmd/cybergrid
+      - name: Build native Tauri macOS test app
+        working-directory: apps/tauri-test
+        run: |
+          npm ci
+          npm run tauri -- build --debug --bundles app --ci
+          git diff --exit-code -- src-tauri/Cargo.lock ../../sdk-rust/Cargo.lock
+      - name: Package native binaries and full notices
+        run: python3 scripts/release/package.py macos --app "$CARGO_TARGET_DIR/debug/bundle/macos/CyberGrid Lab.app" --go-binary sdk/bin/cybergrid-macos
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-macos
+          path: dist/release/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/target/ci-android
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install fixed Rust and Android targets
+        run: |
+          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal --target aarch64-linux-android
+          rustup default "$RUST_TOOLCHAIN"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37" "build-tools;37.0.0" "ndk;$NDK_VERSION"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/$NDK_VERSION" >> "$GITHUB_ENV"
+      - name: Build Go Android arm64 CLI with bionic DNS
+        working-directory: sdk
+        run: |
+          mkdir -p bin
+          CGO_ENABLED=1 GOOS=android GOARCH=arm64 CC="$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android28-clang" go build -mod=readonly -trimpath -ldflags=-checklinkname=0 -o bin/cybergrid-android-arm64 ./cmd/cybergrid
+      - name: Build Android API28 arm64 debug-test APK with ADB control
+        working-directory: apps/tauri-test
+        run: |
+          npm ci
+          sh scripts/prepare-android-provider.sh
+          npm run tauri -- android build --debug --target aarch64 --apk --features adb-test-control --ci
+          git diff --exit-code -- src-tauri/Cargo.lock ../../sdk-rust/Cargo.lock
+      - name: Verify APK provider and package Android outputs
+        run: python3 scripts/release/package.py android --apk apps/tauri-test/src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk --go-binary sdk/bin/cybergrid-android-arm64
+      # The wrapper ZIP is assembled in the final job, avoiding duplicate APK
+      # storage in Actions artifacts. GitHub Release keeps both final formats.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-android
+          path: |
+            dist/release/*-test.apk
+            dist/release/cybergrid-sdk-0.4.0-android-arm64.tar.gz
+            dist/release/build-android.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+
+  publish:
+    needs: [sources, macos, android]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: dist/release
+      - name: Bind every artifact to this commit and generate checksums
+        run: python3 scripts/release/package.py finalize
+      - name: Publish complete Release only after all builds succeed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 -c 'import os,re; assert re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?", os.environ["RELEASE_TAG"])'
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo 'This release already exists; refusing to overwrite it.' >&2
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "CyberGrid $RELEASE_TAG" --notes-file scripts/release/RELEASE-NOTES.md --draft
+          gh release upload "$RELEASE_TAG" dist/release/* --repo "$GITHUB_REPOSITORY"
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest

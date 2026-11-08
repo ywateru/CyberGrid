@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Sean Bowe <ewillbefull@gmail.com>",
+    "Jack Grigg <thestr4d@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "c0b50bfb653653f9ca9095b427bed08ab8d75a137839d9ad64eb11810d5b6393",
+  "declaredLicense": "MIT/Apache-2.0",
+  "name": "ff",
+  "repository": "https://github.com/zkcrypto/ff",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "ff-0.13.1/LICENSE-APACHE",
+      "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "ff-0.13.1/LICENSE-MIT",
+      "sha256": "8d0c1d1d4b2bebf5b9211f0e883d5a482b7808f3ed31320da14ddee95811f4ef"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "851b0f61bbcf9a5b61027307144d8bd1f9b756ba"
+    }
+  },
+  "version": "0.13.1"
+}

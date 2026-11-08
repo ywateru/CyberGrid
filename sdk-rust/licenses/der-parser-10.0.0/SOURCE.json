@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Pierre Chifflier <chifflier@wzdftpd.net>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "07da5016415d5a3c4dd39b11ed26f915f52fc4e0dc197d87908bc916e51bc1a6",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "der-parser",
+  "repository": "https://github.com/rusticata/der-parser.git",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "der-parser-10.0.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "der-parser-10.0.0/LICENSE-MIT",
+      "sha256": "a5c61b93b6ee1d104af9920cf020ff3c7efe818e31fe562c72261847a728f513"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "79ec2d0cfe1e3ba2deb49ee1f68f984f4ef3a971"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "10.0.0"
+}

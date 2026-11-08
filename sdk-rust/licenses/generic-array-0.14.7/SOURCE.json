@@ -1,0 +1,30 @@
+{
+  "authors": [
+    "Bart\u0142omiej Kami\u0144ski <fizyk20@gmail.com>",
+    "Aaron Trent <novacrazy@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "85649ca51fd72272d7821adaf274ad91c288277713d9c18820d8499a7ff69e9a",
+  "declaredLicense": "MIT",
+  "name": "generic-array",
+  "repository": "https://github.com/fizyk20/generic-array.git",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "generic-array-0.14.7/LICENSE",
+      "sha256": "c09aae9d3c77b531f56351a9947bc7446511d6b025b3255312d3e3442a9a7583"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "1397d2bb40c406901b7827161b73b34b056cbe3a"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.14.7"
+}

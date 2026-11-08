@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "f8dd2a808d456c4a54e300a23e9f5a67e122c3024119acbfd73e3bf664491cb2",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "rfc6979",
+  "repository": "https://github.com/RustCrypto/signatures/tree/master/rfc6979",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "rfc6979-0.4.0/LICENSE-APACHE",
+      "sha256": "78779d420019e6b4630376af8e86b6b335ee8a2f89ede6e0411e0469a326aaa4"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "rfc6979-0.4.0/LICENSE-MIT",
+      "sha256": "bdebaf9156a298f8fdab56dd26cb5144673de522d80f4c0d88e0039145f147f9"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "7093bbad82628a44e255c61c5a8389449869bc81"
+    },
+    "path_in_vcs": "rfc6979"
+  },
+  "version": "0.4.0"
+}

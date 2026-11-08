@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "description": "Explicit public-source policy. Everything else is local archive material, never an implicit git add.",
+  "rootFiles": [
+    "README.md",
+    "LICENSE",
+    ".gitignore",
+    ".gitattributes"
+  ],
+  "sourceRoots": [
+    ".github",
+    "scripts/release",
+    "server/src",
+    "server/api",
+    "server/test",
+    "server/tests",
+    "server/public",
+    "server/scripts",
+    "sdk",
+    "sdk-rust",
+    "apps/tauri-test",
+    "tools/cloudflared"
+  ],
+  "exactFiles": [
+    "server/package.json",
+    "server/package-lock.json",
+    "server/tsconfig.json",
+    "server/vercel.json",
+    "server/.vercelignore",
+    "server/.env.example",
+    "server/README.md",
+    "server/middleware.ts",
+    "server/release/build.mjs"
+  ],
+  "publicDocs": [
+    "docs/architecture.md",
+    "docs/deployment.md",
+    "docs/sdk.md",
+    "docs/releasing.md",
+    "docs/getting-started.md"
+  ],
+  "excludedParts": [
+    ".git",
+    ".build",
+    ".vercel",
+    "node_modules",
+    "target",
+    "dist",
+    "dist-artifacts",
+    "bin",
+    "build",
+    ".gradle",
+    ".kotlin",
+    ".idea",
+    "__pycache__",
+    ".private",
+    "archive",
+    "archives",
+    "jniLibs",
+    "schemas",
+    "credentials",
+    "private-device",
+    "secrets",
+    ".ssh",
+    ".gnupg"
+  ],
+  "allowedBinaryRoots": [
+    "tools/cloudflared/bin",
+    "sdk/provider-assets",
+    "sdk-rust/provider-assets",
+    "apps/tauri-test/src-tauri/icons",
+    "apps/tauri-test/src-tauri/gen/android/app/src/main/res"
+  ],
+  "excludedNames": [
+    ".DS_Store",
+    "local.properties",
+    "tauri.settings.gradle",
+    "tauri.build.gradle.kts",
+    "tauri.properties",
+    "deployment.json",
+    "source-code-sha256-0.2.0.json"
+  ],
+  "excludedPrefixes": [
+    "server/public/downloads/",
+    "sdk-rust/docs/",
+    "apps/tauri-test/src-tauri/gen/android/app/src/main/assets/",
+    "tools/cloudflared/diagnostics/"
+  ],
+  "notes": [
+    "Provider bin/jniLibs are explicit exceptions to generic build exclusions.",
+    "Gradle wrapper JAR is a required checked-in build tool, not an application output.",
+    "Only the explicitly reviewed public docs are eligible; original verification/product/plan docs are archived.",
+    "Credentials, .env files other than reviewed .env.example, local freezes and build logs are never public."
+  ],
+  "excludedExactFiles": [
+    "tools/cloudflared/android-startup-check.json",
+    "tools/cloudflared/check-android.sh",
+    "apps/tauri-test/scripts/package-test.py"
+  ]
+}

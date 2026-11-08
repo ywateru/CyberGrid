@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Marvin L\u00f6bel <loebel.marvin@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "20870f649af7073d53e38067b2a84312175d56ea15217e1b15bc83506ec50afb",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "lazy_static",
+  "repository": "https://github.com/rust-lang-nursery/lazy-static.rs",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "lazy_static-1.5.1/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "lazy_static-1.5.1/LICENSE-MIT",
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "4c1b9a170c157d679592e2682b13cc780c1db814"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.5.1"
+}

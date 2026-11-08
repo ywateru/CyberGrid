@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Josh Stone <cuviper@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "autocfg",
+  "repository": "https://github.com/cuviper/autocfg",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "autocfg-1.5.1/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "autocfg-1.5.1/LICENSE-MIT",
+      "sha256": "27995d58ad5c1145c1a8cd86244ce844886958a35eb2b78c6b772748669999ac"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "2799b09c24e6632f8e653c5cd8fc303e85a906ba"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.5.1"
+}

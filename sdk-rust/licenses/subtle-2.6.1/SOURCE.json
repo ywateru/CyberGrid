@@ -1,0 +1,30 @@
+{
+  "authors": [
+    "Isis Lovecruft <isis@patternsinthevoid.net>",
+    "Henry de Valence <hdevalence@hdevalence.ca>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292",
+  "declaredLicense": "BSD-3-Clause",
+  "name": "subtle",
+  "repository": "https://github.com/dalek-cryptography/subtle",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "subtle-2.6.1/LICENSE",
+      "sha256": "d1fc1bc0d155df60b2e7705b6b2ae02a05c96f948e1cec6e2fb86360b09f346b"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5457b5448b021d1da101ababbb854e6657233943"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "2.6.1"
+}

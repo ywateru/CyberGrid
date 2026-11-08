@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Anthony Ramine <n.oxyde@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "d3491c14715ca2294c4d6a88f15e84739788c1d030eed8c110436aafdaa2f3fd",
+  "declaredLicense": "MIT/Apache-2.0",
+  "name": "serde_urlencoded",
+  "repository": "https://github.com/nox/serde_urlencoded",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "serde_urlencoded-0.7.1/LICENSE-APACHE",
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "serde_urlencoded-0.7.1/LICENSE-MIT",
+      "sha256": "b9eb266294324f672cbe945fe8f2e32f85024f0d61a1a7d14382cdde0ac44769"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "d8bc15d16adf6b3ba6ae46d199d7109cf5079efa"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.7.1"
+}

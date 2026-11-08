@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Kris Price <kris@krisprice.nz>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "791930b43c0d5973160d90a8f3894509f2b273430f5c5c73b668636d0287c5c0",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "ipnet",
+  "repository": "https://github.com/krisprice/ipnet",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "ipnet-2.12.2/LICENSE-APACHE",
+      "sha256": "87d9feb9238c6bd8e0024fc4733b06cff036f89f36d93b7df1c8a0549bbb7a5b"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "ipnet-2.12.2/LICENSE-MIT",
+      "sha256": "47dc9ff29128ddfb4d6a0435383c9f89120bc374dbcc1dd00b933a0b28aa7865"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "13c5c5873c02127679b1e8e64b538e4e36942640"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "2.12.2"
+}

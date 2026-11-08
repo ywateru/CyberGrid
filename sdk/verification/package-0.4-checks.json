@@ -1,0 +1,9 @@
+{
+  "sourceMatchesFreeze": true,
+  "cybergrid-sdk-0.4.0-source.tar.gz": "sha256 / paths / notices / build-info PASS",
+  "cybergrid-sdk-0.4.0-macos-arm64.tar.gz": "sha256 / paths / notices / build-info PASS",
+  "cybergrid-sdk-0.4.0-android-arm64.tar.gz": "sha256 / paths / notices / build-info PASS",
+  "historical03ArchivesUnchanged": true,
+  "historical03RootManifestUnchanged": true,
+  "standaloneSourcePackageCompile": true
+}

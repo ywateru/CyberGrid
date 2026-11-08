@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "The Rust Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "5d15f86d12da44cd8d4ec3c73984537eb7f4cadcb9776a575a0a8a05ca11005c",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "log",
+  "repository": "https://github.com/rust-lang/log",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "log-0.4.35/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "log-0.4.35/LICENSE-MIT",
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a46450ba763280c29d35b53aa8ad0ff1fc1d78d0"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.4.35"
+}

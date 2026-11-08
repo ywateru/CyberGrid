@@ -1,0 +1,27 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "4443b1b6d39d7c663139942cc4558262562d2c84123bb6282ef177009ca8b281",
+  "declaredLicense": "ISC",
+  "name": "rustls-webpki",
+  "repository": "https://github.com/rustls/webpki",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "rustls-webpki-0.103.16/LICENSE",
+      "sha256": "5b698ca13897be3afdb7174256fa1574f8c6892b8bea1a66dd6469d3fe27885a"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "8ecdcc76f56b68fda67a6adf7976f5eed5006a4c"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.103.16"
+}

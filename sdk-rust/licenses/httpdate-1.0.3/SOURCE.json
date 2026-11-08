@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Pyfisch <pyfisch@posteo.org>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "httpdate",
+  "repository": "https://github.com/pyfisch/httpdate",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "httpdate-1.0.3/LICENSE-APACHE",
+      "sha256": "4d10fe5f3aa176b05b229a248866bad70b834c173f1252a814ff4748d8a13837"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "httpdate-1.0.3/LICENSE-MIT",
+      "sha256": "934887691e05d69d7c86ad3f2c360980fa30c15b035e351f3c9865e99da4debc"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "638da761065df8b67282b0a1d139c0a7e4a02429"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.0.3"
+}

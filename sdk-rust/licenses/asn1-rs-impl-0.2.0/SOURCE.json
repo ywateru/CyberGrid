@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Pierre Chifflier <chifflier@wzdftpd.net>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "7b18050c2cd6fe86c3a76584ef5e0baf286d038cda203eb6223df2cc413565f7",
+  "declaredLicense": "MIT/Apache-2.0",
+  "name": "asn1-rs-impl",
+  "repository": "https://github.com/rusticata/asn1-rs.git",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "asn1-rs-impl-0.2.0/upstream-repository-root/LICENSE-MIT",
+      "sha256": "a5c61b93b6ee1d104af9920cf020ff3c7efe818e31fe562c72261847a728f513",
+      "url": "https://raw.githubusercontent.com/rusticata/asn1-rs/a20e5f7319c896737ad0f2557037817b91ad854f/LICENSE-MIT"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "asn1-rs-impl-0.2.0/upstream-repository-root/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "url": "https://raw.githubusercontent.com/rusticata/asn1-rs/a20e5f7319c896737ad0f2557037817b91ad854f/LICENSE-APACHE"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a20e5f7319c896737ad0f2557037817b91ad854f"
+    },
+    "path_in_vcs": "impl"
+  },
+  "version": "0.2.0"
+}

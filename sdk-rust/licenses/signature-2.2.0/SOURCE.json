@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "77549399552de45a898a580c1b41d445bf730df867cc44e6c0233bbc4b8329de",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "signature",
+  "repository": "https://github.com/RustCrypto/traits/tree/master/signature",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "signature-2.2.0/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "signature-2.2.0/LICENSE-MIT",
+      "sha256": "b3470648aff02beb36d7a53240fc9260ed80ed93bd43bace6b67d7ef7336ee33"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5adcd4819b380b4aaec2b57c6bf3f2239a109060"
+    },
+    "path_in_vcs": "signature"
+  },
+  "version": "2.2.0"
+}

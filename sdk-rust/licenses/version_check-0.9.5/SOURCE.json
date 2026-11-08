@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Sergio Benitez <sb@sergio.bz>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a",
+  "declaredLicense": "MIT/Apache-2.0",
+  "name": "version_check",
+  "repository": "https://github.com/SergioBenitez/version_check",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "version_check-0.9.5/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "version_check-0.9.5/LICENSE-MIT",
+      "sha256": "b7e650f3fce5c53249d1cdc608b54df156a97edd636cf9d23498d0cfe7aec63e"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "d77ef9f27cc336719b2d839d09ee6635dd22f758"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.9.5"
+}

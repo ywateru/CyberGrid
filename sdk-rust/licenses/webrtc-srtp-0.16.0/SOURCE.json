@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Rain Liu <yliu@webrtc.rs>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "66d8cdc33413f1d0192670a80ce93d17cb78d57fe3a2414be30d6f6dff121123",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "webrtc-srtp",
+  "repository": "https://github.com/webrtc-rs/webrtc/tree/master/srtp",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "webrtc-srtp-0.16.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "webrtc-srtp-0.16.0/LICENSE-MIT",
+      "sha256": "56cc6c08157f4faf70d351b3a7ceac143399d5359a78c180e06dcd0390784f4d"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a1f8f1919235d8452835852e018efd654f2f8366"
+    },
+    "path_in_vcs": "srtp"
+  },
+  "version": "0.16.0"
+}

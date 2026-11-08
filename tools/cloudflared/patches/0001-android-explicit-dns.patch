@@ -1,0 +1,47 @@
+diff --git a/cmd/cloudflared/android_dns.go b/cmd/cloudflared/android_dns.go
+new file mode 100644
+index 0000000..d079675
+--- /dev/null
++++ b/cmd/cloudflared/android_dns.go
+@@ -0,0 +1,41 @@
++//go:build android
++
++// CyberGrid Android compatibility patch: use an explicitly selected DNS
++// endpoint only for this provider process. No system DNS or TLS changes.
++package main
++
++import (
++	"context"
++	"fmt"
++	"net"
++	"os"
++	"strconv"
++	"time"
++)
++
++func init() {
++	server := os.Getenv("CLOUDFLARED_DNS_SERVER")
++	if server == "" {
++		return // Preserve official behavior unless explicitly configured.
++	}
++	host, port, err := net.SplitHostPort(server)
++	number, portErr := strconv.Atoi(port)
++	if err != nil || net.ParseIP(host) == nil || portErr != nil || number < 1 || number > 65535 {
++		fmt.Fprintln(os.Stderr, "CLOUDFLARED_DNS_SERVER must be a literal IP:port endpoint")
++		os.Exit(2)
++	}
++	net.DefaultResolver = &net.Resolver{
++		PreferGo: true,
++		Dial: func(ctx context.Context, network, _ string) (net.Conn, error) {
++			// Respect UDP versus TCP (including DNS truncation retry).
++			dialer := net.Dialer{Timeout: 10 * time.Second}
++			return dialer.DialContext(ctx, network, server)
++		},
++	}
++}
++
++// The embedding Android app should obtain its current network DNS endpoint
++// from LinkProperties and set CLOUDFLARED_DNS_SERVER for the host SDK process.
++// The SDK passes this non-CYBERGRID-prefixed environment variable to its child.
++// With no override, CGO still supplies Android's normal A/AAAA resolver, while
++// Go's SRV/TXT may fail against localhost:53 on older Android releases.

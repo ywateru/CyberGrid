@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "RustCrypto Developers",
+    "Frank Denis <github@pureftpd.org>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "fe42f1670a52a47d448f14b6a5c61dd78fce51856e68edaa38f7ae3a46b8d6b6",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "p384",
+  "repository": "https://github.com/RustCrypto/elliptic-curves/tree/master/p384",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "p384-0.13.1/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "p384-0.13.1/LICENSE-MIT",
+      "sha256": "02168781a5b59970e3da1784d2eb69f432598a3757f283dbffdafd9d483a9113"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "409fd29e00f91cea6cb4f7b632326670e0162388"
+    },
+    "path_in_vcs": "p384"
+  },
+  "version": "0.13.1"
+}

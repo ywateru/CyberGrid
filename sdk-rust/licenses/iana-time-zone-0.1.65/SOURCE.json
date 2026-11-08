@@ -1,0 +1,37 @@
+{
+  "authors": [
+    "Andrew Straw <strawman@astraw.com>",
+    "Ren\u00e9 Kijewski <rene.kijewski@fu-berlin.de>",
+    "Ryan Lopopolo <rjl@hyperbo.la>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "e31bc9ad994ba00e440a8aa5c9ef0ec67d5cb5e5cb0cc7f8b744a35b389cc470",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "iana-time-zone",
+  "repository": "https://github.com/strawlab/iana-time-zone",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "iana-time-zone-0.1.65/LICENSE-APACHE",
+      "sha256": "696759d65dfe558ff7d9f031c76db19ec5c0767470fb67c4e8d990820d1e99c9"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "iana-time-zone-0.1.65/LICENSE-MIT",
+      "sha256": "da28ccc6b158fc2d8cccc74e99794b1cff1d29bd7bbeb019442fcf0c04c6cad9"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "3726968181ae67d95c8de2f750a95b9c703ae4c8"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.1.65"
+}

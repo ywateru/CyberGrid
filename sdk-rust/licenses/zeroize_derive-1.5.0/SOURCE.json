@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "The RustCrypto Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "3c50655cbb0fe3fc43170059e702f1ce5e19b84cec58dc87b037a09935c2f328",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "zeroize_derive",
+  "repository": "https://github.com/RustCrypto/utils",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "zeroize_derive-1.5.0/LICENSE-APACHE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "zeroize_derive-1.5.0/LICENSE-MIT",
+      "sha256": "b8c6939380a400f53e11923d50fcc4dd2fa1ba8339fd9d04cda38a0251b6c9b0"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "1ea42bb68f560a2909c856b20aa3c62901f6305c"
+    },
+    "path_in_vcs": "zeroize_derive"
+  },
+  "version": "1.5.0"
+}

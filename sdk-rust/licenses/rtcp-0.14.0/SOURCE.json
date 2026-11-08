@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Rain Liu <yliu@webrtc.rs>",
+    "Michael Uti <utimichael9@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "81d30d1c4091644431c22acf9f8be6191b56805e0e977f15ca7104b4a6d6eaec",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "rtcp",
+  "repository": "https://github.com/webrtc-rs/webrtc/tree/master/rtcp",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "rtcp-0.14.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "rtcp-0.14.0/LICENSE-MIT",
+      "sha256": "56cc6c08157f4faf70d351b3a7ceac143399d5359a78c180e06dcd0390784f4d"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a1f8f1919235d8452835852e018efd654f2f8366"
+    },
+    "path_in_vcs": "rtcp"
+  },
+  "version": "0.14.0"
+}

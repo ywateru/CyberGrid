@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "The Servo Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "149309498a5f7334b12ddae0cad8aba81ce785fe91755068867e017cf98fee46",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "smallvec",
+  "repository": "https://github.com/servo/rust-smallvec",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "smallvec-1.16.5/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "smallvec-1.16.5/LICENSE-MIT",
+      "sha256": "0b28172679e0009b655da42797c03fd163a3379d5cfa67ba1f1655e974a2a1a9"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "6e900059c51b7c0f5580e13e9e215a50b6be9d27"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.16.5"
+}

@@ -1,0 +1,13 @@
+{
+  "LICENSE": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+  "README.md": "82cb27a1f454a7c9b27cfd92af920f69bea2a6989cf856093c177505666308ef",
+  "THIRD_PARTY_NOTICES.md": "985c73e63d3e209a3dfc1d59a4b1ec102d08dc50944362939a13bbe76837211e",
+  "android-build-manifest.json": "aa24e76b3b4f257796259bafe196cdca1bbfc84aadd5b1cc7f1505c34b8412de",
+  "build-modules-android-arm64.txt": "8d82e177e73c4ac6d9ee83346b91ed9429984f5690869033fe898386a6f9e15f",
+  "build-modules-darwin-arm64.txt": "fb9d6d14ae079a4238fcf42823ab5d89f4392b93c5958cfbd27540658ea0ef2a",
+  "manifest.json": "c76513f15eeb657ea68ae551bbc93d41b03b4f1592819621b022e10d6d23cc98",
+  "patches/0001-android-explicit-dns.patch": "c09b6a9264b9fe1bb6014b9a2802da5cdc485eec3d3ad9acd43908749206286d",
+  "rebuild/build-android.sh": "1e2c610dbb3ddd080ad3eaa0827e3edf3a82ba1afcbda88e06e836ae026bc2df",
+  "rebuild/patches/0001-android-explicit-dns.patch": "c09b6a9264b9fe1bb6014b9a2802da5cdc485eec3d3ad9acd43908749206286d",
+  "rebuild/write-manifest.py": "f0f60b085f5bf7fdc89b8e6c80b881eb59fef2032169babdc3595b42d8f2bfc0"
+}

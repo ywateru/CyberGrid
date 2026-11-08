@@ -1,0 +1,27 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "4583a4551df46e2792f82ceeac45e850d2e2d5debba0b91f102385cda5b11f06",
+  "declaredLicense": "MIT",
+  "name": "data-encoding",
+  "repository": "https://github.com/ia0/data-encoding",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "data-encoding-2.11.1/LICENSE",
+      "sha256": "b68ad1a3367b825447089e1f8d6829b97f47a89eb78d2f4ebaef4672f5606186"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "834737d9c3dc957ce1b653959e3f35061dd77ade"
+    },
+    "path_in_vcs": "lib"
+  },
+  "version": "2.11.1"
+}

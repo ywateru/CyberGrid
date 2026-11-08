@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Chris Wong <lambda.fairy@gmail.com>",
+    "Dan Gohman <dev@sunfishcode.online>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "errno",
+  "repository": "https://github.com/lambda-fairy/rust-errno",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "errno-0.3.14/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "errno-0.3.14/LICENSE-MIT",
+      "sha256": "8764a597675778ddfd4e25f81b08a05dbcf089ac05662df7613fe67f150e3aa2"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "ffc03bfb9eb491013567115e6eea560948cd9e52"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.3.14"
+}

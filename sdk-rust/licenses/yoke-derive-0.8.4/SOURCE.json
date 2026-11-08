@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Manish Goregaokar <manishsmail@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "ec8ebde2db3681e8c9980cc27822030e68752690ddfa9473e739aeb4dbde6d71",
+  "declaredLicense": "Unicode-3.0",
+  "name": "yoke-derive",
+  "repository": "https://github.com/unicode-org/icu4x",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "yoke-derive-0.8.4/LICENSE",
+      "sha256": "f367c1b8e1aa262435251e442901da4607b4650e0e63a026f5044473ecfb90f2"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a59ab860d4bda548e94dfbf992d87fe1f761bc55"
+    },
+    "path_in_vcs": "utils/yoke/derive"
+  },
+  "version": "0.8.4"
+}

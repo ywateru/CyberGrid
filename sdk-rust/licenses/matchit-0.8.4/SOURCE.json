@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Ibraheem Ahmed <ibraheem@ibraheem.ca>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "47e1ffaa40ddd1f3ed91f717a33c8c0ee23fff369e3aa8772b9605cc1d22f4c3",
+  "declaredLicense": "MIT AND BSD-3-Clause",
+  "name": "matchit",
+  "repository": "https://github.com/ibraheemdev/matchit",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "matchit-0.8.4/LICENSE",
+      "sha256": "de701d0618d694feb1af90f02181a1763d9b0bdeb70a3a592781e529077dba65"
+    },
+    {
+      "cratePath": "LICENSE.httprouter",
+      "origin": "cargo-registry-cache",
+      "path": "matchit-0.8.4/LICENSE.httprouter",
+      "sha256": "162ce11ad71338d0a0c6ebaf5c48af72c6ae237b468859d3656fe2d9ed3f3a85"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "413f6e785808b7fa1d6a5d317614447362e1f09e"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.8.4"
+}

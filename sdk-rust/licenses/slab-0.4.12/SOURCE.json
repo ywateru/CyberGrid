@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Carl Lerche <me@carllerche.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5",
+  "declaredLicense": "MIT",
+  "name": "slab",
+  "repository": "https://github.com/tokio-rs/slab",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "slab-0.4.12/LICENSE",
+      "sha256": "8ce0830173fdac609dfb4ea603fdc002c2f4af0dc9b1a005653f5da9cf534b18"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a1e4346070a48c936d808de75191dee5d01e433c"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.4.12"
+}

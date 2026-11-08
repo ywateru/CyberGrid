@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Michal 'vorner' Vaner <vorner@vorner.cz>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "380962b3d93b99642e50b9febf72c071e97e8b32d86eae9cf4ef582bb960ae6e",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "arc-swap",
+  "repository": "https://github.com/vorner/arc-swap",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "arc-swap-1.9.3/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "arc-swap-1.9.3/LICENSE-MIT",
+      "sha256": "ff3f1cd12af8866d9bde961d6cc40df774cd131d484de31d3170c4b02b21a7b5"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "624412b87757c6bd5d73c6ada594d321f602b2d2"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.9.3"
+}

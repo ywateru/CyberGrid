@@ -1,0 +1,7 @@
+{
+  "gitCommit": "10f2ba388fca20f7349996ebae26ccda7a6fda5c",
+  "sources": {
+    "upstream-repository-root/LICENSE-APACHE": "https://raw.githubusercontent.com/rust-windowing/android-ndk-rs/10f2ba388fca20f7349996ebae26ccda7a6fda5c/LICENSE-APACHE",
+    "upstream-repository-root/LICENSE-MIT": "https://raw.githubusercontent.com/rust-windowing/android-ndk-rs/10f2ba388fca20f7349996ebae26ccda7a6fda5c/LICENSE-MIT"
+  }
+}

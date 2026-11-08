@@ -1,0 +1,26 @@
+{
+  "repository": "https://github.com/cloudflare/cloudflared",
+  "version": "2026.9.0",
+  "commit": "b749dfd998f4bced81f48727b9c971cfc3056865",
+  "sourceModified": true,
+  "patches": [
+    {
+      "path": "patches/0001-android-explicit-dns.patch",
+      "sha256": "c09b6a9264b9fe1bb6014b9a2802da5cdc485eec3d3ad9acd43908749206286d"
+    }
+  ],
+  "license": "Apache-2.0",
+  "target": "android/arm64",
+  "androidAPI": 28,
+  "cgoEnabled": true,
+  "go": "go version go1.27.0 darwin/arm64",
+  "clang": "Android (12470979, +pgo, -bolt, +lto, -mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)",
+  "binary": "bin/cloudflared-android-arm64",
+  "sha256": "c1f6fc493bef37eb530022a1598e689c0d50073680192616aa7aea4e732cdd3c",
+  "bytes": 28812032,
+  "sourceGoSumSHA256": "c03244d7317079a00edc365c50136125c30fb356358c883e7f5e0f1335e7258d",
+  "linkedModuleCount": 67,
+  "modulesWithoutRootNotice": [],
+  "publicBuildInformationSha256": "8d82e177e73c4ac6d9ee83346b91ed9429984f5690869033fe898386a6f9e15f",
+  "publicBuildInformationNormalization": "Build-host filename removed; raw provider unchanged"
+}

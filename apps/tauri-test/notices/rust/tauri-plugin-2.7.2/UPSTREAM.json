@@ -1,0 +1,8 @@
+{
+  "gitCommit": "59b63ab500da9859f12d8888c3298bc29bba0b92",
+  "sources": {
+    "upstream-repository-root/LICENSE-APACHE-2.0": "https://raw.githubusercontent.com/tauri-apps/tauri/59b63ab500da9859f12d8888c3298bc29bba0b92/LICENSE-APACHE-2.0",
+    "upstream-repository-root/LICENSE-MIT": "https://raw.githubusercontent.com/tauri-apps/tauri/59b63ab500da9859f12d8888c3298bc29bba0b92/LICENSE-MIT",
+    "upstream-repository-root/LICENSE.spdx": "https://raw.githubusercontent.com/tauri-apps/tauri/59b63ab500da9859f12d8888c3298bc29bba0b92/LICENSE.spdx"
+  }
+}

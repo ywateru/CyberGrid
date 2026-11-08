@@ -1,0 +1,31 @@
+{
+  "authors": [
+    "Carl Lerche <me@carllerche.com>",
+    "Lucio Franco <luciofranco14@gmail.com>",
+    "Sean McArthur <sean@seanmonstar.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "23169fe34a5fbcdd3f3862e78fb9b6fccd5f02a6dc6f732547005d45631ce71c",
+  "declaredLicense": "MIT",
+  "name": "http-body-util",
+  "repository": "https://github.com/hyperium/http-body",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "http-body-util-0.1.5/LICENSE",
+      "sha256": "248378d0a3383c173fb925f17141b88e71580b3ba17ddc6ac3d2a344683232ab"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "07838bd97b714b95bd783cd695ebf211b67545c4"
+    },
+    "path_in_vcs": "http-body-util"
+  },
+  "version": "0.1.5"
+}

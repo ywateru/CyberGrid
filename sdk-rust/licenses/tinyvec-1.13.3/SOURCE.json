@@ -1,0 +1,41 @@
+{
+  "authors": [
+    "Lokathor <zefria@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee",
+  "declaredLicense": "Zlib OR Apache-2.0 OR MIT",
+  "name": "tinyvec",
+  "repository": "https://github.com/Lokathor/tinyvec",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE.md",
+      "origin": "cargo-registry-cache",
+      "path": "tinyvec-1.13.3/LICENSE-APACHE.md",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "cratePath": "LICENSE-MIT.md",
+      "origin": "cargo-registry-cache",
+      "path": "tinyvec-1.13.3/LICENSE-MIT.md",
+      "sha256": "fd80a26fbb3f644af1fa994134446702932968519797227e07a1368dea80f0bc"
+    },
+    {
+      "cratePath": "LICENSE-ZLIB.md",
+      "origin": "cargo-registry-cache",
+      "path": "tinyvec-1.13.3/LICENSE-ZLIB.md",
+      "sha256": "84b34dd7608f7fb9b17bd588a6bf392bf7de504e2716f024a77d89f1b145a151"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "e343bbbb5a6594c9d57de718e6f232e6c0115dcb"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.13.3"
+}

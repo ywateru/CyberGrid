@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Akhil Velagapudi <akhilvelagapudi@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "217698eaf96b4a3f0bc4f3662aaa55bdf913cd54d7204591faa790070c6d0853",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "crc-catalog",
+  "repository": "https://github.com/akhilles/crc-catalog.git",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSES/Apache-2.0.txt",
+      "origin": "cargo-registry-cache",
+      "path": "crc-catalog-2.5.0/LICENSES/Apache-2.0.txt",
+      "sha256": "d3cdb764b98283ee7c3a3cea8d374e2a2957322374378d1f3263f4d512741fc3"
+    },
+    {
+      "cratePath": "LICENSES/MIT.txt",
+      "origin": "cargo-registry-cache",
+      "path": "crc-catalog-2.5.0/LICENSES/MIT.txt",
+      "sha256": "5ef8fcfb6cccec8fcae043c834099a60c8b7406408db576e026d2b7e67dc5cf5"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "ed4ad631f22b05055c21a3a4127eb7cf6d75bb62"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "2.5.0"
+}

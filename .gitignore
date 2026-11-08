@@ -1,0 +1,66 @@
+# Local credentials, deployment state and private archives
+.env*
+!.env.example
+**/.env*
+!**/.env.example
+.vercel/
+**/.vercel/
+.build/
+.private/
+**/.private/
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.key
+*.pem
+*.historical
+*.retired
+*.backup
+*.bak
+# Example/application private credential directories
+private-device/
+**/private-device/
+credentials/
+**/credentials/
+secrets/
+**/secrets/
+.ssh/
+.gnupg/
+*.credentials.json
+# Dependencies, compilation and generated release artifacts
+node_modules/
+**/node_modules/
+target/
+**/target/
+dist/
+**/dist/
+dist-artifacts/
+**/dist-artifacts/
+sdk/bin/
+**/build/
+**/.gradle/
+**/.kotlin/
+**/__pycache__/
+*.pyc
+*.log
+.DS_Store
+# Android host-specific/generated configuration and installed native resources
+**/local.properties
+**/tauri.settings.gradle
+**/tauri.build.gradle.kts
+**/tauri.properties
+apps/tauri-test/src-tauri/gen/schemas/
+apps/tauri-test/src-tauri/gen/android/app/src/main/jniLibs/
+apps/tauri-test/src-tauri/gen/android/app/src/main/assets/
+# Local-only audit/deployment records and historical website binaries
+server/deployment.json
+server/archive/
+server/public/downloads/
+sdk-rust/docs/source-code-sha256-0.2.0.json
+# Offline provider assets are deliberate public source inputs, not outputs.
+!tools/cloudflared/bin/
+!tools/cloudflared/bin/cloudflared-android-arm64
+!tools/cloudflared/bin/cloudflared-darwin-arm64
+!sdk/provider-assets/**
+!sdk-rust/provider-assets/**

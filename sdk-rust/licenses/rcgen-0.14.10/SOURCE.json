@@ -1,0 +1,27 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "8774e05a7d0de114588e6a28fe7e71694b82614ed569d86d8b389dfbc98b8ad8",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "rcgen",
+  "repository": "https://github.com/rustls/rcgen",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "rcgen-0.14.10/LICENSE",
+      "sha256": "debe6fed7ac143217c7f533759c54b14f18cd01d5fe195c51d83c2ae2d136cb4"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "f4a3b165c467c070d5c74b86acc2c3f0a0be10ab"
+    },
+    "path_in_vcs": "rcgen"
+  },
+  "version": "0.14.10"
+}

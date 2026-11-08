@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "88b39c9bfcfc231068454382784bb460aae594343fb030d46e9f50a645418412",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "pem-rfc7468",
+  "repository": "https://github.com/RustCrypto/formats/tree/master/pem-rfc7468",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "pem-rfc7468-0.7.0/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "pem-rfc7468-0.7.0/LICENSE-MIT",
+      "sha256": "90c503b61dee04e1449c323ec34c229dfb68d7adcb96c7e140ee55f70fce2d8e"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "66e782b01d58aeea7dd57213c2e262211e98a9c0"
+    },
+    "path_in_vcs": "pem-rfc7468"
+  },
+  "version": "0.7.0"
+}

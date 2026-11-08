@@ -1,0 +1,3 @@
+# Dependency notices
+
+Actual LICENSE / COPYING / COPYRIGHT / NOTICE texts copied unchanged from the locked Cargo registry and installed npm packages. dependency-index.json records package version, upstream source and SHA256 of each copied file. The collection includes build/target-specific dependencies, so it may be broader than either binary. Cloudflared's Apache-2.0 license, third-party notices, dual-platform resource manifest and exact upstream source/build records are copied unchanged from sdk-rust/provider-assets into notices/cloudflared. That folder's source-files-sha256.json binds the copied texts. The source archive also includes the SDK's pinned macOS/Android provider bytes and offline packaging/rebuild scripts.

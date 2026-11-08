@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Manish Goregaokar <manishsmail@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "417ef3fcf6c300b7dbd25c85531a746931c02ad536f3cf4786ed1e88223340b3",
+  "declaredLicense": "Unicode-3.0",
+  "name": "yoke",
+  "repository": "https://github.com/unicode-org/icu4x",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "yoke-0.8.4/LICENSE",
+      "sha256": "f367c1b8e1aa262435251e442901da4607b4650e0e63a026f5044473ecfb90f2"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "031d9e89f6a3fd26a14491e090729d46094328fd"
+    },
+    "path_in_vcs": "utils/yoke"
+  },
+  "version": "0.8.4"
+}

@@ -1,0 +1,7 @@
+{
+  "gitCommit": "a1f8f1919235d8452835852e018efd654f2f8366",
+  "sources": {
+    "upstream-repository-root/LICENSE-APACHE": "https://raw.githubusercontent.com/webrtc-rs/webrtc/a1f8f1919235d8452835852e018efd654f2f8366/LICENSE-APACHE",
+    "upstream-repository-root/LICENSE-MIT": "https://raw.githubusercontent.com/webrtc-rs/webrtc/a1f8f1919235d8452835852e018efd654f2f8366/LICENSE-MIT"
+  }
+}

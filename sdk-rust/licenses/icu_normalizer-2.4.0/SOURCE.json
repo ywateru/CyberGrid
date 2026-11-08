@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "The ICU4X Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "404a3b8c486f205c87fe7f23ab6894d84a4ad76d6e4671ae1981ba7def87c599",
+  "declaredLicense": "Unicode-3.0",
+  "name": "icu_normalizer",
+  "repository": "https://github.com/unicode-org/icu4x",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "icu_normalizer-2.4.0/LICENSE",
+      "sha256": "f367c1b8e1aa262435251e442901da4607b4650e0e63a026f5044473ecfb90f2"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "031d9e89f6a3fd26a14491e090729d46094328fd"
+    },
+    "path_in_vcs": "components/normalizer"
+  },
+  "version": "2.4.0"
+}

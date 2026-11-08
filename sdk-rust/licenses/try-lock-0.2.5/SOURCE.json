@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Sean McArthur <sean@seanmonstar.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b",
+  "declaredLicense": "MIT",
+  "name": "try-lock",
+  "repository": "https://github.com/seanmonstar/try-lock",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "try-lock-0.2.5/LICENSE",
+      "sha256": "c816a0749cdc6bf062a5111c159723de51b2bfac66a1dac2655abd9e6b1583eb"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "fd160ecd9105e8afcc43dbea450a0ef6e5128cce"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.2.5"
+}

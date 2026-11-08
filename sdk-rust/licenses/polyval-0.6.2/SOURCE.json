@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "9d1fe60d06143b2430aa532c94cfe9e29783047f06c0d7fd359a9a51b729fa25",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "polyval",
+  "repository": "https://github.com/RustCrypto/universal-hashes",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "polyval-0.6.2/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "polyval-0.6.2/LICENSE-MIT",
+      "sha256": "a291b6910744d262a9e953c3b5868d74510e20161359f649a11e1791fde84fcd"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "4e7d04f7c8e44f634ada8c673c8cb1672a64d374"
+    },
+    "path_in_vcs": "polyval"
+  },
+  "version": "0.6.2"
+}

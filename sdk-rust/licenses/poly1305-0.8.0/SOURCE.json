@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "8159bd90725d2df49889a078b54f4f79e87f1f8a8444194cdca81d38f5393abf",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "poly1305",
+  "repository": "https://github.com/RustCrypto/universal-hashes",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "poly1305-0.8.0/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "poly1305-0.8.0/LICENSE-MIT",
+      "sha256": "6d99fffea918d1f7dfe567029c7bd21d6fcaf310ad28c44e6511a0e1f68c79ea"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "47a72962e8898fc70ab79d4ab40949efe61a23d2"
+    },
+    "path_in_vcs": "poly1305"
+  },
+  "version": "0.8.0"
+}

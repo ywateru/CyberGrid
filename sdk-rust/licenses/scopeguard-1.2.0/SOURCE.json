@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "bluss"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "scopeguard",
+  "repository": "https://github.com/bluss/scopeguard",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "scopeguard-1.2.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "scopeguard-1.2.0/LICENSE-MIT",
+      "sha256": "fb77f0a9c53e473abe5103c8632ef9f0f2874d4fb3f17cb2d8c661aab9cee9d7"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "bb988222848d39b0b9037b29da3a3a1eb05ebf4b"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.2.0"
+}

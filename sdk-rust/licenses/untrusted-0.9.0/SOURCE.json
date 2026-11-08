@@ -1,0 +1,28 @@
+{
+  "authors": [
+    "Brian Smith <brian@briansmith.org>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1",
+  "declaredLicense": "ISC",
+  "name": "untrusted",
+  "repository": "https://github.com/briansmith/untrusted",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE.txt",
+      "origin": "cargo-registry-cache",
+      "path": "untrusted-0.9.0/LICENSE.txt",
+      "sha256": "7abd9b6960dcf7d4d0a48606a5b71bfe37d472db68d70637f3a58a56785f1621"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "89c8b8415f692d3803d183fc5fbf9ec08a6adcf4"
+    }
+  },
+  "version": "0.9.0"
+}

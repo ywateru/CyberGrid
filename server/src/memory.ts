@@ -1,0 +1,95 @@
+import {createHash,createHmac,randomBytes,randomUUID} from 'node:crypto';
+import {ApiError,ONLINE_TTL,SESSION_TTL,SIGNAL_TTL,type DeviceRow,type Session,type DeviceSession,type ConsoleSession,type StoredSignal,type Store,type AdminOverviewQuery,type AdminOverview,type AdminDevice} from './types.js';
+export interface MemoryLimits {sessions:number;sessionsPerUser:number;devices:number;devicesPerUser:number;signals:number;signalsPerDevice:number;signalsPerUser:number;signalBytes:number;signalBytesPerDevice:number;signalBytesPerUser:number;rateKeys:number;idempotency:number;waiters:number;waitersPerDevice:number;registrationKeys:number;registrationKeysPerUser:number}
+const defaults:MemoryLimits={sessions:10000,sessionsPerUser:128,devices:5000,devicesPerUser:64,signals:20000,signalsPerDevice:512,signalsPerUser:2048,signalBytes:33554432,signalBytesPerDevice:2097152,signalBytesPerUser:8388608,rateKeys:20000,idempotency:20000,waiters:1000,waitersPerDevice:2,registrationKeys:10000,registrationKeysPerUser:128};
+const digest=(v:unknown)=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
+export const uuid=(v:unknown):v is string=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+interface Registration {content:string;session:Session;expires:number}
+interface Dedup {content:string;id:number;expires:number}
+interface Waiter {device:string;wake:()=>void}
+export class MemoryStore implements Store {
+ private readonly startedAt=Date.now();
+ readonly epoch=randomUUID(); private boot=randomBytes(32); revision=0;
+ private sessions=new Map<string,Session>();private peers=new Map<string,DeviceRow>();private messages:StoredSignal[]=[];private sequence=0;
+ private rates=new Map<string,{start:number;count:number}>();private registrations=new Map<string,Registration>();private dedup=new Map<string,Dedup>();private waiters=new Set<Waiter>();private stopped=false;private fences=new Map<string,{user:string;revision:number;requestId:string;content:string}>();
+ readonly limits:MemoryLimits;
+ constructor(limits:Partial<MemoryLimits>={}){this.limits={...defaults,...limits};for(const [key,value] of Object.entries(this.limits))if(!(key in defaults)||!Number.isSafeInteger(value)||value<1||value>100000000)throw Error('Invalid memory capacity '+key);}
+ close(){this.stopped=true;this.notify();this.boot.fill(0);this.sessions.clear();this.peers.clear();this.messages=[];this.registrations.clear();this.dedup.clear();this.rates.clear();this.fences.clear();}
+ private available(){if(this.stopped)throw new ApiError(503,'COORDINATOR_UNAVAILABLE','协调服务暂不可用',1);}
+ private capacity(ok:boolean,user=false){if(!ok)throw new ApiError(user?429:503,'CAPACITY_EXCEEDED','协调容量已满，请稍后重试',5);}
+ private notify(){this.revision++;for(const w of [...this.waiters])w.wake();}
+ current(s:Session,now:number){this.available();const live=this.sessions.get(s.hash);if(live?.superseded)throw new ApiError(401,'SESSION_SUPERSEDED','设备已被新注册代际接管');if(!live||live.expiresAt<=now)throw new ApiError(401,'INVALID_SESSION','会话已失效，请重新登录');if(live.purpose==='device'&&live.protocol&&this.peers.get(live.deviceId)?.incarnation!==live.incarnation)throw new ApiError(401,'SESSION_SUPERSEDED','设备已被新注册代际接管');}
+ async cleanup(now:number){this.available();let changed=false;for(const [h,s]of this.sessions)if(s.expiresAt<=now){this.sessions.delete(h);changed=true;}for(const [id,d]of this.peers)if(d.lastSeen<=now-86400000){this.peers.delete(id);changed=true;}this.messages=this.messages.filter(m=>m.expiresAt>now&&this.peers.has(m.toDeviceId)&&this.peers.has(m.fromDeviceId));for(const [k,r]of this.rates)if(r.start<=now-60000)this.rates.delete(k);for(const [k,r]of this.registrations)if(r.expires<=now)this.registrations.delete(k);for(const [k,r]of this.dedup)if(r.expires<=now)this.dedup.delete(k);if(changed)this.notify();}
+ private sessionCapacity(user:string,replacing?:string){const active=[...this.sessions.values()].filter(s=>!s.superseded&&!(s.purpose==='device'&&s.deviceId===replacing));this.capacity(active.length<this.limits.sessions);this.capacity(active.filter(s=>s.userId===user).length<this.limits.sessionsPerUser,true);}
+ private deviceCapacity(user:string,id:string){if(this.peers.has(id))return;this.capacity(this.peers.size<this.limits.devices);this.capacity([...this.peers.values()].filter(d=>d.userId===user).length<this.limits.devicesPerUser,true);}
+ register(userId:string,appId:string|null,name:string,key:string|undefined,requestId:string,now:number,registrationRevision?:unknown){this.available();if(!uuid(requestId))throw new ApiError(400,'INVALID_INPUT','requestId 须为 UUID');if(appId!==null&&(typeof key!=='string'||Buffer.from(key,'base64url').length!==32||Buffer.from(key,'base64url').toString('base64url')!==key))throw new ApiError(400,'INVALID_INPUT','registrationKey 须为规范32字节base64url');
+  const id=JSON.stringify([userId,requestId]),content=digest([userId,appId,name,key??null,registrationRevision??null]);
+  const logical=appId===null?undefined:'d_'+digest([userId,appId,key]).slice(0,48);
+  if(logical){if(!Number.isSafeInteger(registrationRevision)||(registrationRevision as number)<1)throw new ApiError(400,'INVALID_INPUT','registrationRevision 须为正安全整数');const f=this.fences.get(logical);if(f&&(registrationRevision as number)<f.revision)throw new ApiError(409,'SESSION_SUPERSEDED','注册尝试已被新revision取代');if(f&&(registrationRevision as number)===f.revision&&(content!==f.content||requestId!==f.requestId))throw new ApiError(409,'REGISTRATION_ID_CONFLICT','注册内容冲突');if(!f){this.capacity(this.fences.size<this.limits.registrationKeys);this.capacity([...this.fences.values()].filter(f=>f.user===userId).length<this.limits.registrationKeysPerUser,true);}}
+  const old=this.registrations.get(id);
+  if(old&&old.expires>now){if(old.content!==content)throw new ApiError(409,'REGISTRATION_ID_CONFLICT','requestId 内容冲突');try{this.current(old.session,now);}catch{throw new ApiError(409,'REGISTRATION_ATTEMPT_EXPIRED','原注册会话已失效');}return {session:{...old.session},sessionKey:this.key(userId,appId,requestId)};}
+  if(logical&&this.fences.get(logical)?.revision===registrationRevision)throw new ApiError(409,'REGISTRATION_ATTEMPT_EXPIRED','旧注册已失效，增加revision后重试');
+  const reclaim=logical?[...this.registrations].filter(([,r])=>r.session.purpose==='device'&&r.session.deviceId===logical):[],oldHashes=new Set(reclaim.map(([,r])=>r.session.hash)),reclaimDedup=[...this.dedup.keys()].filter(k=>oldHashes.has((JSON.parse(k) as [string,string])[0]));this.capacity(this.registrations.size-reclaim.length+this.dedup.size-reclaimDedup.length<this.limits.idempotency);this.sessionCapacity(userId,logical);
+  const sessionKey=this.key(userId,appId,requestId),hash=createHash('sha256').update(sessionKey).digest('hex'),expiresAt=now+SESSION_TTL;let session:Session;
+  if(appId===null){session={purpose:'console',hash,userId,appId:null,deviceId:null,expiresAt,protocol:'memory-v1'};}
+  else {const deviceId=logical!;this.deviceCapacity(userId,deviceId);const incarnation=randomUUID();for(const [oldId,r]of reclaim){this.registrations.delete(oldId);this.sessions.delete(r.session.hash);}for(const k of reclaimDedup)this.dedup.delete(k);for(const s of this.sessions.values())if(s.purpose==='device'&&s.deviceId===deviceId)s.superseded=true;
+   session={purpose:'device',hash,userId,appId,deviceId,expiresAt,protocol:'memory-v1',incarnation};this.peers.set(deviceId,{id:deviceId,userId,appId,name,lastSeen:now,ports:[],tunnelUrl:null,certificateFingerprint:null,incarnation,publishRevision:0});this.messages=this.messages.filter(m=>m.fromDeviceId!==deviceId&&m.toDeviceId!==deviceId);}
+  if(logical)this.fences.set(logical,{user:userId,revision:registrationRevision as number,requestId,content});this.sessions.set(hash,session);this.registrations.set(id,{content,session:{...session},expires:expiresAt});this.notify();return {session:{...session},sessionKey};
+ }
+ private key(user:string,app:string|null,request:string){return createHmac('sha256',this.boot).update(JSON.stringify([this.epoch,user,app,request])).digest('base64url');}
+ async createSession(s:DeviceSession,d:DeviceRow){this.available();this.sessionCapacity(s.userId);this.deviceCapacity(s.userId,d.id);this.peers.set(d.id,structuredClone(d));this.sessions.set(s.hash,{...s});this.notify();}
+ async createConsoleSession(s:ConsoleSession){this.available();this.sessionCapacity(s.userId);this.sessions.set(s.hash,{...s});}
+ async session(hash:string){const s=this.sessions.get(hash);return s?{...s}:undefined;}
+ async revoke(hash:string){const s=this.sessions.get(hash);this.sessions.delete(hash);if(s?.purpose==='device'){const d=this.peers.get(s.deviceId);if(!s.protocol||d?.incarnation===s.incarnation){this.peers.delete(s.deviceId);this.messages=this.messages.filter(m=>m.fromDeviceId!==s.deviceId&&m.toDeviceId!==s.deviceId);}}this.notify();}
+ private online(d:DeviceRow,now:number){return d.lastSeen>now-ONLINE_TTL&&[...this.sessions.values()].some(s=>s.purpose==='device'&&s.deviceId===d.id&&!s.superseded&&s.expiresAt>now&&(!s.protocol||s.incarnation===d.incarnation));}
+ async devices(userId:string,appId:string,now:number){return [...this.peers.values()].filter(d=>d.userId===userId&&d.appId===appId).map(({userId,appId,lastSeen,...d})=>({...structuredClone(d),lastSeen:new Date(lastSeen).toISOString(),online:this.online(this.peers.get(d.id)!,now)}));}
+ async device(id:string,now:number){const d=this.peers.get(id);return d?{...structuredClone(d),online:this.online(d,now)}:undefined;}
+ async heartbeat(id:string,p:Pick<DeviceRow,'ports'|'tunnelUrl'|'certificateFingerprint'>,now:number){const d=this.peers.get(id);if(!d)throw new ApiError(401,'INVALID_SESSION','会话已失效');const changed=!this.online(d,now)||digest([d.ports,d.tunnelUrl,d.certificateFingerprint])!==digest([p.ports,p.tunnelUrl,p.certificateFingerprint]);Object.assign(d,structuredClone(p),{lastSeen:now});if(changed)this.notify();}
+ async publish(s:DeviceSession,p:Pick<DeviceRow,'ports'|'tunnelUrl'|'certificateFingerprint'>,inc:unknown,rev:unknown,now:number){this.current(s,now);const d=this.peers.get(s.deviceId)!;if(s.protocol){if(inc!==s.incarnation)throw new ApiError(409,'INCARNATION_MISMATCH','设备代际不匹配');if(!Number.isSafeInteger(rev)||(rev as number)<1)throw new ApiError(400,'INVALID_INPUT','publishRevision 须为正安全整数');if((rev as number)<d.publishRevision!)throw new ApiError(409,'STALE_PUBLISH_REVISION','快照revision过期');if(rev===d.publishRevision&&digest([d.ports,d.tunnelUrl,d.certificateFingerprint])!==digest([p.ports,p.tunnelUrl,p.certificateFingerprint]))throw new ApiError(409,'PUBLISH_REVISION_CONFLICT','同revision快照冲突');d.publishRevision=rev as number;}
+  // No await between final generation check and full snapshot mutation.
+  return this.heartbeat(s.deviceId,p,now);
+ }
+ async signal(v:Omit<StoredSignal,'id'>){this.available();this.signalCapacity(v);const id=++this.sequence;this.messages.push({...v,id});this.notify();return id;}
+ private signalCapacity(v:Omit<StoredSignal,'id'>){const bytes=Buffer.byteLength(v.payload);const own=this.peers.get(v.fromDeviceId)?.userId;const inbox=this.messages.filter(m=>m.toDeviceId===v.toDeviceId);const user=this.messages.filter(m=>this.peers.get(m.toDeviceId)?.userId===own);const sum=(a:StoredSignal[])=>a.reduce((n,m)=>n+Buffer.byteLength(m.payload),0);
+ this.capacity(this.messages.length<this.limits.signals&&sum(this.messages)+bytes<=this.limits.signalBytes);this.capacity(inbox.length<this.limits.signalsPerDevice&&sum(inbox)+bytes<=this.limits.signalBytesPerDevice&&user.length<this.limits.signalsPerUser&&sum(user)+bytes<=this.limits.signalBytesPerUser,true);}
+ async postSignal(s:DeviceSession,v:Omit<StoredSignal,'id'|'expiresAt'|'fromDeviceId'>,messageId:unknown,now:number){this.current(s,now);const from=this.peers.get(s.deviceId),to=this.peers.get(v.toDeviceId);if(!from||!to||to.id===from.id||to.userId!==s.userId||to.appId!==s.appId||!this.online(from,now)||!this.online(to,now))throw new ApiError(404,'PEER_UNAVAILABLE','目标设备不可用');
+  const value={...v,fromDeviceId:s.deviceId,expiresAt:now+SIGNAL_TTL,...(s.protocol?{fromIncarnation:s.incarnation}:{})};let key:string|undefined,content='';
+  if(s.protocol){if(!uuid(messageId))throw new ApiError(400,'INVALID_INPUT','clientMessageId 须为UUID');if(v.toIncarnation!==to.incarnation)throw new ApiError(409,'INCARNATION_MISMATCH','目标代际已变化');key=JSON.stringify([s.hash,messageId]);content=digest([v,s.incarnation]);const old=this.dedup.get(key);if(old&&old.expires>now){if(old.content!==content)throw new ApiError(409,'SIGNAL_ID_CONFLICT','信令ID内容冲突');return old.id;}this.capacity(this.registrations.size+this.dedup.size<this.limits.idempotency);}
+  this.signalCapacity(value);const id=++this.sequence;this.messages.push({...value,id});if(key)this.dedup.set(key,{id,content,expires:value.expiresAt});this.notify();return id;
+ }
+ private deliverable(m:StoredSignal,to:string,after:number,now:number){const from=this.peers.get(m.fromDeviceId),target=this.peers.get(to);return m.toDeviceId===to&&m.id>after&&m.expiresAt>now&&!!from&&this.online(from,now)&&(!m.fromIncarnation||m.fromIncarnation===from.incarnation)&&(!m.toIncarnation||m.toIncarnation===target?.incarnation);}
+ async signals(to:string,after:number,now:number){const batch:Omit<StoredSignal,'toDeviceId'|'expiresAt'>[]=[];let bytes=0;for(const value of this.messages){if(!this.deliverable(value,to,after,now))continue;const {toDeviceId,expiresAt,...m}=value,item={...m,coordinatorEpoch:this.epoch},size=Buffer.byteLength(JSON.stringify(item));if(batch.length>=100||bytes+size>1<<20)break;batch.push(item);bytes+=size;}return batch;}
+ async wait(s:DeviceSession,after:number,seconds:number,now:()=>number,signal:AbortSignal){this.current(s,now());if(!seconds||signal.aborted||this.messages.some(m=>this.deliverable(m,s.deviceId,after,now())))return;this.capacity(this.waiters.size<this.limits.waiters);this.capacity([...this.waiters].filter(w=>w.device===s.deviceId).length<this.limits.waitersPerDevice,true);await new Promise<void>(resolve=>{let timer:ReturnType<typeof setTimeout>;const w:Waiter={device:s.deviceId,wake:()=>{clearTimeout(timer);signal.removeEventListener('abort',w.wake);this.waiters.delete(w);resolve();}};this.waiters.add(w);timer=setTimeout(w.wake,seconds*1000);signal.addEventListener('abort',w.wake,{once:true});if(signal.aborted)w.wake();});this.current(s,now());}
+ /** White-list projection over existing bounded RAM; never clone private rows. */
+ adminOverview(now:number,query:AdminOverviewQuery):AdminOverview {
+  this.available();
+  if(!Number.isSafeInteger(query.page)||query.page<1||!Number.isSafeInteger(query.pageSize)||query.pageSize<1||query.pageSize>100||!Number.isSafeInteger((query.page-1)*query.pageSize))throw new ApiError(400,'INVALID_INPUT','分页参数无效');
+  const currentDevices=new Set<string>();let sessions=0;
+  for(const s of this.sessions.values()){
+   if(s.expiresAt<=now||s.superseded)continue;
+   const d=s.purpose==='device'?this.peers.get(s.deviceId):undefined;
+   if(s.purpose==='device'&&s.protocol&&d?.incarnation!==s.incarnation)continue;
+   sessions++;
+   if(d&&d.lastSeen>now-86400000)currentDevices.add(d.id);
+  }
+  const isOnline=(d:DeviceRow)=>d.lastSeen>now-ONLINE_TTL&&currentDevices.has(d.id);
+  const devices:AdminDevice[]=[];let deviceCount=0,onlineDevices=0,portCount=0,matched=0;
+  const offset=(query.page-1)*query.pageSize;
+  for(const d of this.peers.values()){
+   if(!currentDevices.has(d.id)||d.lastSeen<=now-86400000)continue;
+   const online=isOnline(d);deviceCount++;if(online)onlineDevices++;portCount+=d.ports.length;
+   if((query.appId!==undefined&&d.appId!==query.appId)||(query.online!==undefined&&online!==query.online))continue;
+   const position=matched++;if(position<offset||devices.length>=query.pageSize)continue;
+   devices.push({id:d.id,appId:d.appId,name:d.name,online,lastSeen:new Date(d.lastSeen).toISOString(),ports:d.ports.slice(0,32).map(p=>({port:p.port,type:p.type})),hasTunnel:!!d.tunnelUrl});
+  }
+  let queuedSignals=0;
+  for(const m of this.messages){
+   if(m.expiresAt<=now||!currentDevices.has(m.fromDeviceId)||!currentDevices.has(m.toDeviceId))continue;
+   const from=this.peers.get(m.fromDeviceId),to=this.peers.get(m.toDeviceId);
+   if(from&&to&&isOnline(from)&&(!m.fromIncarnation||m.fromIncarnation===from.incarnation)&&(!m.toIncarnation||m.toIncarnation===to.incarnation))queuedSignals++;
+  }
+  let waiters=0;for(const w of this.waiters)if(currentDevices.has(w.device))waiters++;
+  return {sampledAt:new Date(now).toISOString(),coordinator:{epoch:this.epoch,startedAt:new Date(this.startedAt).toISOString(),uptimeSeconds:Math.max(0,Math.floor((now-this.startedAt)/1000))},totals:{sessions,devices:deviceCount,onlineDevices,offlineDevices:deviceCount-onlineDevices,ports:portCount,queuedSignals,waiters},page:{number:query.page,size:query.pageSize,totalDevices:matched,totalPages:Math.max(1,Math.ceil(matched/query.pageSize)),hasNext:offset+devices.length<matched},devices};
+ }
+ async rate(key:string,now:number,limit:number){this.available();let r=this.rates.get(key);if(!r||r.start<=now-60000){this.capacity(this.rates.has(key)||this.rates.size<this.limits.rateKeys);r={start:now,count:0};this.rates.set(key,r);}return ++r.count<=limit;}
+}

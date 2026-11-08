@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "0dc92fb57ca44df6db8059111ab3af99a63d5d0f8375d9972e319a379c6bab76",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "crypto-bigint",
+  "repository": "https://github.com/RustCrypto/crypto-bigint",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "crypto-bigint-0.5.5/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "crypto-bigint-0.5.5/LICENSE-MIT",
+      "sha256": "90c503b61dee04e1449c323ec34c229dfb68d7adcb96c7e140ee55f70fce2d8e"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "98f29002552211cbd37dd09d354d1514d84158c4"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.5.5"
+}

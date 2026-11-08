@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "831010a0f742e1209b3bcea8fab6a8e149051ba6099432c8cb2cc117dec3ead1",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "aes-gcm",
+  "repository": "https://github.com/RustCrypto/AEADs",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "aes-gcm-0.10.3/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "aes-gcm-0.10.3/LICENSE-MIT",
+      "sha256": "3c0dfa33fd2e6976038555b52095699452653b1fcabe113074f14e0848a6b11e"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "fa8197f11d79a079fcb1f6ef67fa9119ce6939b9"
+    },
+    "path_in_vcs": "aes-gcm"
+  },
+  "version": "0.10.3"
+}

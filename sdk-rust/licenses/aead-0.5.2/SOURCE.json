@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "d122413f284cf2d62fb1b7db97e02edb8cda96d769b16e443a4f6195e35662b0",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "aead",
+  "repository": "https://github.com/RustCrypto/traits",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "aead-0.5.2/LICENSE-APACHE",
+      "sha256": "b1cf9a3333ca78152b859012cd4a804156e5243e9ca20ad1df7327ba5ea7405c"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "aead-0.5.2/LICENSE-MIT",
+      "sha256": "949ab7b3e7140fee216f06fe3a2bd67d68dd511f8ea73c1e01c98cb348e9c8ae"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "1ae238c527c204dd9590e3abc406cfbb342d46ea"
+    },
+    "path_in_vcs": "aead"
+  },
+  "version": "0.5.2"
+}

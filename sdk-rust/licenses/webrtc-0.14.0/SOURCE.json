@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Rain Liu <yliu@webrtc.rs>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "08fd686c0920ac08f3a57eacc48e31f0e4ca1ffefba4478784606f78c14e83ad",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "webrtc",
+  "repository": "https://github.com/webrtc-rs/webrtc",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "webrtc-0.14.0/upstream-repository-root/LICENSE-MIT",
+      "sha256": "56cc6c08157f4faf70d351b3a7ceac143399d5359a78c180e06dcd0390784f4d",
+      "url": "https://raw.githubusercontent.com/webrtc-rs/webrtc/a1f8f1919235d8452835852e018efd654f2f8366/LICENSE-MIT"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "webrtc-0.14.0/upstream-repository-root/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "url": "https://raw.githubusercontent.com/webrtc-rs/webrtc/a1f8f1919235d8452835852e018efd654f2f8366/LICENSE-APACHE"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a1f8f1919235d8452835852e018efd654f2f8366"
+    },
+    "path_in_vcs": "webrtc"
+  },
+  "version": "0.14.0"
+}

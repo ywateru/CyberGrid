@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Amanieu d'Antras <amanieu@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "93857453250e3077bd71ff98b6a65ea6621a19bb0f559a85248955ac12c45a1a",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "parking_lot",
+  "repository": "https://github.com/Amanieu/parking_lot",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "parking_lot-0.12.5/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "parking_lot-0.12.5/LICENSE-MIT",
+      "sha256": "c9a75f18b9ab2927829a208fc6aa2cf4e63b8420887ba29cdb265d6619ae82d5"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "d7828fff7b5d6327ae608e82db45f888b344449a"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.12.5"
+}

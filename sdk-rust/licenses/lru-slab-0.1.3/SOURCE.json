@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Benjamin Saunders <ben.e.saunders@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "4050469837a6ff301cd14c1f8f24f88549e6d548f24f64e2148eb0f72cebc51f",
+  "declaredLicense": "MIT OR Apache-2.0 OR Zlib",
+  "name": "lru-slab",
+  "repository": "https://github.com/Ralith/lru-slab",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "lru-slab-0.1.3/LICENSE-APACHE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "lru-slab-0.1.3/LICENSE-MIT",
+      "sha256": "1466d9b4f3a59bb8997fc8d5fa977ce3f6a24bb2358793c09bfdf007039f6486"
+    },
+    {
+      "cratePath": "LICENSE-ZLIB",
+      "origin": "cargo-registry-cache",
+      "path": "lru-slab-0.1.3/LICENSE-ZLIB",
+      "sha256": "09785877275ffada6c371b652a30e95c26b435126fc0fc62f1bc2d72171f80a4"
+    }
+  ],
+  "vcs": null,
+  "version": "0.1.3"
+}

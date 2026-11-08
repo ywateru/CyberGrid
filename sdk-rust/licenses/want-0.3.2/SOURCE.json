@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Sean McArthur <sean@seanmonstar.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "ec4cdd0dd910afe868b7ef477227d8d538b46b3075031afee8a9f2acb0a2ed0b",
+  "declaredLicense": "MIT",
+  "name": "want",
+  "repository": "https://github.com/seanmonstar/want",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "want-0.3.2/LICENSE",
+      "sha256": "a65f5d0a945d267751344c95665945b90c030ea107faf5c85d518929886187da"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "322291ce5a87c72ecfd83d383d0d7f5245cf72c6"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.3.2"
+}

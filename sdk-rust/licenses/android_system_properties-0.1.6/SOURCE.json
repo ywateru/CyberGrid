@@ -1,0 +1,34 @@
+{
+  "authors": [
+    "Nicolas Silva <nical@fastmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "ae221649c9976a6f6c56ae1facf410f3ddb33cc661c4b7b61020a912d4237fbc",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "android_system_properties",
+  "repository": "https://github.com/nical/android_system_properties",
+  "targets": [
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "android_system_properties-0.1.6/LICENSE-APACHE",
+      "sha256": "216486f29671a4262efe32af6d84a75bef398127f8c5f369b5c8305983887a06"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "android_system_properties-0.1.6/LICENSE-MIT",
+      "sha256": "80f275e90d799911ed3830a7f242a2ef5a4ade2092fe0aa07bfb2d2cf2f2b95e"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "f859a346ba256d92ef047e7a49d6a2f59972257b"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.1.6"
+}

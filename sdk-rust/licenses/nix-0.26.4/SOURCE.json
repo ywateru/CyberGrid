@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "The nix-rust Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "598beaf3cc6fdd9a5dfb1630c2800c7acd31df7aaf0f565796fba2b53ca1af1b",
+  "declaredLicense": "MIT",
+  "name": "nix",
+  "repository": "https://github.com/nix-rust/nix",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "nix-0.26.4/LICENSE",
+      "sha256": "66e3ee1fa7f909ad3c612d556f2a0cdabcd809ad6e66f3b0605015ac64841b70"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "08d8ba9fc3b5a0b9f6211bc286e6bf336b7c3463"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.26.4"
+}

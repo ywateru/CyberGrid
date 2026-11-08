@@ -1,0 +1,30 @@
+{
+  "authors": [
+    "Eliza Weisman <eliza@buoyant.io>",
+    "Tokio Contributors <team@tokio.rs>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "63e71662fa4b2a2c3a26f570f037eb95bb1f85397f3cd8076caed2f026a6d100",
+  "declaredLicense": "MIT",
+  "name": "tracing",
+  "repository": "https://github.com/tokio-rs/tracing",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "tracing-0.1.44/LICENSE",
+      "sha256": "898b1ae9821e98daf8964c8d6c7f61641f5f5aa78ad500020771c0939ee0dea1"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "2d55f6faf9be83e7e4634129fb96813241aac2b8"
+    },
+    "path_in_vcs": "tracing"
+  },
+  "version": "0.1.44"
+}

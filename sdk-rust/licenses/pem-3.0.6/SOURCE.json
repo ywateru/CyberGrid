@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Jonathan Creekmore <jonathan@thecreekmores.org>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "1d30c53c26bc5b31a98cd02d20f25a7c8567146caf63ed593a9d87b2775291be",
+  "declaredLicense": "MIT",
+  "name": "pem",
+  "repository": "https://github.com/jcreekmore/pem-rs.git",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE.md",
+      "origin": "cargo-registry-cache",
+      "path": "pem-3.0.6/LICENSE.md",
+      "sha256": "b7c76ff4466a3aeb6a7d903e81b651335e97d64ecb857e2ee9812a36c6fd1acf"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "7d6157704805dcedf703229926938a71b1ddd0b1"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "3.0.6"
+}

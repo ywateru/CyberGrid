@@ -1,0 +1,22 @@
+import {timingSafeEqual} from 'node:crypto';
+import {abortable,BodyCapacityError,limited,requestDeadline,type Handler} from './http.js';
+const response=(code:string,status=503)=>new Response(JSON.stringify({error:{code,message:'协调服务暂不可用'}}),{status,headers:{'content-type':'application/json','cache-control':'no-store','retry-after':'2'}});
+export function publicOrigin(raw:string|undefined){const u=new URL(raw??'https://cybergrid.aixgg.com');if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash||u.pathname!=='/')throw Error('Canonical public HTTPS origin required');return u.origin;}
+export function proxySecret(raw:string|undefined){const bytes=Buffer.byteLength(raw??'');if(!raw||bytes<32||bytes>256)throw Error('Private proxy secret of 32..256 bytes required');return raw;}
+export function secretMatches(actual:string|null,expected:string){const a=Buffer.from(actual??''),b=Buffer.from(expected);return a.length===b.length&&timingSafeEqual(a,b);}
+
+export function createProxy(env:NodeJS.ProcessEnv=process.env,fetcher:typeof fetch=fetch):Handler{
+ const upstream=new URL(env.CYBERGRID_OWNER_URL??'');if(upstream.protocol!=='https:'||upstream.username||upstream.password||upstream.pathname!=='/'||upstream.search||upstream.hash)throw Error('Fixed owner HTTPS origin required');
+ const secret=proxySecret(env.CYBERGRID_PROXY_SECRET),origin=publicOrigin(env.CYBERGRID_PUBLIC_ORIGIN);
+ return async(request,ip='unknown')=>{const u=new URL(request.url);if(!u.pathname.startsWith('/api/v1/'))return response('NOT_FOUND',404);if((request.headers.has('origin')&&request.headers.get('origin')!==origin)||request.headers.get('sec-fetch-site')==='cross-site')return response('ORIGIN_REJECTED',403);
+  const target=new URL(upstream);target.pathname=u.pathname;target.search=u.search;
+  const headers=new Headers();for(const name of ['content-type','authorization','origin','sec-fetch-site','x-cybergrid-epoch']){const value=request.headers.get(name);if(value!==null)headers.set(name,value);}headers.set('x-cybergrid-proxy-key',secret);headers.set('x-cybergrid-client-ip',ip.slice(0,128));
+  const controller=new AbortController(),deadline=requestDeadline(request)??Date.now()+25000;const timer=setTimeout(()=>controller.abort(new Error('Proxy deadline exceeded')),Math.max(0,deadline-Date.now()));timer.unref();const signal=AbortSignal.any([request.signal,controller.signal]);
+  try{signal.throwIfAborted();let bytes:Uint8Array<ArrayBuffer>|undefined;try{bytes=request.body?await limited(request.body,100000,signal):undefined;}catch(error){if(error instanceof BodyCapacityError)return response('BODY_TOO_LARGE',413);throw error;}signal.throwIfAborted();const r=await abortable(fetcher(target,{method:request.method,headers,body:bytes,signal,redirect:'error'}),signal);const output=new Headers({'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'});for(const name of ['x-cybergrid-epoch','retry-after']){const value=r.headers.get(name);if(value)output.set(name,value);}let raw:Uint8Array<ArrayBuffer>;try{raw=await limited(r.body,2<<20,signal);}catch(error){if(error instanceof BodyCapacityError)return response('OWNER_INVALID_RESPONSE');throw error;}return new Response(raw,{status:r.status,headers:output});}catch{return response('COORDINATOR_UNAVAILABLE');}finally{clearTimeout(timer);}
+ };
+}
+/** Trusted owner boundary: canonical origin is configuration, never a forwarded header. */
+export function createOwnerGateway(handle:Handler,env:NodeJS.ProcessEnv=process.env):Handler{
+ const secret=proxySecret(env.CYBERGRID_PROXY_SECRET),origin=publicOrigin(env.CYBERGRID_PUBLIC_ORIGIN);
+ return async(request)=>{if(!secretMatches(request.headers.get('x-cybergrid-proxy-key'),secret))return response('PROXY_AUTH_REQUIRED',403);const incoming=new URL(request.url),url=new URL(origin);url.pathname=incoming.pathname;url.search=incoming.search;const headers=new Headers(request.headers);for(const key of [...headers.keys()])if(key.startsWith('x-')||key==='forwarded'||key==='host')headers.delete(key);const epoch=request.headers.get('x-cybergrid-epoch');if(epoch)headers.set('x-cybergrid-epoch',epoch);const ip=request.headers.get('x-cybergrid-client-ip')??'unknown';if(ip.length>128||/[\r\n\0]/.test(ip))return response('INVALID_INPUT',400);return handle(new Request(url,{method:request.method,headers,body:request.body,signal:request.signal,...(request.body?{duplex:'half' as const}:{})}),ip);};
+}

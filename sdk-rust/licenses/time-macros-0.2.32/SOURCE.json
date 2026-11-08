@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Jacob Pratt <open-source@jhpratt.dev>",
+    "Time contributors"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "7e689342a48d2ea927c87ea50cabf8594854bf940e9310208848d680d668ed85",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "time-macros",
+  "repository": "https://github.com/time-rs/time",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-Apache",
+      "origin": "cargo-registry-cache",
+      "path": "time-macros-0.2.32/LICENSE-Apache",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "time-macros-0.2.32/LICENSE-MIT",
+      "sha256": "2537228d9a1b44a5dc595241349cae7090b326c8de165aaf89bfddef4a00d0fc"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "d1c55a454051c83e8fd2ad8431cf37b90dd6ea31"
+    },
+    "path_in_vcs": "time-macros"
+  },
+  "version": "0.2.32"
+}

@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Jacob Pratt <open-source@jhpratt.dev>",
+    "Time contributors"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "9e1c906769ad99c88eaa54e728060edef082f8e358ff32030cb7c7d315e81109",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "time-core",
+  "repository": "https://github.com/time-rs/time",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-Apache",
+      "origin": "cargo-registry-cache",
+      "path": "time-core-0.1.9/LICENSE-Apache",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "time-core-0.1.9/LICENSE-MIT",
+      "sha256": "2537228d9a1b44a5dc595241349cae7090b326c8de165aaf89bfddef4a00d0fc"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5d8737c39b9170c36c99cfc1f9f49cf0c059c63a"
+    },
+    "path_in_vcs": "time-core"
+  },
+  "version": "0.1.9"
+}

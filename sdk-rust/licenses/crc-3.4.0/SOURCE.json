@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Rui Hu <code@mrhooray.com>",
+    "Akhil Velagapudi <4@4khil.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "5eb8a2a1cd12ab0d987a5d5e825195d372001a4094a0376319d5a0ad71c1ba0d",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "crc",
+  "repository": "https://github.com/mrhooray/crc-rs.git",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "crc-3.4.0/LICENSE-APACHE",
+      "sha256": "470355a7eed93fcc4281ec2e0f82ca3b94e7af1e4d83629f91de8cfac34d750e"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "crc-3.4.0/LICENSE-MIT",
+      "sha256": "3488679340a49ecc34d342c4009d2dabf76f4a21f12aec2ca99b15805d656544"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "2c8fd9615d620b5a5f8c9556b79a4ca173d6d401"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "3.4.0"
+}

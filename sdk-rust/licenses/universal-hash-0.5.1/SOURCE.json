@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "fc1de2c688dc15305988b563c3854064043356019f97a4b46276fe734c4f07ea",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "universal-hash",
+  "repository": "https://github.com/RustCrypto/traits",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "universal-hash-0.5.1/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "universal-hash-0.5.1/LICENSE-MIT",
+      "sha256": "6b50510a0400c72172355cc5d2ba0f2c5c2eb33149b8f96539dc345fdc484920"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "742af86f821d7f79e76962d302c819b14622a485"
+    },
+    "path_in_vcs": "universal-hash"
+  },
+  "version": "0.5.1"
+}

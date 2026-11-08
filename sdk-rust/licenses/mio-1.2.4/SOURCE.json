@@ -1,0 +1,31 @@
+{
+  "authors": [
+    "Carl Lerche <me@carllerche.com>",
+    "Thomas de Zeeuw <thomasdezeeuw@gmail.com>",
+    "Tokio Contributors <team@tokio.rs>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "1788edb87fdc09c7e26304471e2f5be8cdefb1b6930d6e3985fc02ff53bf86ee",
+  "declaredLicense": "MIT",
+  "name": "mio",
+  "repository": "https://github.com/tokio-rs/mio",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "mio-1.2.4/LICENSE",
+      "sha256": "07919255c7e04793d8ea760d6c2ce32d19f9ff02bdbdde3ce90b1e1880929a9b"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "79d1417c94e3a45c8bdd796e5422e22e8c488086"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.2.4"
+}

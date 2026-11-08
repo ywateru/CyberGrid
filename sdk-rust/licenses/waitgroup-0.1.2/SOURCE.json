@@ -1,0 +1,28 @@
+{
+  "authors": [
+    "laizy <aochyi@126.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "d1f50000a783467e6c0200f9d10642f4bc424e39efc1b770203e88b488f79292",
+  "declaredLicense": "Apache-2.0",
+  "name": "waitgroup",
+  "repository": "https://github.com/laizy/waitgroup-rs",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "waitgroup-0.1.2/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "7a65c1990015b82584dbf3302b54f6ba29e38a01"
+    }
+  },
+  "version": "0.1.2"
+}

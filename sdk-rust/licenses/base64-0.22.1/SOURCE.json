@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Marshall Pierce <marshall@mpierce.org>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "base64",
+  "repository": "https://github.com/marshallpierce/rust-base64",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "base64-0.22.1/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "base64-0.22.1/LICENSE-MIT",
+      "sha256": "0dd882e53de11566d50f8e8e2d5a651bcf3fabee4987d70f306233cf39094ba7"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "e14400697453bcc85997119b874bc03d9601d0af"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.22.1"
+}
