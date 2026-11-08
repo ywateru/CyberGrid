@@ -26,6 +26,8 @@ JWT 验签的 Logto issuer、JWKS 和 API resource 始终由启动配置固定�
 
 网站、文档、个人控制台和管理页面都由该 Node 进程提供，并设置精确放行可信 Logto origin 的 CSP。默认与自定义控制台回调路径均落到本进程的控制台页面，保留 OAuth 查询参数。静态文件仅从公开资源目录读取，拒绝路径穿越；健康检查只反映进程存活，不向 Logto发请求或暴露配置、密钥和协调内容。关闭时停止接受新请求、终止协调等待者并释放租约。
 
+HTTP 适配器依据实际请求字节判断 GET / HEAD 是否携带请求体。反向代理使用合法的空分块传输时，应在同一请求总预算、容量上限与断连取消机制下读完并确认零字节，不能仅因 `Transfer-Encoding: chunked` 就拒绝无请求体的访问。实际非空 GET / HEAD 请求体仍在调用业务 handler 前拒绝；传输声明超出容量或实际读取超限仍按原容量边界拒绝，不放宽 HTTP 解析器对冲突或非法 framing 的校验。
+
 Logto 管理用户与应用。SDK 的 AppID 是启用 Device Flow 的 Native 应用 `client_id`；通过 JWT 验签后的 subject 与 client_id 划分命名空间。设备只能发现和连接同账号、同应用的终端。CyberGrid 不提供应用 CRUD。浏览器个人控制台使用独立 SPA PKCE 身份，只读设备信息，不注册设备。
 
 服务内存保存有界的会话 hash、设备心跳、端口、证书指纹和短期信令。它不保存用户密码、refresh token、端到端私钥或业务 payload。设备内存元数据会过期，服务重启清空所有协调状态并生成新 epoch。

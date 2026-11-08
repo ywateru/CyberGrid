@@ -1,6 +1,7 @@
 import type {IncomingMessage,ServerResponse} from 'node:http';
 export type Handler=(request:Request,clientIP?:string)=>Promise<Response>;
 export class BodyCapacityError extends Error {}
+class UnexpectedRequestBodyError extends Error {}
 export function abortable<T>(operation:Promise<T>,signal:AbortSignal):Promise<T>{
  return new Promise((resolve,reject)=>{
   const stop=()=>{signal.removeEventListener('abort',stop);reject(signal.reason??new Error('Request canceled'));};
@@ -20,7 +21,7 @@ export async function limited(body:ReadableStream<Uint8Array>|null,max:number,si
  }finally{signal.removeEventListener('abort',cancel);reader.releaseLock();}
  return new Uint8Array(Buffer.concat(chunks));
 }
-function incoming(req:IncomingMessage,signal:AbortSignal):Promise<Buffer>{
+function incoming(req:IncomingMessage,signal:AbortSignal,emptyOnly=false):Promise<Buffer>{
  if(signal.aborted)return Promise.reject(signal.reason);
  if(req.readableEnded)return Promise.resolve(Buffer.alloc(0));
  return new Promise((resolve,reject)=>{
@@ -28,7 +29,7 @@ function incoming(req:IncomingMessage,signal:AbortSignal):Promise<Buffer>{
   const cleanup=()=>{req.off('data',data);req.off('end',end);req.off('error',error);signal.removeEventListener('abort',stop);};
   const error=(reason:unknown)=>{req.pause();cleanup();reject(reason);};
   const stop=()=>error(signal.reason??new Error('Request canceled'));
-  const data=(part:Buffer)=>{size+=part.length;if(size>100000){error(new BodyCapacityError('body capacity exceeded'));return;}parts.push(part);};
+  const data=(part:Buffer)=>{size+=part.length;if(size>100000){error(new BodyCapacityError('body capacity exceeded'));return;}if(emptyOnly&&size>0){error(new UnexpectedRequestBodyError('GET/HEAD request body is not allowed'));return;}parts.push(part);};
   const end=()=>{cleanup();resolve(Buffer.concat(parts));};
   req.on('data',data);req.once('end',end);req.once('error',error);signal.addEventListener('abort',stop,{once:true});if(signal.aborted)stop();
  });
@@ -53,8 +54,12 @@ export async function serveAPI(req:IncomingMessage,res:ServerResponse,handle:Han
   let origin:string;try{origin=effectiveOrigin(req,canonicalOrigin);}catch{fail('INVALID_REQUEST_ORIGIN',400);return;}
   let raw:Buffer|undefined;
   if(Number(req.headers['content-length']??0)>100000)throw new BodyCapacityError('body capacity exceeded');
-  if(['GET','HEAD'].includes(req.method??'GET')&&(req.headers['transfer-encoding']||Number(req.headers['content-length']??0)>0)){fail('INVALID_INPUT',400);return;}
-  if(!['GET','HEAD'].includes(req.method??'GET')){
+  if(['GET','HEAD'].includes(req.method??'GET')){
+   if(Number(req.headers['content-length']??0)>0){fail('INVALID_INPUT',400);return;}
+   // Proxies may frame an empty GET/HEAD with chunked encoding. Confirm EOF
+   // within the same request budget; framing alone is not an application body.
+   await incoming(req,abort.signal,true);
+  }else{
    raw=await incoming(req,abort.signal);
    if(raw.length>100000)throw new BodyCapacityError('body capacity exceeded');
   }
@@ -69,7 +74,7 @@ export async function serveAPI(req:IncomingMessage,res:ServerResponse,handle:Han
    const cleanup=()=>{res.off('finish',done);res.off('error',error);};
    res.once('finish',done);res.once('error',error);res.end(req.method==='HEAD'?undefined:Buffer.from(bytes));
   }),abort.signal);
- }catch(error){fail(error instanceof BodyCapacityError?'BODY_TOO_LARGE':'COORDINATOR_UNAVAILABLE',error instanceof BodyCapacityError?413:503);}
+ }catch(error){if(error instanceof UnexpectedRequestBodyError)fail('INVALID_INPUT',400);else fail(error instanceof BodyCapacityError?'BODY_TOO_LARGE':'COORDINATOR_UNAVAILABLE',error instanceof BodyCapacityError?413:503);}
  finally{clearTimeout(timer);res.off('close',onClose);req.off('aborted',onAborted);}
 }
 
