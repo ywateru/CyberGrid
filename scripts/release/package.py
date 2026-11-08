@@ -118,7 +118,7 @@ def package_macos(app, binary):
     if not app.is_dir() or not binary.is_file():
         raise RuntimeError('Build native Mac app and CLI first')
     native = app / 'Contents/MacOS/cybergrid-tauri-lab'
-    subprocess.run(['lipo', '-verify_arch', 'arm64', str(native)], check=True)
+    subprocess.run(['lipo', str(native), '-verify_arch', 'arm64'], check=True)
     subprocess.run(['codesign', '--verify', '--deep', '--strict', str(app)], check=True)
     target = OUT / 'CyberGrid-Lab-0.2.0-macos-arm64-test.zip'
     subprocess.run(['ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', str(app), str(target)], check=True)
@@ -139,7 +139,10 @@ def package_android(apk, binary, manifest):
     if os.environ.get('CI'):
         aapt = Path(os.environ['ANDROID_HOME']) / 'build-tools/36.0.0/aapt2'
         badging = subprocess.check_output([str(aapt), 'dump', 'badging', str(apk)]).decode()
-        if "sdkVersion:'28'" not in badging or 'application-debuggable' not in badging or "native-code: 'arm64-v8a'" not in badging:
+        lines = [line.strip() for line in badging.splitlines()]
+        minimums = [line for line in lines if line.startswith(('sdkVersion:', 'minSdkVersion:'))]
+        native = [line for line in lines if line.startswith('native-code:')]
+        if len(minimums) != 1 or minimums[0] not in {"sdkVersion:'28'", "minSdkVersion:'28'"} or 'application-debuggable' not in lines or native != ["native-code: 'arm64-v8a'"]:
             raise RuntimeError('APK must be API28 debug-test arm64 only')
     with zipfile.ZipFile(apk) as archive:
         names = [n for n in archive.namelist() if n.endswith('/libcloudflared.so')]

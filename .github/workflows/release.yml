@@ -83,6 +83,7 @@ jobs:
         run: |
           npm ci
           npm run tauri -- build --debug --bundles app --ci
+          codesign --force --sign - "$CARGO_TARGET_DIR/debug/bundle/macos/CyberGrid Lab.app"
           git diff --exit-code -- src-tauri/Cargo.lock ../../sdk-rust/Cargo.lock
       - name: Package native binaries and full notices
         run: python3 scripts/release/package.py macos --app "$CARGO_TARGET_DIR/debug/bundle/macos/CyberGrid Lab.app" --go-binary sdk/bin/cybergrid-macos
