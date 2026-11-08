@@ -8,7 +8,7 @@ The `Build and publish native SDKs` workflow in `.github/workflows/release.yml` 
 
 The workflow has three required build jobs:
 
-- **sources**, on Linux: build the website and typecheck the coordinator/middleware, verify both fixed provider resources, then package committed Go/Rust/App source and original license texts.
+- **sources**, on Linux: build the website and typecheck the Node service, verify both fixed provider resources, then package committed Go/Rust/App source and original license texts.
 - **macos**, on a native macOS arm64 runner: fixed Node 22.23.4, Go 1.27.0 and Rust 1.97.1; build the Go CLI and Tauri 2 debug-test app.
 - **android**, on Linux: the same language toolchains, JDK 17, Android SDK Platform 37.0, Build-Tools 36.0.0 and NDK 27.2.12479018; build the Go arm64 CLI with the API28 NDK compiler and bionic DNS, plus the arm64 API28+ Tauri debug-test APK with `adb-test-control` enabled.
 
@@ -60,4 +60,4 @@ Output is under `dist/release/`, which is not committed. `finalize` requires all
 
 The macOS app is an arm64 debug-test build and is not notarized. The Android APK is an arm64 debug-test build with an explicit ADB control feature and an ephemeral CI debug signing key. A key change prevents in-place Android upgrades; users must handle existing app credentials with the original app before choosing uninstall/reinstall. These builds do not publish signing keys or personal app data.
 
-CI performs actual compilation and packaging. It does not automatically authorize Logto grants, run phones, repeat WAN tests, or claim new runtime acceptance from a successful build. The website and fixed API proxy are deployed separately; SDK/App binaries are downloaded from GitHub Releases rather than stored in the Vercel website output.
+CI performs actual compilation and packaging. It does not automatically authorize Logto grants, run phones, repeat WAN tests, or claim new runtime acceptance from a successful build. The website and API run in one persistent Node process (directly or in Docker). SDK/App binaries are downloaded from GitHub Releases rather than stored in the service image. A separate server workflow checks the Node entrypoint and Docker image without triggering native releases.

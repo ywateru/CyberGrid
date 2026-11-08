@@ -1,70 +1,73 @@
-# 部署与参数
+# 部署 CyberGrid Node 服务
 
-CyberGrid 不使用数据库。完整部署包含一个单进程内存 owner、Vercel 网站／API 代理，以及自己的 Logto 租户。Vercel 按钮只部署网站与代理，不能代替 owner 宿主。
+CyberGrid 由一个长期运行的 Node.js 22 进程提供完整官网、管理后台、Logto 控制台和 `/api/v1/`。协调状态只在该进程的有界内存中，不需要数据库。不要配置多副本、Node cluster 或 serverless Function；外部 HTTPS 入口可以使用普通 Nginx、Caddy 或隧道，服务不依赖特定平台。
 
-## 准备 Logto
+## 配置 Logto
 
-在 Logto 创建并配置：
+在自己的 Logto 租户中准备：
 
-- 启用 Device Flow 的 Native 应用，公开 Application ID 传给 SDK／Lab。
-- 用于个人设备控制台的 SPA 应用，允许回跳 `https://你的域名/console/callback/`、退出地址与站点 origin。支持公开注册时，在 Logto 开启相应登录／注册方式。
-- 标识符为 `https://你的域名/api` 的 API resource，配置本项目使用的 `connect` 权限，允许 Native／SPA 获取该 resource 的 access token。
-- 读取应用目录的 M2M Management API 凭据。当前 Logto Management API 的 `all` 权限较宽，须只保存在 owner；运行代码只对固定租户执行目录 GET，不将凭据下发客户端。
+- 一个 SPA Application，用于网站 `/console/`。登记完整的回跳 URI，默认 `https://你的域名/console/callback/`，以及该 HTTPS origin。
+- 启用 Device Flow 的 Native Applications。每个 SDK 使用自己的真实 Application ID，两端分别授权。
+- 一个 API resource，默认 `CYBERGRID_PUBLIC_ORIGIN` 加 `/api`，提供 `connect` scope；签发面向该 resource 的 ES384 用户 access token。
+- 读取应用目录的 M2M Management API 凭据。当前使用的 `all` 权限较宽，须只保存在服务端；运行代码只读取固定租户目录，不写入用户或应用。
 
-确认租户方案支持自定义 API resource 和所需配额。issuer、resource 和 client_id 必须精确一致，不能用其他项目的公开 ID 代替。SMTP／邮件验证在 Logto 中配置；不要把 SMTP 密码放到 SDK、前端或 Vercel public 变量。
+SMTP、用户注册和邮件验证在 Logto 中配置。不要把 M2M、SMTP 或管理后台密钥放进 SDK、前端或 Git。
 
-## 运行单一 owner
+## Docker：一个命令启动
 
-需要 Node.js22+、POSIX Python3 标准库 `fcntl`、可供 Vercel访问的可信 HTTPS入口。不运行 Node cluster 或多实例负载均衡。克隆源码后：
+安装 Docker Engine / Docker Desktop 与 Compose 后：
 
 ```sh
 cd server
-npm ci
 cp .env.example .env
 chmod 600 .env
-# 编辑 .env 后启动
-node --env-file=.env --import tsx src/owner.ts
+# 编辑 .env，填写自己的 HTTPS origin 和 Logto 配置
+docker compose up --build -d
 ```
 
-owner 的 `.env` 参数如下。所有秘密均填写自己的值，不提交真实文件。
+容器以非 root 用户运行 Node，包含 POSIX Python3 租约 helper。构建上下文只有 `server/` 的明确源码和站点文件，不包含真实 `.env`、SDK、provider 或测试制品。Compose 在运行时注入 `.env`，默认仅发布 `127.0.0.1:7400`，用宿主机 HTTPS 反向代理连接它。容器内的 HTTP 端口用于入口转发；`CYBERGRID_PUBLIC_ORIGIN` 仍必须是最终 HTTPS 域名。
 
-| 参数 | 用途 |
+Compose 的命名卷只保存固定租约 inode，不保存会话、设备或信令。保持一个服务实例，不要 `--scale`；不要删除运行中租约文件。停止或更新使用 `docker compose down` / `docker compose up --build -d`。更新会清空协调内存，SDK 按既有恢复协议重新注册。
+
+## 直接运行 Node
+
+需要 Node.js22+、POSIX Python3 标准库 `fcntl`：
+
+```sh
+cd server
+npm ci --include=dev
+cp .env.example .env
+chmod 600 .env
+# 编辑配置
+npm run build
+npm start
+```
+
+`npm start` 自动读取存在的 `.env`。`npm run dev`、`npm run owner` 和旧的 `src/owner.ts` / `src/local.ts` 都进入同一生命周期，不创建第二份协调服务。生产安装可在构建后 `npm prune --omit=dev`；运行依赖包含 `tsx`。
+
+| 配置 | 用途 |
 | --- | --- |
-| `LOGTO_ISSUER` | 租户 HTTPS issuer，无末尾 `/`，对应可信 OAuth 端点 |
-| `LOGTO_BROWSER_CLIENT_ID` | 个人控制台的 SPA Application ID |
-| `LOGTO_MANAGEMENT_CLIENT_ID` | 读取目录的 M2M client ID |
-| `LOGTO_MANAGEMENT_CLIENT_SECRET` | M2M 私密凭据，仅 owner 保存 |
-| `LOGTO_RESOURCE` | 可选 API resource；默认公共 origin 加 `/api` |
-| `CYBERGRID_PUBLIC_ORIGIN` | 外部站点的 HTTPS origin，不含路径，须与 Vercel域名及 Logto回跳配置匹配 |
-| `CYBERGRID_PROXY_SECRET` | 32–256 UTF8字节随机秘密；owner与Vercel必须相同 |
-| `CYBERGRID_ADMIN_KEY` | 独立的32–256 UTF8字节管理密钥；不复用proxy秘密；未配置时管理接口禁用 |
-| `CYBERGRID_OWNER_LOCK` | owner宿主上的唯一绝对租约路径，保持固定，不手工删除lease文件 |
-| `CYBERGRID_CONSOLE_REDIRECT_URI` | 可选同origin回跳地址，默认公共origin加`/console/callback/`；根路径及`/api`、`/admin`保留路径不可用 |
+| `CYBERGRID_PUBLIC_ORIGIN` | 必填，对外 HTTPS origin，不含路径、凭据、query 或 fragment |
+| `LOGTO_ISSUER` | 固定租户 HTTPS issuer，以 `/oidc` 结尾；同时用于精确 CSP |
+| `LOGTO_BROWSER_CLIENT_ID` | 独立 SPA client_id |
+| `LOGTO_MANAGEMENT_CLIENT_ID` / `LOGTO_MANAGEMENT_CLIENT_SECRET` | 目录读取的 M2M 凭据，仅服务端保存 |
+| `CYBERGRID_ADMIN_KEY` | 可选，独立随机 32–256 UTF8 字节；为空时管理 API 返回503 |
+| `LOGTO_RESOURCE` | 可选，默认公开 origin 加 `/api` |
+| `CYBERGRID_CONSOLE_REDIRECT_URI` | 可选，同 origin 专用回跳；默认 `/console/callback/` |
+| `CYBERGRID_BIND` / `PORT` | Node 默认 `127.0.0.1:7400`；Compose 在容器内设为 `0.0.0.0:7400` |
+| `CYBERGRID_OWNER_LOCK` | 固定租约路径；默认当前目录 `.cybergrid-owner.lock` |
+| `CYBERGRID_MEMORY_LIMITS` | 可选 JSON 容量限制，必须符合 MemoryStore 的边界 |
 
-使用 `.env.example` 中的实际端口参数配置监听。默认loopback，需要可信反向代理或HTTPS隧道将公开入口转发到它。Quick Tunnel可用于测试，但没有SLA；长期运行应选择稳定入口。固定owner上游必须是HTTPS origin，不能包含用户名、密码、路径、查询或片段。
+回跳不能使用 `/`、`/api`、`/admin` 或 `/healthz` 保留路径；在 Logto SPA 注册精确 URI。Node 直接返回控制台页面，保留 URL 中的 code/state query，不依赖平台 rewrite。`CYBERGRID_DEV_MODE=1` 只允许配置为 HTTPS loopback origin，且生产环境拒绝此开关；不提供假登录。
 
-生成密钥可使用 `openssl rand -hex 32`，分别生成proxy和admin密钥，写入私有文件；不要在命令记录、截图或公共工单中粘贴秘密。后台入口为 `/admin/`，密钥只在当前页面内存保存。
+## HTTPS、限流与存活检查
 
-## 一键部署 Vercel
+API 请求 URL 与同源验证基于配置的公开 origin。Host、Forwarded 和 X-Forwarded-* 不能改变它；客户端 IP 只取 socket 地址。若所有请求经过一个外部代理，它们会共享该代理的 IP 限流桶；当前没有 trust-proxy 开关，不能靠注入转发头获得独立配额。
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Ftree%2Fmain%2Fserver&env=CYBERGRID_OWNER_URL,CYBERGRID_PROXY_SECRET,CYBERGRID_PUBLIC_ORIGIN,LOGTO_ISSUER&envDescription=Configure%20your%20owner%2C%20proxy%20key%2C%20public%20origin%20and%20Logto%20issuer&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md&project-name=cybergrid&repository-name=cybergrid)
+`GET /healthz` 和 `HEAD /healthz` 只报告进程存活，不调用 Logto、不泄露配置或协调状态。请求从读 body 到 handler / 响应读取共用25秒预算，body 上限100000字节、响应上限2MiB，信令长轮询最多15秒；客户端断连释放等待者。SIGTERM 停止接入、关闭协调等待者与连接并释放租约；SIGKILL 后 helper 通过 stdin EOF 自动释放内核锁。
 
-模板目录为 `server/`，使用该目录自己的package与Vercel配置。若直接导入整个仓库，手动将Root Directory设为`server`。按钮不需要GitHub PAT或任何现有部署的秘密。
+`/admin/` 使用同一服务 `.env` 中的独立管理密钥，只读查看协调状态；密钥只保存在当前页面内存，刷新后重新输入。`/console/` 使用 Logto，提供当前用户自己的只读设备视图。
 
-| Vercel参数 | 填写内容 |
-| --- | --- |
-| `CYBERGRID_OWNER_URL` | 已运行owner的固定可信HTTPS上游origin |
-| `CYBERGRID_PROXY_SECRET` | 与owner相同的私密proxy密钥 |
-| `CYBERGRID_PUBLIC_ORIGIN` | 要对外使用的站点HTTPS origin |
-| `LOGTO_ISSUER` | 与owner相同的公开issuer，供Middleware精确配置浏览器连接策略；不含M2M秘密 |
-| `CYBERGRID_CONSOLE_REDIRECT_URI` | 可选，自定义回跳时与owner及Logto SPA相同，默认无需配置 |
+## SDK 与发布
 
-Vercel上不需要数据库URL、Logto M2M secret或后台管理密钥。创建项目后绑定目标域名，核对公共origin、Logto SPA的回跳／允许origin；修改issuer后重新部署。SDK始终填写公共站点地址，不直连私密owner端口。
-
-管理后台密钥放在owner `.env`；访问`/admin/`时输入它，由同源代理传给owner校验。HTTPS代理认证与管理身份是两层独立校验。普通用户使用`/console/`的Logto登录查看自己的设备，不能调用管理API。
-
-## GitHub Actions 与发布
-
-仓库的Actions根据tag或手动触发构建macOS arm64与Android arm64测试产物，汇总SDK／App源码、provider、许可证及SHA256SUMS到GitHub Release。构建不需要Logto用户凭据或部署密钥，发布使用仓库作用域的`GITHUB_TOKEN`。网站链接直接指向GitHub Releases，不再在Vercel构建时下载和托管SDK大文件。
-
-源码公开前排除本机环境、真实.env、签名私钥、账号／设备测试记录、缓存和旧部署材料。正式签名、公证、商店发布及长期owner监控需要另外配置；不要把debug-test包描述为正式商店发行。
+[GitHub Releases](https://github.com/ywateru/CyberGrid/releases) 提供 Go、Rust、Lab 和校验清单。网站构建不下载这些大文件。原生制品通过独立的 Release workflow 构建；Node 服务 CI 只检查新服务与 Docker，不运行手机或 WAN 验收。正式签名、公证、商店发布与长期监控需另行配置。

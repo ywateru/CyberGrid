@@ -1,0 +1,18 @@
+# Explicit build-context allowlist. Runtime secrets come from compose env_file.
+**
+!Dockerfile
+!.dockerignore
+!package.json
+!package-lock.json
+!tsconfig.json
+!src/
+!src/**
+!public/
+!public/**
+!release/
+!release/build.mjs
+public/downloads/
+public/downloads/**
+**/.env*
+**/*.log
+**/__pycache__/

@@ -6,11 +6,19 @@ Go 和 Rust SDK 优先建立 WebRTC 直连，失败后使用 Cloudflare Quick Tu
 
 [使用文档](docs/getting-started.md) · [下载 SDK 和 App](https://github.com/ywateru/CyberGrid/releases) · [部署说明](docs/deployment.md) · [架构](docs/architecture.md)
 
-## 一键部署网站与 API 入口
+## 部署网站与 API
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Ftree%2Fmain%2Fserver&env=CYBERGRID_OWNER_URL,CYBERGRID_PROXY_SECRET,CYBERGRID_PUBLIC_ORIGIN,LOGTO_ISSUER&envDescription=Configure%20the%20single%20memory%20owner%2C%20private%20proxy%20key%2C%20public%20HTTPS%20origin%20and%20Logto%20issuer&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md&project-name=cybergrid&repository-name=cybergrid)
+网站、Logto 控制台、管理后台和 API 由一个长期运行的 Node.js22 进程提供，协调状态只在同进程有界内存中。无需数据库，不使用多副本或 serverless Function。
 
-按钮部署官网、管理后台页面和无状态 API 代理。**单一内存协调进程需要单独运行**，不能放进多个 Vercel Function 的全局变量中。先部署 owner、获得 HTTPS 上游，再填写按钮要求的参数。参数、Logto 应用与回跳配置见 [完整部署步骤](docs/deployment.md)。不需要 PostgreSQL、Supabase 或其他数据库。
+```sh
+cd server
+cp .env.example .env
+chmod 600 .env
+# 填写自己的 HTTPS origin 与 Logto 配置
+docker compose up --build -d
+```
+
+Docker 以非 root 用户运行；也可直接 `npm ci --include=dev && npm start`。通过通用 HTTPS 反向代理连接默认 loopback7400端口。详细配置见 [部署步骤](docs/deployment.md)。
 
 ## SDK 与测试程序
 
@@ -37,14 +45,14 @@ python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" login \
 
 ## 管理后台
 
-部署后的 `/admin/` 使用 owner `.env` 中独立配置的 `CYBERGRID_ADMIN_KEY`，可查看当前协调会话、在线客户端、端口与信令概况。密钥不会随前端构建下发，仅在当前页面内存保存；退出或刷新后需重新输入。`/console/` 仍提供 Logto 用户登录后的个人只读设备视图。
+部署后的 `/admin/` 使用 服务 `.env` 中独立配置的 `CYBERGRID_ADMIN_KEY`，可查看当前协调会话、在线客户端、端口与信令概况。密钥不会随前端构建下发，仅在当前页面内存保存；退出或刷新后需重新输入。`/console/` 仍提供 Logto 用户登录后的个人只读设备视图。
 
 在线状态表示设备心跳与协调会话有效。中央不接触业务链路，因此不会将其误报为业务 TCP 已建立，也不能查看业务消息、同步内容或文件。
 
 ## 项目结构
 
 ```text
-server/             内存 owner、Vercel 固定代理、官网与管理后台
+server/             单进程 Node 网站、API、内存协调与 Docker
 sdk/                Go SDK、CLI、离线 provider 及许可
 sdk-rust/           Rust SDK、离线 provider 及许可
 apps/tauri-test/    Tauri 2 双平台测试 App 与 ADB 工具
@@ -61,7 +69,7 @@ docs/              接入、架构与部署文档
 - owner 重启会清空内存并更换 epoch。SDK 保留本地服务和映射意图，协调恢复后新的 TCP 连接可重新握手；不重放业务字节，不承诺旧 TCP 无损续传。
 - 仅支持 TCP 端口映射；端口 `type` 是业务自定义字符串。默认只监听本机 loopback。
 - 真实 macOS Wi-Fi／Android 蜂窝测试完成了双向消息、64 KiB hash 与 owner 重启后原映射新 TCP 恢复。公网实际使用 Cloudflare 回退；尚无该网络下 WebRTC 直连成功证据。
-- Quick Tunnel 无 SLA。长期运行需自行选择可靠的 owner 宿主和 HTTPS 上游；Android 后台保活、商店发布、Apple 公证及无损网络切换不在当前交付范围。
+- Quick Tunnel 无 SLA。长期运行需自行选择可靠的 Node 宿主和 HTTPS 入口；Android 后台保活、商店发布、Apple 公证及无损网络切换不在当前交付范围。
 - Logto 租户方案和自定义 API resource 权限需自行确认。邮箱发件域在 Logto SMTP 连接器中配置；真实邮件投递／注册确认需使用自己的邮箱验证。
 
 源码公开不改变现有许可：原 CyberGrid 代码保留其权利声明，第三方依赖按各自许可证分发。完整声明随源码及发布包提供。

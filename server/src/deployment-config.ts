@@ -1,4 +1,9 @@
-import {publicOrigin} from './proxy.js';
+export function publicOrigin(raw:string|undefined):string {
+ if(!raw||raw.trim()!==raw)throw Error('CYBERGRID_PUBLIC_ORIGIN must be a canonical HTTPS origin');
+ const u=new URL(raw);
+ if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash||u.pathname!=='/')throw Error('Canonical public HTTPS origin required');
+ return u.origin;
+}
 import type {AuthConfiguration} from './types.js';
 export class DeploymentConfigurationError extends Error {
  readonly code='INVALID_CONSOLE_REDIRECT_URI';
@@ -11,7 +16,7 @@ export function coordinatorAuthConfiguration(env:NodeJS.ProcessEnv):AuthConfigur
  const resource=env.LOGTO_RESOURCE??origin+'/api';const audience=new URL(resource);
  if(audience.protocol!=='https:'||audience.username||audience.password||audience.search||audience.hash)throw Error('LOGTO_RESOURCE must be a pinned HTTPS identifier without credentials, query or fragment');
  const redirectUri=env.CYBERGRID_CONSOLE_REDIRECT_URI??origin+'/console/callback/';const redirect=new URL(redirectUri);
- if(redirect.pathname==='/'||/^\/(?:api|admin)(?:\/|$)/.test(redirect.pathname))throw new DeploymentConfigurationError('Console callback must use a dedicated path outside /, /api and /admin');
+ if(redirect.pathname==='/'||/^\/(?:api|admin|healthz)(?:\/|$)/.test(redirect.pathname))throw new DeploymentConfigurationError('Console callback must use a dedicated path outside /, /api and /admin');
  if(redirect.origin!==origin||redirect.username||redirect.password||redirect.search||redirect.hash)throw Error('Console callback must use the configured public HTTPS origin without query or fragment');
  return {provider:'logto',issuer,clientId,resource,scope:'openid offline_access profile email connect',deviceAuthorizationEndpoint:issuer+'/device/auth',authorizationEndpoint:issuer+'/auth',tokenEndpoint:issuer+'/token',revocationEndpoint:issuer+'/token/revocation',redirectUri,jwksUri:issuer+'/jwks'};
 }

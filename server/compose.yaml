@@ -1,0 +1,19 @@
+services:
+  cybergrid:
+    build:
+      context: .
+    init: true
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      CYBERGRID_BIND: 0.0.0.0
+      PORT: '7400'
+      CYBERGRID_OWNER_LOCK: /var/run/cybergrid/lease
+    ports:
+      - '127.0.0.1:7400:7400'
+    volumes:
+      - coordination-lease:/var/run/cybergrid
+    stop_grace_period: 10s
+volumes:
+  coordination-lease:

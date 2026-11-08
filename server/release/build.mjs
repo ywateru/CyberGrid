@@ -1,5 +1,5 @@
 // The website is self-contained. Release artifacts are hosted by GitHub and are
-// never fetched or materialized as a side effect of a normal Vercel build.
+// never fetched or materialized as a side effect of a normal server build.
 import {access, readFile} from 'node:fs/promises';
 for (const file of ['index.html', 'site.css', 'site.js', 'docs/index.html', 'admin/index.html', 'admin/admin.js', 'console/index.html', 'console/callback/index.html']) {
   await access(new URL('../public/' + file, import.meta.url));

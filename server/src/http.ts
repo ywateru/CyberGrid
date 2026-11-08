@@ -1,8 +1,5 @@
 import type {IncomingMessage,ServerResponse} from 'node:http';
 export type Handler=(request:Request,clientIP?:string)=>Promise<Response>;
-const deadlines=new WeakMap<Request,number>();
-/** Adapter-created Requests retain the ingress deadline; a proxy cannot restart it. */
-export const requestDeadline=(request:Request)=>deadlines.get(request);
 export class BodyCapacityError extends Error {}
 export function abortable<T>(operation:Promise<T>,signal:AbortSignal):Promise<T>{
  return new Promise((resolve,reject)=>{
@@ -36,36 +33,52 @@ function incoming(req:IncomingMessage,signal:AbortSignal):Promise<Buffer>{
   req.on('data',data);req.once('end',end);req.once('error',error);signal.addEventListener('abort',stop,{once:true});if(signal.aborted)stop();
  });
 }
-export async function serveAPI(req:IncomingMessage,res:ServerResponse,handle:Handler,vercel=false){
+export async function serveAPI(req:IncomingMessage,res:ServerResponse,handle:Handler,canonicalOrigin:string){
  const deadline=Date.now()+25000,abort=new AbortController();
  const timer=setTimeout(()=>abort.abort(new Error('Request deadline exceeded')),Math.max(0,deadline-Date.now()));timer.unref();
- const onClose=()=>{if(!res.writableEnded)abort.abort(new Error('Client disconnected'));};
+ const onClose=()=>{if(!res.writableFinished)abort.abort(new Error('Client disconnected'));};
  const onAborted=()=>abort.abort(new Error('Client disconnected'));
  res.on('close',onClose);req.on('aborted',onAborted);
  const onError=(error:Error)=>abort.abort(error);req.on('error',onError);req.once('close',()=>req.off('error',onError));
  const fail=(code:string,status:number)=>{
-  if(res.destroyed||res.writableEnded)return;
+  if(res.destroyed)return;
+  if(res.headersSent){res.destroy();return;}
   req.pause();res.once('finish',()=>{if(!req.complete)req.destroy();});
   res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','connection':'close'});res.end(JSON.stringify({error:{code,message:status===413?'请求体过大':'协调服务暂不可用'}}));
  };
  try{
   const headers=new Headers();for(const [k,v] of Object.entries(req.headers))if(v!==undefined)headers.set(k,Array.isArray(v)?v.join(','):v);
-  const host=req.headers.host??'localhost',protocol=vercel?'https':'http';let raw:Buffer|undefined;
+  const target=req.url??'/';
+  if(!validRequestTarget(target)){fail('INVALID_REQUEST_TARGET',400);return;}
+  let raw:Buffer|undefined;
   if(Number(req.headers['content-length']??0)>100000)throw new BodyCapacityError('body capacity exceeded');
+  if(['GET','HEAD'].includes(req.method??'GET')&&(req.headers['transfer-encoding']||Number(req.headers['content-length']??0)>0)){fail('INVALID_INPUT',400);return;}
   if(!['GET','HEAD'].includes(req.method??'GET')){
    raw=await incoming(req,abort.signal);
-   // Some Vercel runtimes consume the stream and supply a pre-parsed body.
-   const parsed=(req as IncomingMessage & {body?:unknown}).body;
-   if(raw.length===0&&parsed!==undefined)raw=Buffer.isBuffer(parsed)?parsed:Buffer.from(typeof parsed==='string'?parsed:JSON.stringify(parsed));
    if(raw.length>100000)throw new BodyCapacityError('body capacity exceeded');
   }
   abort.signal.throwIfAborted();
-  const request=new Request(`${protocol}://${host}${req.url??'/'}`,{method:req.method,headers,body:raw?new Uint8Array(raw):undefined,signal:abort.signal});deadlines.set(request,deadline);
-  // Only the platform-set forwarding header is accepted in the hosted adapter.
-  const ip=vercel?String(req.headers['x-vercel-forwarded-for']??req.socket.remoteAddress??'unknown').split(',')[0]!:req.socket.remoteAddress??'unknown';
+  const request=new Request(canonicalOrigin+target,{method:req.method,headers,body:raw?new Uint8Array(raw):undefined,signal:abort.signal});
+  const ip=req.socket.remoteAddress??'unknown';
   const response=await abortable(handle(request,ip),abort.signal);
   const bytes=await limited(response.body,2<<20,abort.signal);abort.signal.throwIfAborted();
-  res.writeHead(response.status,Object.fromEntries(response.headers));res.end(Buffer.from(bytes));
+  res.writeHead(response.status,Object.fromEntries(response.headers));
+  await abortable(new Promise<void>((resolve,reject)=>{
+   const done=()=>{cleanup();resolve();},error=(e:Error)=>{cleanup();reject(e);};
+   const cleanup=()=>{res.off('finish',done);res.off('error',error);};
+   res.once('finish',done);res.once('error',error);res.end(req.method==='HEAD'?undefined:Buffer.from(bytes));
+  }),abort.signal);
  }catch(error){fail(error instanceof BodyCapacityError?'BODY_TOO_LARGE':'COORDINATOR_UNAVAILABLE',error instanceof BodyCapacityError?413:503);}
  finally{clearTimeout(timer);res.off('close',onClose);req.off('aborted',onAborted);}
+}
+
+/** Validate the unnormalized origin-form target before WHATWG URL dot folding. */
+export function validRequestTarget(target:string):boolean {
+ if(!target.startsWith('/')||target.startsWith('//')||/[\\\x00-\x20\x7f#]/.test(target))return false;
+ try{
+  const path=decodeURIComponent(target.split('?')[0]!);
+  if(/[\\\x00-\x1f\x7f]/.test(path)||/%(?:2e|2f|5c)/i.test(path))return false;
+  if(/%2f|%5c/i.test(target.split('?')[0]!))return false;
+  return !path.split('/').some(part=>part==='.'||part==='..');
+ }catch{return false;}
 }

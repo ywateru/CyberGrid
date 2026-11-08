@@ -64,3 +64,6 @@ sdk-rust/docs/source-code-sha256-0.2.0.json
 !tools/cloudflared/bin/cloudflared-darwin-arm64
 !sdk/provider-assets/**
 !sdk-rust/provider-assets/**
+
+# Default runtime OS lease directory (no coordination snapshots)
+server/.cybergrid-owner.lock/

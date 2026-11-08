@@ -4,14 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx src/local.ts",
-    "build": "tsc --noEmit && tsc --noEmit --target ES2023 --module NodeNext --moduleResolution NodeNext --skipLibCheck middleware.ts && node release/build.mjs",
+    "dev": "npm start",
+    "build": "tsc --noEmit && node release/build.mjs",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test test/*.test.ts",
-    "owner": "tsx src/owner.ts"
+    "owner": "npm start",
+    "start": "node --env-file-if-exists=.env --import tsx src/main.ts",
+    "test:node": "tsx --test test/node.test.ts test/http.test.ts test/owner.test.ts"
   },
   "dependencies": {
-    "@vercel/functions": "3.11.0",
     "jose": "^6.2.15",
     "tsx": "4.23.15"
   },

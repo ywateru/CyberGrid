@@ -1,6 +1,6 @@
 # 从登录到端口互通
 
-1. 按 [部署说明](deployment.md) 配置 Logto 和单一内存 owner，部署网站及 API 代理。记录自己的中央 HTTPS 地址和真实 Native Application ID。
+1. 按 [部署说明](deployment.md) 配置 Logto，用 Node / Docker 运行网站、API 与唯一内存协调服务。记录自己的中央 HTTPS 地址和真实 Native Application ID。
 2. 从 [GitHub Releases](https://github.com/ywateru/CyberGrid/releases) 下载 Go SDK／CLI、Rust SDK 或 Tauri Lab。核对发布清单中的平台、版本、文件大小和 SHA256。
 3. 各设备独立登录同一个 Logto 账号，并使用同一个应用 ID。SDK 不接收账号密码，登录／注册在 Logto 托管页面完成。
 4. 通过 SDK 声明本机可提供的 loopback TCP 端口及业务类型字符串，列出同账号、同应用的其他设备及端口。

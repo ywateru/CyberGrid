@@ -1,0 +1,47 @@
+name: Node service and Docker
+on:
+  push:
+    branches: [main]
+    paths: ['server/**', '.github/workflows/server.yml']
+  pull_request:
+    paths: ['server/**', '.github/workflows/server.yml']
+permissions:
+  contents: read
+jobs:
+  server:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci --include=dev
+        working-directory: server
+      - run: npm run build && npm run test:node
+        working-directory: server
+      - name: Build and run the same nonroot Node entrypoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build -t cybergrid-node-ci server
+          test "$(docker image inspect cybergrid-node-ci --format '{{.Config.User}}')" = node
+          trap 'docker logs cybergrid-node-ci; docker rm -f cybergrid-node-ci >/dev/null 2>&1 || true' EXIT
+          docker run -d --name cybergrid-node-ci \
+            -e CYBERGRID_PUBLIC_ORIGIN=https://grid.example \
+            -e LOGTO_ISSUER=https://fixture.invalid/oidc \
+            -e LOGTO_BROWSER_CLIENT_ID=FixtureSPA \
+            -e LOGTO_MANAGEMENT_CLIENT_ID=FixtureDirectory \
+            -e LOGTO_MANAGEMENT_CLIENT_SECRET=fixture-not-used \
+            cybergrid-node-ci
+          for attempt in $(seq 1 30); do
+            status=$(docker inspect cybergrid-node-ci --format '{{.State.Health.Status}}')
+            if [ "$status" = healthy ]; then break; fi
+            sleep 2
+          done
+          test "$(docker inspect cybergrid-node-ci --format '{{.State.Health.Status}}')" = healthy
+          docker stop --time 10 cybergrid-node-ci
+          test "$(docker inspect cybergrid-node-ci --format '{{.State.ExitCode}}')" = 0

@@ -1,13 +1,2 @@
-import { createServer } from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import { resolve, extname, sep } from 'node:path';
-import { createConfiguredService } from './config.js';
-import { serveAPI } from './http.js';
-const service=createConfiguredService();const port=Number(process.env.PORT??7300);
-if(!Number.isInteger(port)||port<1||port>65535)throw new Error('Invalid PORT');
-const root=resolve(fileURLToPath(new URL('../public/',import.meta.url)));
-const types:Record<string,string>={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.gz':'application/gzip','.md':'text/plain; charset=utf-8','.patch':'text/plain; charset=utf-8','.txt':'text/plain; charset=utf-8'};
-const origin=process.env.LOGTO_ISSUER?new URL(process.env.LOGTO_ISSUER).origin:'';
-const csp=`default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' ${origin}; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`;
-createServer(async(req,res)=>{try{const pathname=new URL(req.url??'/', 'http://localhost').pathname;if(pathname.startsWith('/api/')){await serveAPI(req,res,service);return;}if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405);res.end();return;}let relative=decodeURIComponent(pathname);if(relative==='/console/callback/'||relative==='/console/callback')relative='/console/';if(relative.endsWith('/'))relative+='index.html';const path=resolve(root,'.'+relative);if(!path.startsWith(root+sep)||!(await stat(path).catch(()=>null))?.isFile()){res.writeHead(404);res.end('Not found');return;}res.writeHead(200,{'content-type':types[extname(path)]??'application/octet-stream','content-security-policy':csp,'x-content-type-options':'nosniff','referrer-policy':'no-referrer','cache-control':'no-store'});res.end(req.method==='HEAD'?undefined:await readFile(path));}catch{res.writeHead(500);res.end('Service unavailable');}}).listen(port,'127.0.0.1',()=>console.log(`CyberGrid local control plane http://127.0.0.1:${port} (${process.env.CYBERGRID_DEV_MODE==='1'?'isolated in-memory development':'Logto + bounded memory owner'})`));
+// Development uses the same lease, HTTP boundaries and coordinator as production.
+import './main.js';
