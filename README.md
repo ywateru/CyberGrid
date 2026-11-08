@@ -14,11 +14,11 @@ Go 和 Rust SDK 优先建立 WebRTC 直连，失败后使用 Cloudflare Quick Tu
 cd server
 cp .env.example .env
 chmod 600 .env
-# 填写自己的 HTTPS origin 与 Logto 配置
+# 填写自己的 Logto 配置；公开 origin 可留空
 docker compose up --build -d
 ```
 
-Docker 以非 root 用户运行；也可直接 `npm ci --include=dev && npm start`。通过通用 HTTPS 反向代理连接默认 loopback7400端口。详细配置见 [部署步骤](docs/deployment.md)。
+公开 origin 可留空；回跳按每次访问地址生成，OAuth resource 始终固定。Docker 以非 root 用户运行；也可直接 `npm ci --include=dev && npm start`。通过通用 HTTPS 反向代理连接默认 loopback7400端口。详细配置见 [部署步骤](docs/deployment.md)。
 
 ## SDK 与测试程序
 

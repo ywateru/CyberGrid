@@ -10,7 +10,8 @@
     "test": "tsx --test test/*.test.ts",
     "owner": "npm start",
     "start": "node --env-file-if-exists=.env --import tsx src/main.ts",
-    "test:node": "tsx --test test/node.test.ts test/http.test.ts test/owner.test.ts"
+    "test:node": "tsx --test test/node.test.ts test/http.test.ts test/owner.test.ts test/origin.test.ts",
+    "test:origin": "tsx --test test/origin.test.ts"
   },
   "dependencies": {
     "jose": "^6.2.15",

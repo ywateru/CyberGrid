@@ -7,7 +7,7 @@
 ```sh
 cp .env.example .env
 chmod 600 .env
-# 编辑自己的 HTTPS origin、Logto SPA/M2M 配置，可选独立 admin key
+# 编辑 Logto SPA/M2M 配置，可选公开 origin 与独立 admin key
 docker compose up --build -d
 ```
 
@@ -21,11 +21,13 @@ npm run build
 npm start
 ```
 
-`start`、`dev`、`owner` 使用同一入口与租约。生产构建后可 `npm prune --omit=dev`；`tsx` 是运行依赖。`CYBERGRID_PUBLIC_ORIGIN` 必须配置 HTTPS origin，不从 Host 或转发头推导；API IP 限流只采用 socket 地址，外部代理后的用户会共享代理 IP 的限流桶。
+`start`、`dev`、`owner` 使用同一入口与租约。生产构建后可 `npm prune --omit=dev`；`tsx` 是运行依赖。`CYBERGRID_PUBLIC_ORIGIN` 可留空：配置时固定使用该 HTTPS origin；未配置时从本请求合法 Host / socket HTTP/TLS 派生，也支持严格单值 `X-Forwarded-Host` 与 `X-Forwarded-Proto`。外部代理必须覆盖这两个头，不能追加或透传客户端输入；Forwarded 不受支持。API IP 限流始终只采用 socket 地址，外部代理后的用户共享代理 IP 的限流桶。
+
+`LOGTO_RESOURCE` 是启动时固定的 OAuth audience，不随 Host 改变。未显式配置时，有公开 origin 则兼容默认该 origin 加 `/api`，否则使用固定标识 `https://cybergrid.local/api`（无需 DNS，但要在 Logto 创建相同 resource）。已有部署移除公开 origin 前须显式保存原 resource。
 
 `GET/HEAD /healthz` 是不调用 Logto 的进程存活检查。信令长轮询最多15秒；全请求预算25秒，body 上限100000字节、响应上限2MiB。不要运行多副本或 Node cluster。固定 POSIX flock 租约只保证单进程，不保存协调状态；重启产生新 epoch，SDK 重新注册与发布端口。
 
-默认 SPA 回跳为公开 origin 加 `/console/callback/`，可配置同源专用路径，并在 Logto 登记相同 URI。根路径和 `/api`、`/admin`、`/healthz` 保留路径不可用。Node 自行提供回跳页面，保留 query。静态服务只访问 public tree，拒绝路径穿越、隐藏文件和符号链接，CSP 精确放行配置的 Logto issuer origin。
+默认 SPA 回跳为本次有效 origin 加 `/console/callback/`，可配置同源专用路径，并在 Logto 登记相同 URI。根路径和 `/api`、`/admin`、`/healthz` 保留路径不可用。Node 自行提供回跳页面，保留 query。静态服务只访问 public tree，拒绝路径穿越、隐藏文件和符号链接，CSP 精确放行配置的 Logto issuer origin。
 
 管理后台使用独立 `CYBERGRID_ADMIN_KEY`，只读展示白名单 DTO；不配置时 API 返回503。前端不内置密钥。Logto 管理用户和应用，中央不管理应用目录，也不向 Logto 写协调数据。
 

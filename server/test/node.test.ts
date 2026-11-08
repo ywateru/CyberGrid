@@ -36,8 +36,8 @@ test('GET/HEAD static and custom callback retain code query; traversal, symlinks
  for(const path of ['/../.env','/%2e%2e/.env','/%252e%252e/.env','/console%2f..%2f.env','//evil.example/','.env','/bad%00','/bad%zz','/outside/passwd','/leak','/.env','/downloads/private'])assert.notEqual((await f.request(path)).status,200,path);
  assert.equal((await f.request('/',{method:'POST',body:'{}'})).status,405);assert.equal((await f.request('/healthz',{method:'POST',body:'{}'})).status,405);
 });
-test('public origin is required HTTPS, independent of localhost listener and forwarding headers',()=>{
- for(const value of [undefined,'http://localhost','https://example/path','https://user@example','https://example?x',' https://example'])assert.throws(()=>publicOrigin(value));assert.equal(publicOrigin('https://GRID.example:443/'),'https://grid.example');
+test('configured public origin is HTTPS, independent of localhost listener and forwarding headers',()=>{
+ for(const value of ['http://localhost','https://example/path','https://user@example','https://example?x',' https://example'])assert.throws(()=>publicOrigin(value));assert.equal(publicOrigin('https://GRID.example:443/'),'https://grid.example');assert.equal(publicOrigin(undefined),undefined);assert.equal(publicOrigin(''),undefined);
 });
 
 test('real HTTP long-poll disconnect and coordinator close release same-store waiters',async t=>{

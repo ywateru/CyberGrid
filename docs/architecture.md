@@ -20,7 +20,9 @@
 
 一个部署由一个长期运行的 Node.js 进程提供完整网站和 API，并持有唯一有界 MemoryStore。API 在进程内直接调用协调服务，不进行上游 HTTP 转发，不配置 `CYBERGRID_OWNER_URL` 或 `CYBERGRID_PROXY_SECRET`。不使用 Node cluster、多副本或 serverless Function 分散协调状态。保留已有 POSIX flock 单进程租约，强杀后由内核释放；该锁不存储协调数据。
 
-`CYBERGRID_PUBLIC_ORIGIN` 声明唯一对外 HTTPS origin，所有 OAuth 回跳和 API 同源判断都基于该配置，不能信任请求的 Host、Forwarded 或 X-Forwarded-*。客户端 IP 默认取连接的 socket 地址，不允许客户端自带转发头绕过限流。外部 HTTPS 代理是可选基础设施，Node.js 服务本身不依赖 Vercel、Cloudflare 或特定容器平台；Docker 使用同一服务入口，单副本运行。
+`CYBERGRID_PUBLIC_ORIGIN` 是可选的对外 HTTPS origin。配置后固定使用它，不让请求头覆盖；留空时从本次请求的合法 Host 和 HTTP/TLS 连接识别访问地址，也支持严格的单值 `X-Forwarded-Host` / `X-Forwarded-Proto` 供 HTTPS 反向代理声明外部地址。代理必须覆盖这两个头，不追加或透传客户端自带值；多值、非法 authority、userinfo 或非 HTTP(S) scheme 均拒绝。派生地址仅用于本请求 URL、同源检查及 OAuth 回跳，不存入全局配置、不采用首请求绑定，也不触发任何向该地址的服务端网络请求。客户端 IP 始终取连接的 socket 地址，忽略 Forwarded 和 X-Forwarded-For，不能用转发头绕过限流。外部 HTTPS 代理是可选基础设施，Node.js 服务本身不依赖特定平台；Docker 使用同一服务入口，单副本运行。
+
+JWT 验签的 Logto issuer、JWKS 和 API resource 始终由启动配置固定，与请求地址无关。API resource 优先使用 `LOGTO_RESOURCE`；若未指定且配置了公开 origin，兼容默认值为该 origin 加 `/api`；两者均未指定时使用固定标识 `https://cybergrid.local/api`。该标识只用于 OAuth audience，不需要域名解析或实际 HTTP 服务，须在 Logto 创建相同 API resource。已有部署会显式保存原 API resource，因此删除公开 origin 不会改变其验签范围。默认回跳按本次有效访问地址加 `/console/callback/` 生成，始终返回绝对 URI；显式回跳须与本次有效 origin 一致并在 Logto 登记，禁止保留路径。不同 Host 请求不会改变其他请求的回跳或 JWT audience。
 
 网站、文档、个人控制台和管理页面都由该 Node 进程提供，并设置精确放行可信 Logto origin 的 CSP。默认与自定义控制台回调路径均落到本进程的控制台页面，保留 OAuth 查询参数。静态文件仅从公开资源目录读取，拒绝路径穿越；健康检查只反映进程存活，不向 Logto发请求或暴露配置、密钥和协调内容。关闭时停止接受新请求、终止协调等待者并释放租约。
 

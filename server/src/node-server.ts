@@ -4,10 +4,10 @@ import {lstat,open,realpath} from 'node:fs/promises';
 import {resolve,join,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {serveAPI,type Handler} from './http.js';
-import {publicOrigin} from './deployment-config.js';
+import {publicOrigin,consoleCallback} from './deployment-config.js';
 
 export interface WebsiteOptions {
- publicOrigin:string;
+ publicOrigin?:string;
  issuer:string;
  callbackUri:string;
  publicRoot?:string;
@@ -17,8 +17,7 @@ const types:Record<string,string>={'.html':'text/html; charset=utf-8','.js':'tex
 export function createNodeServer(api:Handler,options:WebsiteOptions){
  const origin=publicOrigin(options.publicOrigin),issuer=new URL(options.issuer);
  if(issuer.protocol!=='https:'||issuer.username||issuer.password||issuer.search||issuer.hash)throw Error('Pinned HTTPS Logto issuer required');
- const callback=new URL(options.callbackUri);
- if(callback.origin!==origin||callback.username||callback.password||callback.search||callback.hash||callback.pathname==='/'||/^\/(?:api|admin|healthz)(?:\/|$)/.test(callback.pathname))throw Error('Invalid console callback path');
+ const callback=consoleCallback(options.callbackUri,origin);
  const root=resolve(options.publicRoot??fileURLToPath(new URL('../public/',import.meta.url)));
  const csp="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' "+issuer.origin+"; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
  const route:Handler=async(request,ip)=>{
@@ -30,7 +29,10 @@ export function createNodeServer(api:Handler,options:WebsiteOptions){
   // Both the configured and default callback render the console directly. The
   // browser retains its original query (code/state); no redirect consumes it.
   let relative=decodeURIComponent(path);
-  if(path===callback.pathname||path==='/console/callback/'||path==='/console/callback')relative='/console/';
+  if(path===callback.pathname||path==='/console/callback/'||path==='/console/callback'){
+   try{consoleCallback(options.callbackUri,url.origin);}catch{return new Response(null,{status:400,headers});}
+   relative='/console/';
+  }
   if(['/console','/docs','/admin'].includes(relative))relative+='/';
   if(relative.endsWith('/'))relative+='index.html';
   const parts=relative.slice(1).split('/');

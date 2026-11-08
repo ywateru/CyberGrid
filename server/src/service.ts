@@ -1,3 +1,4 @@
+import {requestAuthConfiguration} from './deployment-config.js';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import {adminVerifier,overviewQuery} from './admin.js';
 import {eligible} from './directory.js';
@@ -29,8 +30,9 @@ export function createService(options:ServiceOptions){
    return json(store.adminOverview(time,overviewQuery(u.searchParams)));
   }
   if(path==='/api/v1/auth/register'||path==='/api/v1/auth/login')throw new ApiError(410,'AUTH_FLOW_REPLACED','请使用 Logto 浏览器授权与 /auth/exchange；中央服务不接收密码');
-  if(path==='/api/v1/auth/config'&&method==='GET'){const id=appID(u.searchParams.get('appId')??undefined);await application(id);return json({...identity.configuration(id),coordination:coordination()});}
-  if(path==='/api/v1/console/auth/config'&&method==='GET')return json({...identity.configuration(options.browserClientId),coordination:coordination()});
+  const authConfiguration=(id:string)=>{try{return requestAuthConfiguration(identity.configuration(id),u.origin);}catch{throw new ApiError(400,'INVALID_CONSOLE_REDIRECT_URI','控制台回跳与本次访问 origin 不一致');}};
+  if(path==='/api/v1/auth/config'&&method==='GET'){const id=appID(u.searchParams.get('appId')??undefined);await application(id);return json({...authConfiguration(id),coordination:coordination()});}
+  if(path==='/api/v1/console/auth/config'&&method==='GET')return json({...authConfiguration(options.browserClientId),coordination:coordination()});
   await store.cleanup(time);
   let body:Record<string,unknown>={};if(['POST','PUT','PATCH'].includes(method)){
    if(!request.headers.get('content-type')?.toLowerCase().startsWith('application/json'))throw new ApiError(415,'JSON_REQUIRED','请使用 application/json');if(Number(request.headers.get('content-length')??0)>MAX_BODY)throw new ApiError(413,'BODY_TOO_LARGE','请求体过大');
