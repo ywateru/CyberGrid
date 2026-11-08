@@ -71,3 +71,40 @@ jobs:
           '
           docker stop --time 10 cybergrid-node-ci-optional
           test "$(docker inspect cybergrid-node-ci-optional --format '{{.State.ExitCode}}')" = 0
+      - name: Run the documented Compose service with the existing image
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_dir=$(mktemp -d "$RUNNER_TEMP/cybergrid-compose.XXXXXX")
+          chmod 700 "$smoke_dir"
+          project="cybergrid-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          compose=(docker compose --project-name "$project" --project-directory "$smoke_dir" -f "$GITHUB_WORKSPACE/server/compose.yaml" -f "$smoke_dir/image.yaml")
+          cleanup() {
+            "${compose[@]}" logs --no-color || true
+            "${compose[@]}" down --volumes --remove-orphans || true
+            rm -rf "$smoke_dir"
+          }
+          trap cleanup EXIT
+          umask 077
+          cat > "$smoke_dir/.env" <<'ENV'
+          LOGTO_ISSUER=https://fixture.invalid/oidc
+          LOGTO_BROWSER_CLIENT_ID=FixtureSPA
+          LOGTO_MANAGEMENT_CLIENT_ID=FixtureDirectory
+          LOGTO_MANAGEMENT_CLIENT_SECRET=fixture-not-used
+          ENV
+          printf 'services:\n  cybergrid:\n    image: cybergrid-node-ci\n' > "$smoke_dir/image.yaml"
+          "${compose[@]}" up -d --no-build --pull never
+          container=$("${compose[@]}" ps -q cybergrid)
+          test -n "$container"
+          test "$(docker inspect "$container" --format '{{.Config.User}}')" = node
+          test "$(docker exec "$container" id -u)" != 0
+          for attempt in $(seq 1 45); do
+            status=$(docker inspect "$container" --format '{{.State.Health.Status}}')
+            if [ "$status" = healthy ]; then break; fi
+            sleep 1
+          done
+          test "$(docker inspect "$container" --format '{{.State.Health.Status}}')" = healthy
+          curl --fail --silent http://127.0.0.1:7400/healthz >/dev/null
+          "${compose[@]}" stop --timeout 10
+          test "$(docker inspect "$container" --format '{{.State.ExitCode}}')" = 0
+          "${compose[@]}" down --volumes --remove-orphans
