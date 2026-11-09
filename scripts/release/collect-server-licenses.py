@@ -50,14 +50,16 @@ def archive_texts(meta, name):
             path = Path(member.name)
             if member.isfile() and len(path.parts) == 2 and path.name.lower().startswith(PREFIXES):
                 result[path.name] = archive.extractfile(member).read()
-    source = {"package": name, "version": meta["version"], "archive": url}
+    # Provenance describes the published package, independent of whether this
+    # OS installed it or its pinned archive supplied the same original text.
+    source = {"package": name, "version": meta["version"]}
     if not result and (name == "redis" or name.startswith("@redis/")) and meta["version"] == "6.3.1":
         commit = metadata.get("gitHead", "")
         if not re.fullmatch('[0-9a-f]{40}', commit) or metadata.get('repository', {}).get('url') != 'git://github.com/redis/node-redis.git':
             raise RuntimeError("Review changed Redis package license provenance")
         url = f'https://raw.githubusercontent.com/redis/node-redis/{commit}/LICENSE'
         result["upstream-repository/LICENSE"] = public_bytes(url)
-        source.update({"gitCommit": commit, "licenseURL": url,
+        source.update({"archive": metadata["dist"]["tarball"], "gitCommit": commit, "licenseURL": url,
                        "reason": "Published npm archive omits license body; original MIT text from its exact npm gitHead."})
     return result, source
 
