@@ -1,7 +1,7 @@
 ---
 id: redis-002
 scope: deployment
-status: in-progress
+status: done
 depends-on: [redis-001]
 ---
 

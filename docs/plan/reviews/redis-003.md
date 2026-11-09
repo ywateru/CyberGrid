@@ -1,6 +1,6 @@
 # Redis 共享协调独立评审
 
-当前结论：**SOURCE + LOCAL REDIS PASS；实际 Vercel Functions 部署验收待完成。** 本结论不批准将旧服务器的外部 rewrite 当作 Functions 部署，也不把健康检查成功当作完整认证或公网传输验收。
+当前结论：**PASS：源码、独立多实例 Redis 反例、Functions 预览、实际 Docker CI 及正式域名有限后验均通过。** 本结论不把健康检查成功当作完整认证或公网业务传输验收。
 
 ## 源码与契约
 
@@ -41,6 +41,31 @@ Upstash 官方说明其复制模型为最终一致性，单 TCP 连接可提供�
 
 免费 Redis 有存储、命令与带宽额度；有界轮询仍会消耗额度，不能承诺无限持续在线或始终免费。配额耗尽必须明确失败，不能建立第二份内存权威状态。Docker 的持久卷与 AOF 也不能替代备份或保证断电时不丢失已确认写入。
 
-当前源码及本地 Redis 子集无未解决阻断项。实际 Functions 产物、路由、部署源码绑定、Redis 可用性与无旧主机代理依赖，仍需预览部署证据后补充结论；尚未据此宣称线上验收完成。
+当前已验子集无未解决阻断项。生产采用独立 production 构建与配置，未直接提升预览并假定环境重新投影。
 
-补充文档与许可检查：Go SDK、SDK 总览、Lab 与架构文档中的旧 RAM／owner 重启描述已同步为 Redis namespace 语义，Functions 共享限流桶例外也已明确。服务 lock 中 39 个精确依赖版本与 notices manifest 集合一致，39 份许可文本 SHA256 均匹配；6 个 Redis 包的缺失 npm 原文已按各自固定上游提交补齐。实际 Docker／Function 产物中的许可包含关系仍随部署产物验收，不以源目录存在代替入包证明。
+补充文档与许可检查：Go SDK、SDK 总览、Lab 与架构文档中的旧 RAM／owner 重启描述已同步为 Redis namespace 语义，Functions 共享限流桶例外也已明确。服务 lock 中 39 个精确依赖版本与 notices manifest 集合一致，39 份许可文本 SHA256 均匹配；6 个 Redis 包的缺失 npm 原文已按各自固定上游提交补齐。Docker 的构建上下文和运行阶段均保留 notices。
+
+## Functions 预览增量
+
+部署源码基线为 `dff3c14`，Redis 逻辑仍为 `9488018`。已独立核对根部署配置、Function 入口与 Redis 关键源码同预览上传源一致。所有路径仅内部 rewrite 到 Node Function，没有旧主机、隧道或外部 HTTP owner 路由。Docker 的唯一许可增量为复制 notices，并允许其进入构建上下文；运行阶段继承完整应用目录。本轮未重复构建 Docker 镜像。
+
+独立通过平台登录保护旁路读取预览：Redis 就绪健康路由返回精确 `ok` 内容及 200，未知路径返回 404，两者均为 no-store。另核对开发方实际响应字节，文档及管理页与提交源码一致；首页仅多出平台预览工具栏脚本，精确移除此单一平台注入后与源码一致。开发方实际 Native 配置返回 authorization_code，并保持固定 resource；无真实用户身份的 JSON POST 返回固定身份错误，证明请求体到达 Function 内部身份校验，而非被平台预先吞掉。
+
+同源 Vercel CLI 65.12.1 实际构建输出为 Node 22 Function。41 个 notices 文件通过构建器 `filePathMap` 引用进入函数，逐项 SHA256 与提交及上传源一致；独立核对 CLI 的映射还原逻辑确实加载源文件为 FileFsRef 并加入函数文件集合。因此未把函数目录缺少物理副本误判为遗漏，也未把远端不可展开的 opaque 函数对象冒充已下载检查。此为同源实际构建输出、映射实现及远端构建配置绑定的等效交付证据。
+
+独立在内存解析实际拉取的预览及生产环境：两者均只配置 TLS TCP Redis，namespace 均显式存在且不同；固定 resource 保留 `/api`，生产 origin 保持正式地址。证据仅记录布尔结果，不输出连接地址、令牌或 prefix 值。生产必须重新构建，不能直接假定预览部署持有生产 namespace。
+
+最终服务器 CI [42589602334](https://github.com/ywateru/CyberGrid/actions/runs/42589602334) 报告 82/82、0 skipped，许可证 39 项通过，实际 Docker Compose 验证非 root、Node 重启、Redis AOF 重启保持 epoch、Redis 停止时健康 503 及恢复。早期开发全套为 80 项；两者属于不同执行，未混记为独立重跑。后续提交 `8dcece4` 仅统一跨平台许可证来源元数据，Redis 固定上游许可证溯源保留，未改变运行逻辑。
+
+## 正式域名有限后验
+
+生产源码提交为 `8dcece43e28d3d401ae1d10b25962aefc8c91f1e`。独立将生产上传源清单中的 77 个文件 SHA256 对照该提交 blob，全部一致；部署方的 production 构建、正式 alias 与候选探测证据已核阅。部署仍使用同一内部 Function 路由，无旧主机外部 rewrite 依赖。
+
+在部署方正式 READY 后，独立对正式域名执行且仅执行四个无凭据 GET，无平台保护 bypass：
+
+1. 健康路由 200，内容为精确 3 字节 `ok` 换行。
+2. Native 配置 200，clientId 与公开预置一致，loginFlow 为 authorization_code，resource 保持正式 `/api`，协议为 memory-v1；配置含 epoch 与已核生产候选一致。
+3. 管理概览未提供凭据时返回 401、固定 INVALID_ADMIN_KEY。
+4. 未知路径返回 404。
+
+四个响应均包含 no-store 与平台响应标识，未创建用户会话或使用真实用户 token。至此关闭本任务的 Functions + Redis 有限运行门槛。未重复旧 SDK、原生、手机、登录或 WAN 传输套件；多 worker 竞争与故障反例来自前述真实本地 Redis 独立验证，而非声称在生产制造故障。上游 Redis 一致性、免费额度和远端 opaque 构建对象的证明边界仍按本报告保留。

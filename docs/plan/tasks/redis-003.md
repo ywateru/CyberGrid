@@ -1,7 +1,7 @@
 ---
 id: redis-003
 scope: independent-review
-status: in-progress
+status: done
 depends-on: [redis-001, redis-002]
 ---
 
