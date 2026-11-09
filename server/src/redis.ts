@@ -9,13 +9,31 @@ export const REDIS_HARD_LIMITS:MemoryLimits={sessions:512,sessionsPerUser:128,de
 const unavailable=()=>new ApiError(503,'COORDINATOR_UNAVAILABLE','协调存储暂时不可用，请稍后重试',1);
 export interface RedisTransport {eval(script:string,key:string,args:string[]):Promise<string>;close():void}
 export function redisTransport(env:NodeJS.ProcessEnv):RedisTransport {
- const tcp=env.REDIS_URL,rest=env.UPSTASH_REDIS_REST_URL,token=env.UPSTASH_REDIS_REST_TOKEN;
- if((tcp&&(rest||token))||(!tcp&&!(rest&&token)))throw Error('Configure exactly REDIS_URL or UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN');
- if(tcp){const url=new URL(tcp);if(!['redis:','rediss:'].includes(url.protocol)||url.hash)throw Error('Invalid REDIS_URL');
+ type Transport='tcp'|'upstash-rest'|'vercel-kv';
+ const selector=env.CYBERGRID_REDIS_TRANSPORT;
+ const read=(transport:Transport)=>transport==='tcp'
+  ?{tcp:env.REDIS_URL,rest:undefined,token:undefined}
+  :transport==='upstash-rest'
+   ?{tcp:undefined,rest:env.UPSTASH_REDIS_REST_URL,token:env.UPSTASH_REDIS_REST_TOKEN}
+   :{tcp:undefined,rest:env.KV_REST_API_URL,token:env.KV_REST_API_TOKEN};
+ let selected:ReturnType<typeof read>;
+ if(selector!==undefined){
+  if(selector!=='tcp'&&selector!=='upstash-rest'&&selector!=='vercel-kv')throw Error('Invalid CYBERGRID_REDIS_TRANSPORT');
+  selected=read(selector);
+ }else{
+  const configured=(['tcp','upstash-rest','vercel-kv'] as const).map(read).filter(group=>group.tcp||group.rest||group.token);
+  if(configured.length!==1)throw Error('Configure exactly one complete Redis transport group or select CYBERGRID_REDIS_TRANSPORT');
+  selected=configured[0]!;
+ }
+ const {tcp,rest,token}=selected;
+ if(!(tcp||rest&&token))throw Error('Selected Redis transport configuration is incomplete');
+ const parseURL=(value:string,message:string)=>{try{if(value.trim()!==value||/[\x00-\x20\x7f]/.test(value))throw Error();return new URL(value);}catch{throw Error(message);}};
+ if(tcp){const url=parseURL(tcp,'Invalid REDIS_URL');if(!['redis:','rediss:'].includes(url.protocol)||url.hash)throw Error('Invalid REDIS_URL');
   const client=createClient({url:tcp,socket:{connectTimeout:4000,reconnectStrategy:false},disableOfflineQueue:true});client.on('error',()=>{});let connecting:Promise<unknown>|undefined;
   return {async eval(script,key,args){if(!client.isOpen){connecting??=client.connect().finally(()=>{connecting=undefined;});await connecting;}return String(await client.withCommandOptions({timeout:4500}).eval(script,{keys:[key],arguments:args}));},close(){if(client.isOpen)client.destroy();}};
  }
- const url=new URL(rest!);if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||url.pathname!=='/')throw Error('UPSTASH_REDIS_REST_URL must be an HTTPS origin');
+ if(typeof token!=='string'||!token||token.trim()!==token||/[^\x21-\x7e]/.test(token))throw Error('Selected Redis REST token is invalid');
+ const url=parseURL(rest!,'Selected Redis REST URL must be an HTTPS origin');if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||url.pathname!=='/')throw Error('Selected Redis REST URL must be an HTTPS origin');
  return {async eval(script,key,args){const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),4500);timer.unref();try{const response=await fetch(url,{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json'},body:JSON.stringify(['EVAL',script,'1',key,...args]),signal:abort.signal,redirect:'error',credentials:'omit'});if(!response.ok)throw unavailable();const body=await response.json() as {result?:unknown;error?:unknown};if(typeof body.result!=='string'||body.error)throw unavailable();return body.result;}finally{clearTimeout(timer);}},close(){}};
 }
 const messages:Record<string,string>={INVALID_SESSION:'会话已失效，请重新登录',SESSION_SUPERSEDED:'设备已被新注册代际接管',COORDINATOR_RESET:'协调服务已重置，请重新注册',REGISTRATION_ID_CONFLICT:'注册内容冲突',REGISTRATION_ATTEMPT_EXPIRED:'原注册会话已失效，请增加注册revision',CAPACITY_EXCEEDED:'协调容量已满，请稍后重试',INCARNATION_MISMATCH:'设备代际已变化',STALE_PUBLISH_REVISION:'快照revision过期',PUBLISH_REVISION_CONFLICT:'同revision快照冲突',PEER_UNAVAILABLE:'目标设备不可用',SIGNAL_ID_CONFLICT:'信令ID内容冲突',COORDINATOR_UNAVAILABLE:'协调存储暂时不可用'};
