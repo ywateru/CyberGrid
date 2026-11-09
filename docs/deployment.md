@@ -61,17 +61,21 @@ npm start
 4. 部署后将实际 HTTPS origin 和完整 `/console/callback/` 回跳登记到 Logto SPA。首次部署可以暂不设置 `CYBERGRID_PUBLIC_ORIGIN`；设置后必须与实际访问域名一致。
 5. 绑定自己的域名并再次核对 Logto 回跳。打开官网、`/console/` 和 `/admin/`；`/healthz` 检查实例与 Redis 可用，还要通过配置/认证 API 验证 Logto。
 
-Vercel 服务端的存储变量如下，URL 与 token 由集成注入，不要提交真实值：
+也可在自己的 Upstash 账户中创建 Redis，再将数据库详情中的 REST URL 和完整 REST token 分别配置为 Vercel 服务端的 `KV_REST_API_URL`、`KV_REST_API_TOKEN`，同样设置 `CYBERGRID_REDIS_TRANSPORT=vercel-kv`。此方式不要求 Marketplace 自动注入变量。Upstash 账户管理 API 密钥只用于资源管理，不是数据库 REST token，也不应配置到 CyberGrid 的运行环境。创建测试库时选择免费方案并关闭自动升级；免费额度仍有限。
+
+Vercel 服务端的存储变量如下，URL 与 token 由集成注入或手动配置，不要提交真实值：
 
 ```dotenv
 CYBERGRID_REDIS_TRANSPORT=vercel-kv
-# KV_REST_API_URL 和 KV_REST_API_TOKEN 由 Marketplace 集成注入
+# KV_REST_API_URL 和 KV_REST_API_TOKEN 由集成注入或手动配置
 CYBERGRID_REDIS_PREFIX=cybergrid:production
 ```
 
 预览环境使用另一个 prefix，例如 `cybergrid:preview`。Marketplace 可能同时注入 TCP 和 REST 地址；显式 `vercel-kv` 只采用 KV REST 这一组，因此不会误选其他连接。`KV_URL` 和只读 token 不参与此模式。
 
 已有部署切换连接方式时，继续连接原资源并保留原 prefix 和容量配置，不要照抄示例 prefix 覆盖生产值。切换前后核对共享 epoch 一致，无需清空数据。Vercel 环境变量更新后重新部署才会生效；生产候选应先检查成功再切换正式域名。项目无需 `CYBERGRID_OWNER_URL`、`CYBERGRID_PROXY_SECRET` 或旧服务 rewrite 地址。平台的存储接入步骤见 [Marketplace Storage 官方文档](https://vercel.com/docs/marketplace-storage)。
+
+如果有意改用新数据库，空库会建立新的协调 epoch，旧库中的会话不会随之迁移。客户端需要恢复注册；授权或会话已失效时重新登录。这属于协调状态重置，应单独记录，并保留旧库和原部署作为回退，而不能声称只是连接方式变更且会话保持。
 
 网站和 API 由同一个 Node Function 入口处理，包含安全头、静态路径校验和控制台回跳。Function 冷启动复用 Redis 里的会话，不通过隧道或代理转发到旧 Node 主机。Function 请求时限为 30 秒，内部 HTTP 预算 25 秒，信令等待不超过 15 秒。
 
