@@ -41,6 +41,12 @@ jobs:
         run: |
           npm ci --include=dev
           npm run build
+      - name: Build and verify the read-only browser SDK against the real coordinator
+        working-directory: sdk-js
+        run: |
+          npm ci --include=dev --ignore-scripts
+          npm test
+          npm run test:integration
       - name: Verify fixed resources and package committed source and licenses
         run: python3 scripts/release/package.py sources
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

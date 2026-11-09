@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "bluss"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "5905ec755cc8386d7928353e4d356d2be3e89e81e5ca01fe630a1ca4d08dc175",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "fixedbitset",
+  "repository": "https://github.com/petgraph/fixedbitset",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "fixedbitset-0.5.9/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "fixedbitset-0.5.9/LICENSE-MIT",
+      "sha256": "ce592787ff2321feab698a4c612237f4378cc658ebb1d472913e5802cc47afb4"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "c2aa9b71f6255699ef79788ecc29c31a777aca98"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.5.9"
+}

@@ -1,6 +1,8 @@
 # CyberGrid Rust SDK 0.2.0
 
-Native Rust device discovery and TCP port mapping for macOS and Android. The control plane manages Logto login, device metadata, heartbeats and signaling. Application bytes pass between endpoints over WebRTC first, then an authenticated Cloudflare Quick Tunnel when direct connection fails. The CyberGrid server never proxies those bytes. Cloudflare carries the fallback connection; endpoint TLS remains inside the WebSocket stream.
+Native Rust device discovery and TCP port mapping for macOS and Android. Rust is the primary SDK for new development; Go remains compatible with the existing protocol. The control plane manages Logto login, device metadata, heartbeats and signaling. The current source tries WebRTC, then direct iroh QUIC, then an authenticated Cloudflare Quick Tunnel. The CyberGrid server never proxies application bytes. iroh relays are disabled; Cloudflare carries only the final fallback connection, with endpoint TLS inside the WebSocket stream.
+
+Project release v0.7.0 includes the iroh integration. The v0.6.0 downloadable SDK and Lab packages still use WebRTC followed by Quick Tunnel. Use the matching v0.7.0 coordinator and SDK archives to exercise the new three-stage policy; do not infer iroh support from an older release's component version.
 
 This crate implements HTTP v1 with the `memory-v1` coordination extension and interoperates with Go SDK 0.4. It does not invoke the Go SDK or use a Go FFI bridge. Fixed cloudflared resources are bundled for macOS arm64 and Android arm64; no separate installation or runtime download is needed. Android hosts install the included native resource with their APK.
 
@@ -73,9 +75,24 @@ A Client has one login lifecycle. Close it explicitly and construct a fresh Clie
 
 ## Transport and provider configuration
 
-Defaults: server `https://cybergrid.aixgg.com`, direct timeout 12 seconds, fallback timeout 35 seconds, signal long-poll 15 seconds (with a 1-second minimum spacing); Google and Cloudflare STUN; no interface filter. Only `stun:` URLs are accepted; TURN is disabled. `interface_name` can select the real network interface when testing. Direct is always attempted first. Shortening `direct_timeout` is an explicit fallback test setting, not a deployment default.
+Defaults: server `https://cybergrid.aixgg.com`, `direct_strategy: DirectStrategy::Sequential`, WebRTC direct timeout 12 seconds, `iroh_enabled: true`, `iroh_timeout: 8 seconds`, Cloudflare fallback timeout 35 seconds, signal long-poll 15 seconds (with a 1-second minimum spacing); Google and Cloudflare STUN for WebRTC; no interface filter. Only `stun:` URLs are accepted; TURN is disabled. `interface_name` can select the real network interface when testing. Shortening `direct_timeout` alone does not force Cloudflare: iroh can still connect. Set `iroh_enabled: false` as well when explicitly testing the final fallback.
 
-Both paths require endpoint TLS 1.3 mutual authentication, a single Ed25519 leaf certificate, device-ID CN, validity checks, real signature verification and SHA256 fingerprint matching against the current authenticated same-account/application directory. Heartbeat lease and metadata invalidation close stale peers. Certificates and keys remain in memory. WebRTC uses a detached `cybergrid-v1` DataChannel; fallback uses binary WebSocket messages and the same subprotocol, with inner TLS above it. smux V1 streams preserve half-close and bound application frames to 32768 bytes.
+Use `DirectStrategy::Parallel` to start both direct transports together. Only the first connection that passes inner mTLS and current-directory authentication can win; the other attempt is canceled and awaited before returning. Cloudflare is attempted only when both direct paths fail. Sequential direct budgets add; parallel direct budgets use their maximum. Per-attempt timeouts remain independent.
+
+```rust,no_run
+use cybergrid_sdk::{Config, DirectStrategy};
+let config = Config {
+    app_id: "your-native-client-id".into(),
+    direct_strategy: DirectStrategy::Parallel,
+    ..Config::default()
+};
+```
+
+iroh is pinned to 1.4.1 with relay mode disabled and no default address lookup. The coordinator publishes an optional endpoint ID and up to eight numeric socket addresses in the authenticated device snapshot; no iroh keys are persisted and no relay URL is accepted. Missing peer metadata skips this stage for older peers. Each runtime generation owns a fresh endpoint, which closes with the generation. The iroh timeout includes its direct connection and inner authentication; mapping recovery includes all three transport budgets. Failed or canceled attempts do not replay application data. The transport event and peer label for a successful connection are `iroh-direct`.
+
+Disabling relays also restricts iroh's NAT traversal and address discovery capabilities; the extra transport does not guarantee direct connectivity between arbitrary Wi-Fi and mobile networks. When `interface_name` is set, iroh is skipped because this integration cannot enforce the same interface restriction. It must not silently bypass the selected interface.
+
+All three paths require endpoint TLS 1.3 mutual authentication, a single Ed25519 leaf certificate, device-ID CN, validity checks, real signature verification and SHA256 fingerprint matching against the current authenticated same-account/application directory. The QUIC endpoint ID is an additional transport identity, not a substitute for that authentication. Heartbeat lease and metadata invalidation close stale peers. Certificates and keys remain in memory. WebRTC uses a detached `cybergrid-v1` DataChannel; iroh carries the same authenticated byte protocol over a bidirectional QUIC stream; fallback uses binary WebSocket messages and the same subprotocol, with inner TLS above it. smux V1 streams preserve half-close and bound application frames to 32768 bytes.
 
 To enable an inbound Quick Tunnel on macOS arm64, use `Config.cloudflared = Some(CloudflaredConfig::bundled(absolute_cache_base)?)`. The SDK securely extracts and revalidates its fixed resource with no PATH lookup or runtime download. `None` disables a local provider while still allowing remote tunnel dialing. `CloudflaredConfig::new(path)` is an explicit trusted external override; its bytes are not covered by the bundled guarantee. Provider lifecycle, readiness, bounded restart and cancellation semantics remain unchanged.
 
@@ -83,9 +100,27 @@ On Android arm64, run `python3 scripts/prepare-android-provider.py /absolute/hos
 
 Quick Tunnels are a temporary testing/development service, with changing hostnames and no uptime guarantee. Their current documented limit is 200 in-flight requests and they do not support SSE. This SDK uses WebSocket. See [the official Quick Tunnel limitations](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/).
 
+## Advertise a business port's own tunnel URL
+
+The host may create its own Quick Tunnel for a local business service and explicitly attach that HTTPS root URL to the port. The SDK does not automatically create a separate provider for each port. Its existing device-level tunnel remains the encrypted SDK WebSocket transport and must not be treated as a browser HTTP endpoint.
+
+```rust,no_run
+# async fn example(client: &cybergrid_sdk::Client) -> cybergrid_sdk::Result<()> {
+let mut port = cybergrid_sdk::Port::tcp("api", 6789, "my-http-api");
+port.tunnel_url = Some("https://example-name.trycloudflare.com".into());
+client.expose(port).await?;
+client.update_port_tunnel_url("api", Some("https://new-example-name.trycloudflare.com")).await?;
+client.update_port_tunnel_url("api", None).await?; // Withdraw the URL; retain the port.
+# Ok(()) }
+```
+
+Only HTTPS `trycloudflare.com` subdomain roots without credentials, non-default ports, query or fragment are accepted. A successful update publishes a new full snapshot. The coordinator bounds each device's complete serialized publication to 24 KiB, including port URLs and iroh metadata, and returns `DEVICE_METADATA_TOO_LARGE` before changing the snapshot if exceeded. If publication fails, local intent remains available for recovery; await a confirmed update before assuming remote clients have seen it. Recovery republishes the port URL with the port snapshot. An older client that omits it remains compatible.
+
+The [read-only JS SDK](../sdk-js/README.md) can retrieve the explicitly declared port URL after the host logs into Logto. Business HTTP authentication and CORS remain the exposed service's responsibility; the URL itself is not an access credential. CyberGrid never fetches or proxies that service.
+
 ## Build and exercise
 
-Validated toolchain: Rust 1.97.1, macOS arm64, Android arm64 API 28 with NDK 27.2.12479018. The declared Rust minimum is 1.88; that older toolchain has not been independently validated. Cargo.lock is included; use `--locked`. Android requires its Rust target and NDK clang/linker environment. The SDK has no Windows implementation for the provided Unix credential store.
+Previously validated release toolchain: Rust 1.97.1, macOS arm64, Android arm64 API 28 with NDK 27.2.12479018. iroh 1.4.1 raises the current source's declared Rust minimum to 1.91; that minimum and new platform behavior require their own checks and are not implied by the v0.6.0 release results. Cargo.lock is included; use `--locked`. Android requires its Rust target and NDK clang/linker environment. The SDK has no Windows implementation for the provided Unix credential store.
 
 For the downloaded archive, run these commands from the directory containing `cybergrid-sdk-rust-0.2.0.tar.gz`. The archive has one top-level directory, `cybergrid-sdk-rust-0.2.0/`, which directly contains Cargo.toml, Cargo.lock, src/, examples/ and scripts/:
 
@@ -120,4 +155,4 @@ Authorize each physical device independently. Do not copy refresh credentials be
 
 Source and test binaries are distributed through [GitHub Releases](https://github.com/ywateru/CyberGrid/releases). The repository Actions bind each release manifest to its source commit and include SHA256SUMS, fixed provider resources and original notices. Build directories, local authorization and test records are excluded. See the repository release documentation for the CI packaging entry point.
 
-Third-party declarations are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), with verbatim license/copyright/notice texts and source pins in [licenses/README.md](licenses/README.md). Dependencies are fetched separately by Cargo under their own licenses. The original CyberGrid code retains its existing rights notice; publishing source does not add a separate open-source license.
+Third-party declarations are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), with license/copyright/notice texts and source pins in [licenses/README.md](licenses/README.md). Original text files retain their bytes. For enum-assoc 1.4.2, whose exact published source declares `MIT OR Apache-2.0` but omits a license text, the collection explicitly selects Apache-2.0 and includes the canonical standard text plus the exact upstream declaration; it does not present that text as an upstream original. Dependencies are fetched separately by Cargo under their own licenses. The original CyberGrid code retains its existing rights notice; publishing source does not add a separate open-source license.

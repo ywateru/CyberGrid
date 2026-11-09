@@ -1,8 +1,10 @@
 # Building and publishing a release
 
-CyberGrid uses a project release tag, such as `v0.6.0`, while the components retain their own versions: Go SDK/CLI 0.4.0, Rust SDK 0.2.0 and CyberGrid Lab 0.3.0. Publishing source does not grant an additional open-source license. See the root and component `LICENSE` files; third-party grants remain separately effective.
+CyberGrid uses a project release tag, such as `v0.6.0`, while the components retain their own versions: Go SDK/CLI 0.4.0, Rust SDK 0.2.0, CyberGrid Lab 0.3.0 and the new JS SDK 0.1.0. Publishing source does not grant an additional open-source license. See the root and component `LICENSE` files; third-party grants remain separately effective.
 
 The v0.6.0 coordinator and Lab use ordinary Logto Native applications with Device Flow disabled. Deploy the matching coordinator with the client release. Historical device-code CLI login does not work with this coordinator; it remains only for older compatible services. Existing releases are immutable.
+
+Project release v0.7.0 adds iroh direct connections, configurable WebRTC/iroh parallel attempts, per-port Quick Tunnel declarations, and the read-only JS SDK. These features are absent from the existing v0.6.0 downloads. Use the matching v0.7.0 coordinator and archives. Reusing a component version does not update an existing project release.
 
 ## Workflow
 
@@ -10,7 +12,7 @@ The `Build and publish native SDKs` workflow in `.github/workflows/release.yml` 
 
 The workflow has three required build jobs:
 
-- **sources**, on Linux: build the website and typecheck the Node service, verify both fixed provider resources, then package committed Go/Rust/App source and original license texts.
+- **sources**, on Linux: build the website and typecheck the Node service; build and test the JS SDK, including its real coordinator integration; verify both fixed provider resources; then package committed Go/Rust/JS/App source, built JS ESM/types, and license texts with recorded provenance.
 - **macos**, on a native macOS arm64 runner: fixed Node 22.23.4, Go 1.27.0 and Rust 1.97.1; build the Go CLI and Tauri 2 debug-test app.
 - **android**, on Linux: the same language toolchains, JDK 17, Android SDK Platform 37.0, Build-Tools 36.0.0 and NDK 27.2.12479018; build the Go arm64 CLI with the API28 NDK compiler and bionic DNS, plus the arm64 API28+ Tauri debug-test APK with `adb-test-control` enabled.
 
@@ -26,10 +28,10 @@ From the reviewed, clean repository:
 
 ```sh
 git push origin main
-gh workflow run release.yml --ref main -f release_tag=v0.6.0
+gh workflow run release.yml --ref main -f release_tag=v0.7.0
 ```
 
-Dispatch from the exact reviewed source revision. The publishing job creates the project tag only after all required builds have passed, and binds the Release to that job's `GITHUB_SHA`. Do not create or move a release tag during build iteration. Existing tags remain unchanged. The Go submodule uses its independent `sdk/v0.4.0` tag; create a new submodule tag only for a new Go SDK version.
+`v0.7.0` is an example: choose a new, unused project tag after review. Dispatch from the exact reviewed source revision. The publishing job creates the project tag only after all required builds have passed, and binds the Release to that job's `GITHUB_SHA`. Do not create or move a release tag during build iteration. Existing tags remain unchanged. The Go submodule uses its independent `sdk/v0.4.0` tag; create a new submodule tag only for a new Go SDK version.
 
 Check that all required jobs succeeded and the Release is published at [GitHub Releases](https://github.com/ywateru/CyberGrid/releases). Download `SHA256SUMS` with the desired asset and verify it:
 
@@ -50,13 +52,21 @@ python3 sdk-rust/scripts/prepare-android-provider.py /absolute/path/to/host/app/
 Release packaging reads the committed source list through `git ls-files`. It does not reuse a previous local verification manifest or infer a source freeze from an old package:
 
 ```sh
+# Build the website/service and JS SDK before packaging sources.
+npm --prefix server ci --include=dev
+npm --prefix server run build
+npm --prefix sdk-js ci --include=dev --ignore-scripts
+npm --prefix sdk-js test
+npm --prefix sdk-js run test:integration
 python3 scripts/release/package.py sources
 python3 scripts/release/package.py macos --app '/absolute/path/to/CyberGrid Lab.app' --go-binary sdk/bin/cybergrid-macos
 python3 scripts/release/package.py android --apk /absolute/path/to/app-universal-debug.apk --go-binary sdk/bin/cybergrid-android-arm64
-RELEASE_TAG=v0.6.0 python3 scripts/release/package.py finalize
+RELEASE_TAG=v0.7.0 python3 scripts/release/package.py finalize
 ```
 
 Output is under `dist/release/`, which is not committed. `finalize` requires all three platform/source job metadata files. Source archives contain the offline SDK provider resources and licenses. Platform packages include full notices; the macOS CLI embeds its provider, while Android requires the OS-installed native library directory.
+
+The JS outputs are `cybergrid-sdk-js-0.1.0-source.tar.gz`, its source manifest, and `cybergrid-sdk-js-0.1.0-esm.tar.gz`. The ESM archive includes the usable `dist/` module and declarations, package metadata, README, LICENSE, notices and build provenance. It contains no `node_modules` or user credentials. The source package remains private to prevent accidental npm publication; consumers may install the extracted local package. A separate `sdk-js.yml` workflow also checks source changes without publishing a release.
 
 ## Test-build limitations
 

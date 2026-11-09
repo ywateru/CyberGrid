@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "sha2",
+  "repository": "https://github.com/RustCrypto/hashes",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "sha2-0.11.1/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "sha2-0.11.1/LICENSE-MIT",
+      "sha256": "831e0f43ad0bf014c1c4fec5767aae470434c1d66d6e671be2d823e729063e25"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "138dc5a05b93f8e49cda177fc6cfd7cc43673e5d"
+    },
+    "path_in_vcs": "sha2"
+  },
+  "version": "0.11.1"
+}

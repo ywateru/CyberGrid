@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Allen Welkie <>",
+    "James Munns <james@onevariable.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "0fa961b519f0b462e3a3b4a34b64d119eeaca1d59af726fe450bbba07a9fc0a1",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "cobs",
+  "repository": "https://github.com/jamesmunns/cobs.rs",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "cobs-0.3.0/LICENSE-APACHE",
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "cobs-0.3.0/LICENSE-MIT",
+      "sha256": "e0cfa1006a64520633de6bfbf563f5b1bea04ef0c5b73f049681931fa297dda3"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "b86d5c1ace3d8c311d1db143f05f8083743700d1"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.3.0"
+}

@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Philipp Kr\u00fcger <philipp@n0.computer>",
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "e2ab99dfb861450e68853d34ae665243a88b8c493d01ba957321a1e9b2312bbe",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "n0-future",
+  "repository": "https://github.com/n0-computer/n0-future",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "n0-future-0.3.2/LICENSE-APACHE",
+      "sha256": "7986218ec4ea89de3511a843ae27fea2584a525036c220ff7b26589179f07888"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "n0-future-0.3.2/LICENSE-MIT",
+      "sha256": "33616ec4c88b6e00de66e6c06f1a55d80bb32a9d7939f3aa83d28e673a1adcae"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5d960ac5aab484dc8fbaf0c5b2692fca37854e79"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.3.2"
+}

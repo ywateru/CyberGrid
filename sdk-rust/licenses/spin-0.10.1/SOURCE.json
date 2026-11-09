@@ -1,0 +1,31 @@
+{
+  "authors": [
+    "Mathijs van de Nes <git@mathijs.vd-nes.nl>",
+    "John Ericson <git@JohnEricson.me>",
+    "Joshua Barretto <joshua.s.barretto@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "023a211cb3138dbc438680b32560ad89f699977624c9f8dbb95a47d5b4c07dd3",
+  "declaredLicense": "MIT",
+  "name": "spin",
+  "repository": "https://github.com/mvdnes/spin-rs.git",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "spin-0.10.1/LICENSE",
+      "sha256": "6ac8711fb340c62ce0a4ecd463342d3fa0e8e70de697c863a2e1c0c53006003c"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "026d8e95bf03f90ad2067038df4c138ebc1ac4e7"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.10.1"
+}

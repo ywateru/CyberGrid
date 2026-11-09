@@ -1,0 +1,27 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "cffb0e931875b666fc4fcb20fee52e9bbd1ef836fd9e9e04ec21555f9f85f7ef",
+  "declaredLicense": "Apache-2.0",
+  "name": "backon",
+  "repository": "https://github.com/Xuanwo/backon",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "backon-1.6.0/LICENSE",
+      "sha256": "3e16583bb85121134f781623f64f72481a617f3c295182e60728804b05f0aeda"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "e24dc92742e201f7320868d46a12ff59eb82ef72"
+    },
+    "path_in_vcs": "backon"
+  },
+  "version": "1.6.0"
+}

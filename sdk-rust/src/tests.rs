@@ -69,6 +69,7 @@ impl Fixture {
             app_id: app.into(),
             stun_servers: vec![],
             direct_timeout: Duration::from_secs(10),
+            iroh_enabled: false,
             ..Config::default()
         })
         .unwrap();
@@ -697,6 +698,7 @@ async fn oauth_cancel_and_configuration_mismatch() {
 struct Control {
     epoch: String,
     fail_next_publish: bool,
+    drop_signals: bool,
     attempts: HashMap<String, Value>,
     registrations: Vec<Value>,
     devices: HashMap<String, Value>,
@@ -721,11 +723,11 @@ async fn control() -> (Fixture, Arc<Mutex<Control>>) {
             // Certificate CN maps to the fixture's generated device identity; first missing fingerprint receives each initial heartbeat.
             let body:Value=serde_json::from_slice(&body).unwrap();let fp=body["certificateFingerprint"].clone();
             let id=who.clone();
-            let epoch=s.epoch.clone();let fail=s.fail_next_publish;s.fail_next_publish=false;let d=s.devices.get_mut(&id).unwrap();d["publishRevision"]=body["publishRevision"].clone();d["certificateFingerprint"]=fp;d["ports"]=body["ports"].clone();d["tunnelUrl"]=body.get("tunnelUrl").cloned().unwrap_or(Value::Null);if fail{return(599,json!({"coordinatorEpoch":epoch,"error":{"code":"RESPONSE_LOST"}}));}return(200,json!({"device":d,"coordinatorEpoch":epoch}));
+            let epoch=s.epoch.clone();let fail=s.fail_next_publish;s.fail_next_publish=false;let d=s.devices.get_mut(&id).unwrap();d["publishRevision"]=body["publishRevision"].clone();d["certificateFingerprint"]=fp;d["ports"]=body["ports"].clone();d["tunnelUrl"]=body.get("tunnelUrl").cloned().unwrap_or(Value::Null);d["iroh"]=body.get("iroh").cloned().unwrap_or(Value::Null);if fail{return(599,json!({"coordinatorEpoch":epoch,"error":{"code":"RESPONSE_LOST"}}));}return(200,json!({"device":d,"coordinatorEpoch":epoch}));
         }
         if method=="GET"&&path=="/api/v1/devices"{return(200,json!({"coordinatorEpoch":s.epoch,"devices":s.devices.values().collect::<Vec<_>>()}));}
         if method=="POST"&&path=="/api/v1/signals"{let mut v:Value=serde_json::from_slice(&body).unwrap();s.n+=1;v["id"]=json!(s.n);let kind=v["kind"].as_str().unwrap().to_owned();v["fromDeviceId"]=json!(who);v["coordinatorEpoch"]=json!(s.epoch);v["fromIncarnation"]=s.devices[&who]["incarnation"].clone();assert!(matches!(kind.as_str(),"offer"|"answer"|"candidate"|"close"));s.signals.push(v);return(200,json!({"id":s.n,"coordinatorEpoch":s.epoch}));}
-        if method=="GET"&&path.starts_with("/api/v1/signals?"){let after=path.split("after=").nth(1).unwrap().split('&').next().unwrap().parse::<u64>().unwrap();return(200,json!({"coordinatorEpoch":s.epoch,"signals":s.signals.iter().filter(|s|s["id"].as_u64().unwrap()>after&&s["toDeviceId"]==who).collect::<Vec<_>>(),"cursor":s.n}));}
+        if method=="GET"&&path.starts_with("/api/v1/signals?"){if s.drop_signals{return(200,json!({"coordinatorEpoch":s.epoch,"signals":[],"cursor":s.n}));}let after=path.split("after=").nth(1).unwrap().split('&').next().unwrap().parse::<u64>().unwrap();return(200,json!({"coordinatorEpoch":s.epoch,"signals":s.signals.iter().filter(|s|s["id"].as_u64().unwrap()>after&&s["toDeviceId"]==who).collect::<Vec<_>>(),"cursor":s.n}));}
         if method=="DELETE"&&path=="/api/v1/session"{return(200,json!({"ok":true}));}
         (404,json!({"error":{"code":"NOT_FOUND"}}))
     })).await;
@@ -1589,4 +1591,521 @@ async fn browser_login_flow_prevents_device_oauth_requests() {
     let mut invalid = legacy;
     invalid.login_flow = Some("unknown".into());
     assert!(invalid.validate("RealA").is_err());
+}
+
+fn iroh_fixture_client(f: &Fixture, strategy: DirectStrategy) -> Arc<Client> {
+    let mut c = f.client("RealA");
+    let cfg = &mut Arc::get_mut(&mut c).unwrap().cfg;
+    cfg.iroh_enabled = true;
+    cfg.direct_strategy = strategy;
+    cfg.direct_timeout = Duration::from_nanos(1);
+    cfg.iroh_timeout = Duration::from_secs(3);
+    cfg.fallback_timeout = Duration::from_millis(150);
+    cfg.poll_interval = Duration::from_millis(10);
+    cfg.stun_servers.clear();
+    c
+}
+async fn iroh_publish_ready(c: &Arc<Client>) {
+    for _ in 0..100 {
+        if c.active()
+            .await
+            .unwrap()
+            .iroh
+            .as_ref()
+            .unwrap()
+            .info()
+            .addresses
+            .len()
+            > 0
+        {
+            c.heartbeat().await.unwrap();
+            return;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    panic!("local direct endpoint did not publish a numeric address");
+}
+async fn live_peers(c: &Arc<Client>) -> usize {
+    c.active()
+        .await
+        .unwrap()
+        .peers
+        .lock()
+        .await
+        .iter()
+        .filter(|p| !p.is_closed())
+        .count()
+}
+#[tokio::test]
+async fn iroh_actual_quic_inner_mtls_smux_halfclose_and_peer_cleanup() {
+    let (f, _) = control().await;
+    let a = iroh_fixture_client(&f, DirectStrategy::Sequential);
+    let b = iroh_fixture_client(&f, DirectStrategy::Sequential);
+    a.login_with_access_token("fixture-token-a", "a")
+        .await
+        .unwrap();
+    b.login_with_access_token("fixture-token-b", "b")
+        .await
+        .unwrap();
+    iroh_publish_ready(&a).await;
+    iroh_publish_ready(&b).await;
+    let (port, echo) = echo().await;
+    b.expose(Port::tcp("echo", port, "echo")).await.unwrap();
+    let mut events = a.subscribe();
+    let peer = a.connect("id-b").await.unwrap();
+    assert_eq!(peer.transport, "iroh-direct");
+    let conn = peer.iroh.lock().await.clone().unwrap();
+    assert!(conn.paths().iter().any(|p| p.is_selected() && p.is_ip()));
+    assert!(conn.paths().iter().all(|p| !p.is_relay()));
+    let mut stream = peer.dial("echo").await.unwrap();
+    let data: Vec<u8> = (0..65536).map(|i| (i % 251) as u8).collect();
+    let (mut read, mut write) = tokio::io::split(&mut stream);
+    let (_, result) = tokio::join!(
+        async {
+            write.write_all(&data).await.unwrap();
+            write.shutdown().await.unwrap();
+        },
+        async {
+            let mut out = Vec::new();
+            read.read_to_end(&mut out).await.unwrap();
+            out
+        }
+    );
+    assert_eq!(result, data);
+    let mut phases = Vec::new();
+    while let Ok(e) = events.try_recv() {
+        phases.push((e.phase, e.transport));
+    }
+    let rtc = phases.iter().position(|e| e.0 == "direct-attempt").unwrap();
+    let iroh = phases.iter().position(|e| e.0 == "iroh-attempt").unwrap();
+    assert!(rtc < iroh);
+    assert!(phases
+        .iter()
+        .any(|e| e.0 == "mutual-tls-ready" && e.1.as_deref() == Some("iroh-direct")));
+    assert!(!phases.iter().any(|e| e.0 == "fallback-attempt"));
+    peer.close().await;
+    tokio::time::timeout(Duration::from_secs(2), conn.closed())
+        .await
+        .unwrap();
+    for _ in 0..100 {
+        if live_peers(&b).await == 0 {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    assert_eq!(live_peers(&b).await, 0);
+    let endpoint = a
+        .active()
+        .await
+        .unwrap()
+        .iroh
+        .as_ref()
+        .unwrap()
+        .endpoint
+        .clone();
+    a.close().await.unwrap();
+    b.close().await.unwrap();
+    assert!(endpoint.is_closed());
+    echo.abort();
+}
+#[tokio::test]
+async fn iroh_wrong_inner_identity_and_endpoint_namespace_are_rejected() {
+    let (f, state) = control().await;
+    let a = iroh_fixture_client(&f, DirectStrategy::Sequential);
+    let b = iroh_fixture_client(&f, DirectStrategy::Sequential);
+    a.login_with_access_token("fixture-token-a", "a")
+        .await
+        .unwrap();
+    b.login_with_access_token("fixture-token-b", "b")
+        .await
+        .unwrap();
+    iroh_publish_ready(&a).await;
+    iroh_publish_ready(&b).await;
+    let mut device = a.device("id-b").await.unwrap();
+    device.certificate_fingerprint = Some("0".repeat(64));
+    assert!(a.dial_iroh(&device).await.is_err());
+    // A real outer public key belonging to no published device must not get to
+    // use a valid inner certificate as a substitute for the missing binding.
+    state.lock().unwrap().devices.get_mut("id-a").unwrap()["iroh"] = Value::Null;
+    assert!(a.dial_iroh(&a.device("id-b").await.unwrap()).await.is_err());
+    assert_eq!(live_peers(&a).await, 0);
+    assert_eq!(live_peers(&b).await, 0);
+    a.close().await.unwrap();
+    b.close().await.unwrap();
+}
+#[tokio::test]
+async fn iroh_parallel_first_authenticated_winner_has_no_late_loser_peer() {
+    let (f, _) = control().await;
+    let mut a = iroh_fixture_client(&f, DirectStrategy::Parallel);
+    Arc::get_mut(&mut a).unwrap().cfg.direct_timeout = Duration::from_secs(3);
+    let b = iroh_fixture_client(&f, DirectStrategy::Sequential);
+    a.login_with_access_token("fixture-token-a", "a")
+        .await
+        .unwrap();
+    b.login_with_access_token("fixture-token-b", "b")
+        .await
+        .unwrap();
+    iroh_publish_ready(&a).await;
+    iroh_publish_ready(&b).await;
+    let mut events = a.subscribe();
+
+    let peer = a.connect("id-b").await.unwrap();
+
+    assert!(matches!(
+        peer.transport.as_str(),
+        "iroh-direct" | "webrtc-direct"
+    ));
+    tokio::time::sleep(Duration::from_millis(200)).await;
+    assert_eq!(live_peers(&a).await, 1);
+    assert_eq!(live_peers(&b).await, 1);
+    let mut ready = 0;
+    while let Ok(event) = events.try_recv() {
+        if event.phase == "multiplexer-ready" {
+            ready += 1;
+        }
+        assert_ne!(event.phase, "fallback-attempt");
+    }
+    assert_eq!(ready, 1);
+    let rt = a.active().await.unwrap();
+    assert!(rt
+        .attempts
+        .lock()
+        .await
+        .values()
+        .all(|attempt| attempt.connected.load(Ordering::SeqCst) || attempt.cancel.is_cancelled()));
+
+    peer.close().await;
+
+    a.close().await.unwrap();
+
+    b.close().await.unwrap();
+}
+#[tokio::test]
+async fn iroh_legacy_peer_skip_fallback_budget_and_cancel() {
+    let (f, state) = control().await;
+    state.lock().unwrap().drop_signals = true;
+    let a = iroh_fixture_client(&f, DirectStrategy::Sequential);
+    let b = f.client("RealA"); // old peer: no iroh metadata
+    a.login_with_access_token("fixture-token-a", "a")
+        .await
+        .unwrap();
+    b.login_with_access_token("fixture-token-b", "b")
+        .await
+        .unwrap();
+    let mut events = a.subscribe();
+    let started = std::time::Instant::now();
+    assert!(a.connect("id-b").await.is_err());
+    assert!(started.elapsed() < Duration::from_secs(2));
+    let mut phases = Vec::new();
+    while let Ok(e) = events.try_recv() {
+        phases.push(e.phase);
+    }
+    assert!(
+        phases.iter().position(|s| s == "direct-attempt").unwrap()
+            < phases.iter().position(|s| s == "iroh-skipped").unwrap()
+    );
+    assert!(phases.contains(&"fallback-attempt".to_owned()));
+    assert!(!phases.contains(&"iroh-attempt".to_owned()));
+    let pending = {
+        let a = a.clone();
+        tokio::spawn(async move { a.connect("id-b").await })
+    };
+    tokio::time::sleep(Duration::from_millis(10)).await;
+    let rt = a.active().await.unwrap();
+    a.close().await.unwrap();
+    assert!(tokio::time::timeout(Duration::from_secs(2), pending)
+        .await
+        .unwrap()
+        .unwrap()
+        .is_err());
+    assert!(rt.iroh.as_ref().unwrap().endpoint.is_closed());
+    assert!(rt
+        .attempts
+        .lock()
+        .await
+        .values()
+        .all(|a| a.cancel.is_cancelled()));
+    b.close().await.unwrap();
+}
+#[test]
+fn iroh_metadata_numeric_policy_and_parallel_budget() {
+    let valid = |addresses: Vec<&str>| json!({"endpointId":"ab".repeat(32),"addresses":addresses});
+    for addresses in [
+        vec![],
+        vec!["127.0.0.1:1234", "[::1]:1234", "[::ffff:192.0.2.1]:1234"],
+    ] {
+        serde_json::from_value::<IrohInfo>(valid(addresses))
+            .unwrap()
+            .validate()
+            .unwrap();
+    }
+    for addresses in [
+        vec!["0.0.0.0:1"],
+        vec!["[::]:1"],
+        vec!["224.0.0.1:1"],
+        vec!["[ff02::1]:1"],
+        vec!["[::ffff:224.0.0.1]:1"],
+        vec!["[::ffff:e000:1]:1"],
+        vec!["[::ffff:0.0.0.0]:1"],
+        vec!["192.0.2.1:1", "[::ffff:192.0.2.1]:1"],
+        vec!["127.0.0.1:0"],
+    ] {
+        assert!(serde_json::from_value::<IrohInfo>(valid(addresses))
+            .unwrap()
+            .validate()
+            .is_err());
+    }
+    assert!(serde_json::from_value::<IrohInfo>(valid(vec!["example.test:1"])).is_err());
+    for address in ["[fe80::1%0]:1", "[fe80::1%1]:1"] {
+        assert!(serde_json::from_value::<IrohInfo>(valid(vec![address])).is_err());
+    }
+    let mut unknown = valid(vec![]);
+    unknown["relayUrl"] = json!("https://relay.example.test");
+    assert!(serde_json::from_value::<IrohInfo>(unknown).is_err());
+    let mut c = Config::default();
+    assert_eq!(c.connection_budget(), Duration::from_secs(57));
+    c.direct_strategy = DirectStrategy::Parallel;
+    assert_eq!(c.connection_budget(), Duration::from_secs(49));
+    c.interface_name = Some("explicit-filter".into());
+    assert_eq!(c.connection_budget(), Duration::from_secs(49));
+    c.direct_timeout = Duration::MAX;
+    assert_eq!(c.connection_budget(), Duration::from_secs(90));
+}
+#[tokio::test]
+async fn port_tunnel_explicit_update_withdraw_preserves_service_snapshot() {
+    let (f, state) = control().await;
+    let c = f.client("RealA");
+    c.login_with_access_token("fixture-token-a", "a")
+        .await
+        .unwrap();
+    c.expose(Port::tcp("http", 6789, "http")).await.unwrap();
+    let url = "https://one-port-only.trycloudflare.com/";
+    c.update_port_tunnel_url("http", Some(url)).await.unwrap();
+    {
+        let s = state.lock().unwrap();
+        let p = &s.devices["id-a"]["ports"][0];
+        assert_eq!(p["port"], 6789);
+        assert_eq!(p["type"], "http");
+        assert_eq!(p["tunnelUrl"], url);
+        assert!(s.devices["id-a"]["tunnelUrl"].is_null());
+    }
+    for invalid in [
+        "http://one-port-only.trycloudflare.com/",
+        "https://secret@one-port-only.trycloudflare.com/",
+        "https://one-port-only.trycloudflare.com/path",
+        "https://one-port-only.trycloudflare.com/?q=1",
+        "https://one-port-only.trycloudflare.com:444/",
+    ] {
+        assert!(c
+            .update_port_tunnel_url("http", Some(invalid))
+            .await
+            .is_err());
+    }
+    assert_eq!(
+        c.ports.read().await["http"].tunnel_url.as_deref(),
+        Some(url)
+    );
+    c.update_port_tunnel_url("http", None).await.unwrap();
+    assert!(state.lock().unwrap().devices["id-a"]["ports"][0]
+        .get("tunnelUrl")
+        .is_none());
+    assert_eq!(c.ports.read().await["http"].port, 6789);
+    assert!(c.update_port_tunnel_url("absent", Some(url)).await.is_err());
+    c.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn iroh_generation_recovery_rotates_key_and_preserves_port_url() {
+    let (f, state) = control().await;
+    let c = iroh_fixture_client(&f, DirectStrategy::Sequential);
+    c.set_auth_provider(Arc::new(TestProvider {
+        calls: AtomicUsize::new(0),
+    }))
+    .await;
+    c.login_with_access_token("first", "a").await.unwrap();
+    iroh_publish_ready(&c).await;
+    let mut port = Port::tcp("public-http", 6789, "http");
+    port.tunnel_url = Some("https://one-port-only.trycloudflare.com/".into());
+    c.expose(port).await.unwrap();
+    let old = c.active().await.unwrap();
+    let old_endpoint = old.iroh.as_ref().unwrap();
+    let old_id = old_endpoint.info().endpoint_id;
+    state.lock().unwrap().epoch = "iroh-next-generation".into();
+    assert!(c.devices().await.is_err());
+    tokio::time::timeout(Duration::from_secs(5), async {
+        loop {
+            if let Ok(rt) = c.active().await {
+                if rt.generation != old.generation {
+                    break;
+                }
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+    let current = c.active().await.unwrap();
+    assert!(old_endpoint.endpoint.is_closed());
+    assert_ne!(old_id, current.iroh.as_ref().unwrap().info().endpoint_id);
+    assert_eq!(
+        state.lock().unwrap().devices["id-a"]["ports"][0]["tunnelUrl"],
+        "https://one-port-only.trycloudflare.com/"
+    );
+    // A late attempt holding a retired generation cannot publish a new peer.
+    let stale = crate::peer::DialFence::single(CancellationToken::new(), old.generation);
+    let device = c.device("id-a").await.unwrap();
+    assert!(matches!(
+        c.dial_iroh_fenced(&device, &stale).await,
+        Err(Error::Cancelled)
+    ));
+    c.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn iroh_interface_filter_skips_endpoint_and_parallel_both_fail_before_fallback() {
+    let (f, state) = control().await;
+    state.lock().unwrap().drop_signals = true;
+    let mut a = iroh_fixture_client(&f, DirectStrategy::Parallel);
+
+    let cfg = &mut Arc::get_mut(&mut a).unwrap().cfg;
+    cfg.interface_name = Some("cybergrid-no-such-interface".into());
+    a.login_with_access_token("a", "a").await.unwrap();
+    assert!(a.active().await.unwrap().iroh.is_none());
+    assert!(state.lock().unwrap().devices["id-a"]["iroh"].is_null());
+    a.close().await.unwrap();
+
+    let mut a = iroh_fixture_client(&f, DirectStrategy::Parallel);
+
+    let cfg = &mut Arc::get_mut(&mut a).unwrap().cfg;
+    cfg.direct_timeout = Duration::from_millis(80);
+    cfg.iroh_timeout = Duration::from_millis(100);
+    let b = iroh_fixture_client(&f, DirectStrategy::Sequential);
+    a.login_with_access_token("a", "a").await.unwrap();
+    b.login_with_access_token("b", "b").await.unwrap();
+    iroh_publish_ready(&a).await;
+    iroh_publish_ready(&b).await;
+    state.lock().unwrap().devices.get_mut("id-b").unwrap()["iroh"]["addresses"] =
+        json!(["127.0.0.1:9"]);
+    let mut events = a.subscribe();
+    let start = std::time::Instant::now();
+
+    assert!(a.connect("id-b").await.is_err());
+
+    assert!(start.elapsed() >= Duration::from_millis(100));
+    assert!(start.elapsed() < Duration::from_secs(1));
+    let mut phases = Vec::new();
+    while let Ok(event) = events.try_recv() {
+        phases.push(event.phase);
+    }
+    assert!(
+        phases.iter().position(|p| p == "iroh-attempt").unwrap()
+            < phases.iter().position(|p| p == "fallback-attempt").unwrap()
+    );
+    assert_eq!(live_peers(&a).await, 0);
+    assert_eq!(live_peers(&b).await, 0);
+    let pending = {
+        let a = a.clone();
+        tokio::spawn(async move { a.connect("id-b").await })
+    };
+    tokio::time::sleep(Duration::from_millis(10)).await;
+    let rt = a.active().await.unwrap();
+    a.close().await.unwrap();
+    assert!(tokio::time::timeout(Duration::from_secs(2), pending)
+        .await
+        .unwrap()
+        .unwrap()
+        .is_err());
+    assert!(rt.iroh.as_ref().unwrap().endpoint.is_closed());
+
+    assert!(rt.attempts.lock().await.is_empty());
+    b.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn iroh_parallel_dropped_caller_retires_early_webrtc_creation() {
+    let (f, state) = control().await;
+    state.lock().unwrap().drop_signals = true;
+    let mut a = iroh_fixture_client(&f, DirectStrategy::Parallel);
+    Arc::get_mut(&mut a).unwrap().cfg.direct_timeout = Duration::from_secs(1);
+    let b = iroh_fixture_client(&f, DirectStrategy::Sequential);
+    a.login_with_access_token("a", "a").await.unwrap();
+    b.login_with_access_token("b", "b").await.unwrap();
+    iroh_publish_ready(&a).await;
+    iroh_publish_ready(&b).await;
+    state.lock().unwrap().devices.get_mut("id-b").unwrap()["iroh"]["addresses"] =
+        json!(["127.0.0.1:9"]);
+    for _ in 0..12 {
+        let mut events = a.subscribe();
+        let pending = {
+            let a = a.clone();
+            tokio::spawn(async move { a.connect("id-b").await })
+        };
+        tokio::time::timeout(Duration::from_secs(1), async {
+            loop {
+                if events.recv().await.unwrap().phase == "direct-attempt" {
+                    break;
+                }
+            }
+        })
+        .await
+        .unwrap();
+        pending.abort();
+        let _ = pending.await;
+        tokio::time::timeout(Duration::from_secs(2), async {
+            loop {
+                if a.active().await.unwrap().attempts.lock().await.is_empty() {
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(5)).await;
+            }
+        })
+        .await
+        .unwrap();
+        assert_eq!(live_peers(&a).await, 0);
+        assert_eq!(live_peers(&b).await, 0);
+    }
+    a.close().await.unwrap();
+    b.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn iroh_mapping_close_joins_cancelled_parallel_reconnect() {
+    let (f, state) = control().await;
+    let a = iroh_fixture_client(&f, DirectStrategy::Parallel);
+    let b = iroh_fixture_client(&f, DirectStrategy::Sequential);
+    a.login_with_access_token("a", "a").await.unwrap();
+    b.login_with_access_token("b", "b").await.unwrap();
+    iroh_publish_ready(&a).await;
+    iroh_publish_ready(&b).await;
+    let (port, echo) = echo().await;
+    b.expose(Port::tcp("echo", port, "echo")).await.unwrap();
+    let mapping = a
+        .map("id-b", "echo", "127.0.0.1:0".parse().unwrap())
+        .await
+        .unwrap();
+    mapping.peer.close().await;
+    {
+        let mut s = state.lock().unwrap();
+        s.drop_signals = true;
+        s.devices.get_mut("id-b").unwrap()["iroh"]["addresses"] = json!(["127.0.0.1:9"]);
+    }
+    let mut events = a.subscribe();
+    let _socket = tokio::net::TcpStream::connect(mapping.addr).await.unwrap();
+    tokio::time::timeout(Duration::from_secs(1), async {
+        loop {
+            if events.recv().await.unwrap().phase == "iroh-attempt" {
+                break;
+            }
+        }
+    })
+    .await
+    .unwrap();
+    tokio::time::timeout(Duration::from_secs(2), mapping.close())
+        .await
+        .unwrap();
+    assert!(a.active().await.unwrap().attempts.lock().await.is_empty());
+    assert_eq!(live_peers(&a).await, 0);
+    a.close().await.unwrap();
+    b.close().await.unwrap();
+    echo.abort();
 }

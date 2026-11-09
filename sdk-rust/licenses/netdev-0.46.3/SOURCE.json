@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "shellrow <shellrow@foctal.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "c3c52c2584961c68f5a6e3356797344061f818c93b8acc9cd6d7e284795e563e",
+  "declaredLicense": "MIT",
+  "name": "netdev",
+  "repository": "https://github.com/shellrow/netdev",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "netdev-0.46.3/LICENSE",
+      "sha256": "766312a83b497b8b83b68df0dc3a99e87480ad9019f54d5a53a5deeb9150d635"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "4505d238696975a97b029c1b8607487453c0f86e"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.46.3"
+}

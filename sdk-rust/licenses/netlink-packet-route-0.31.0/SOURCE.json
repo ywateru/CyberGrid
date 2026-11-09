@@ -1,0 +1,34 @@
+{
+  "authors": [
+    "Corentin Henry <corentinhenry@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "e2288fcb784eb3defd5fb16f4c4160d5f477de192eac730f43e1d11c24d9a007",
+  "declaredLicense": "MIT",
+  "name": "netlink-packet-route",
+  "repository": "https://github.com/rust-netlink/netlink-packet-route",
+  "targets": [
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": ".github/workflows/license.yml",
+      "origin": "cargo-registry-cache",
+      "path": "netlink-packet-route-0.31.0/.github/workflows/license.yml",
+      "sha256": "c5593ff9a2f0e638847681609214cb86989c2e43705ed3af3e04721a5bb6f913"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "netlink-packet-route-0.31.0/LICENSE-MIT",
+      "sha256": "d1a664187bf61b2e9711448db9656f7be12a5b6944e36ffaa94a3f215dbcabb3"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "c71b30219967cdd0f2c3233f14ac485b48dd1a8d"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.31.0"
+}

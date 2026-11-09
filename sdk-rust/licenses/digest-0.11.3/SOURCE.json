@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "digest",
+  "repository": "https://github.com/RustCrypto/traits",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "digest-0.11.3/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "digest-0.11.3/LICENSE-MIT",
+      "sha256": "af59cea35d7f5e2777a713b8d155d65efa2c339eb43f3c14e868c6ac8506edad"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "2fb9ed8922e244117040bb037a7d141a6a2b8228"
+    },
+    "path_in_vcs": "digest"
+  },
+  "version": "0.11.3"
+}

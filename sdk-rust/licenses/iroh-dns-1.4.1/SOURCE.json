@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "7481d0792dde1035a2b06ec06ed3cf6d01fcb1a494e6931b489e32073382048d",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "iroh-dns",
+  "repository": "https://github.com/n0-computer/iroh",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "iroh-dns-1.4.1/upstream-repository-root/LICENSE-APACHE",
+      "sha256": "903131e2786f073a942fbf8fae122d9e576e4dad758c6da7f9f2ba58fd8611ab",
+      "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-APACHE"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "iroh-dns-1.4.1/upstream-repository-root/LICENSE-MIT",
+      "sha256": "f169adb8124d3b005416d8485d00777c9a7bdd9099982c52a4493f9732e6d050",
+      "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-MIT"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940"
+    },
+    "path_in_vcs": "iroh-dns"
+  },
+  "version": "1.4.1"
+}

@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "29fcf32e6c73d1079f83ab4d782de2d81620346a5f38c6237a86a22f8368980a",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "ed25519",
+  "repository": "https://github.com/RustCrypto/signatures",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "ed25519-3.0.0/LICENSE-APACHE",
+      "sha256": "78779d420019e6b4630376af8e86b6b335ee8a2f89ede6e0411e0469a326aaa4"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "ed25519-3.0.0/LICENSE-MIT",
+      "sha256": "9aa4f92bfcde293ebeca9e2379fa18d1d61f000977da144c7b74c2986c9b6466"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "f2b087c0f38fa67b62ad1bc16a2ea62a80227fc9"
+    },
+    "path_in_vcs": "ed25519"
+  },
+  "version": "3.0.0"
+}

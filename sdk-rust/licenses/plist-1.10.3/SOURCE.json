@@ -1,0 +1,28 @@
+{
+  "authors": [
+    "Ed Barnard <eabarnard@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "327a4cb2ad49dc48adfdc9da89e22c64d488b508c67a044d71ba729e4521a285",
+  "declaredLicense": "MIT",
+  "name": "plist",
+  "repository": "https://github.com/ebarnard/rust-plist/",
+  "targets": [
+    "aarch64-apple-darwin"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENCE",
+      "origin": "cargo-registry-cache",
+      "path": "plist-1.10.3/LICENCE",
+      "sha256": "5b0ae40d1a35f7ae6591a28e44771240e6a88cb03a66c9189a45b9681639b466"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a2d3e61cb9956965e89b7541f21ab965cdb6d9fa"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.10.3"
+}

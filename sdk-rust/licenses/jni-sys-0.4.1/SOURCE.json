@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Steven Fackler <sfackler@gmail.com>",
+    "Robert Bragg <robert@sixbynine.org>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "c6377a88cb3910bee9b0fa88d4f42e1d2da8e79915598f65fb0c7ee14c878af2",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "jni-sys",
+  "repository": "https://github.com/jni-rs/jni-sys",
+  "targets": [
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "jni-sys-0.4.1/LICENSE-APACHE",
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "jni-sys-0.4.1/LICENSE-MIT",
+      "sha256": "1d85bd754b04ceec93e98e890edd1fa3c6a22e81bcb32135806beeccefa51cd1"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "65ea279041232aec345dbd9483b3956c788862aa"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.4.1"
+}

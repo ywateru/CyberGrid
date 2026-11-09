@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Mara Bos <m-ou.se@m-ou.se>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "c87e960f4dca2788eeb86bbdde8dd246be8948790b7618d656e68f9b720a86e8",
+  "declaredLicense": "BSD-2-Clause",
+  "name": "spez",
+  "repository": "https://github.com/m-ou-se/spez",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "spez-0.1.2/LICENSE",
+      "sha256": "26cdda6660b48c74b37d2ef1babd276de1d73f00f8756b9180448de99713a1a4"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "3691abecfdff9d4ae0d971524eea8a82b551cb6b"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.1.2"
+}

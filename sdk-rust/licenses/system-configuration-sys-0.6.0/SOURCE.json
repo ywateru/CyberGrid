@@ -1,0 +1,34 @@
+{
+  "authors": [
+    "Mullvad VPN"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "8e1d1b10ced5ca923a1fcb8d03e96b8d3268065d724548c0211415ff6ac6bac4",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "system-configuration-sys",
+  "repository": "https://github.com/mullvad/system-configuration-rs",
+  "targets": [
+    "aarch64-apple-darwin"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "system-configuration-sys-0.6.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "system-configuration-sys-0.6.0/LICENSE-MIT",
+      "sha256": "000cbb5bea6f21829c8f0d9e1fe87410bd5ef0453412ffc017845982a3e19824"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "fd43df6f57de954878d824c14c08b57045e46e76"
+    },
+    "path_in_vcs": "system-configuration-sys"
+  },
+  "version": "0.6.0"
+}

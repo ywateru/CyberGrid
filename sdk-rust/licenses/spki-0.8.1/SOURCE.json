@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "7ef958a98b9d5da290cfc78946e9f3e61e1e62a18db0d92cac0b83cc161491a9",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "spki",
+  "repository": "https://github.com/RustCrypto/formats",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "spki-0.8.1/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "spki-0.8.1/LICENSE-MIT",
+      "sha256": "57a4d75c1d095bb94754a478f3cd15e60ac66a5c5627d844be01a918eea5fe88"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "9e21af601bf08f1d8ccd9713d08d1aba832a9ca8"
+    },
+    "path_in_vcs": "spki"
+  },
+  "version": "0.8.1"
+}

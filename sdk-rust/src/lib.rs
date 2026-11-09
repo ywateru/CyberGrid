@@ -3,6 +3,7 @@ mod auth;
 mod client;
 mod credentials;
 mod error;
+mod iroh_direct;
 mod mux;
 mod peer;
 mod provider;
@@ -22,7 +23,8 @@ pub use peer::{Mapping, Peer};
 pub use tokio_util::sync::CancellationToken;
 pub use tunnel::validate_tunnel_url;
 pub use types::{
-    Application, CloudflaredConfig, Config, Device, Event, Port, ProviderEnvironment, Session, User,
+    Application, CloudflaredConfig, Config, Device, DirectStrategy, Event, IrohInfo, Port,
+    ProviderEnvironment, Session, User,
 };
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 

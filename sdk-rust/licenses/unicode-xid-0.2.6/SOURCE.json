@@ -1,0 +1,43 @@
+{
+  "authors": [
+    "erick.tryzelaar <erick.tryzelaar@gmail.com>",
+    "kwantam <kwantam@gmail.com>",
+    "Manish Goregaokar <manishsmail@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "unicode-xid",
+  "repository": "https://github.com/unicode-rs/unicode-xid",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "COPYRIGHT",
+      "origin": "cargo-registry-cache",
+      "path": "unicode-xid-0.2.6/COPYRIGHT",
+      "sha256": "23860c2a7b5d96b21569afedf033469bab9fe14a1b24a35068b8641c578ce24d"
+    },
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "unicode-xid-0.2.6/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "unicode-xid-0.2.6/LICENSE-MIT",
+      "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5d50587f19713cd35f1f48e5d4d011aa9c54dbff"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.2.6"
+}

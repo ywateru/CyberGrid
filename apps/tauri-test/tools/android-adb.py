@@ -165,6 +165,7 @@ def parser():
         q.add_argument("--app")
         q.add_argument("--name")
         q.add_argument("--force-fallback", action="store_true")
+        q.add_argument("--direct-strategy", choices=("sequential", "parallel"))
     for action in ("connect", "probe"):
         sub.add_parser(action).add_argument("--device-id", required=True)
     sub.add_parser("send").add_argument("--text", required=True)
@@ -199,6 +200,8 @@ def main(argv=None, adb_factory=Adb):
                    (("server", args.server), ("app", args.app), ("name", args.name))
                    if value is not None}
         payload["forceFallback"] = args.force_fallback
+        if args.direct_strategy is not None:
+            payload["directStrategy"] = args.direct_strategy
     elif args.action in ("connect", "probe"):
         payload = {"deviceId": args.device_id}
     elif args.action == "send":

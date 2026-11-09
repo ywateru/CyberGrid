@@ -18,6 +18,7 @@
     "server/scripts",
     "sdk",
     "sdk-rust",
+    "sdk-js",
     "apps/tauri-test",
     "tools/cloudflared"
   ],

@@ -1,0 +1,32 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "eec689c0bc40ff2458a5977b6619cb718087084a18e02a131c599b62d05e1a5f",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "rustls-platform-verifier-android",
+  "repository": "https://github.com/rustls/rustls-platform-verifier",
+  "targets": [
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "rustls-platform-verifier-android-0.2.0/upstream-repository-root/LICENSE-APACHE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "url": "https://raw.githubusercontent.com/rustls/rustls-platform-verifier/252e25161a91af476cbea620e29d277592d27ec7/LICENSE-APACHE"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "rustls-platform-verifier-android-0.2.0/upstream-repository-root/LICENSE-MIT",
+      "sha256": "1c7cf76689c837a68ed8d704994e52a0f2940c087958f860d17f3186afbdcc0c",
+      "url": "https://raw.githubusercontent.com/rustls/rustls-platform-verifier/252e25161a91af476cbea620e29d277592d27ec7/LICENSE-MIT"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "252e25161a91af476cbea620e29d277592d27ec7"
+    },
+    "path_in_vcs": "android-release-support"
+  },
+  "version": "0.2.0"
+}

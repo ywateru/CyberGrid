@@ -1,0 +1,42 @@
+{
+  "authors": [
+    "Stjepan Glavina <stjepang@gmail.com>",
+    "Contributors to futures-rs"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "f78e10609fe0e0b3f4157ffab1876319b5b0db102a2c60dc4626306dc46b44ad",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "futures-lite",
+  "repository": "https://github.com/smol-rs/futures-lite",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "futures-lite-2.6.1/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "futures-lite-2.6.1/LICENSE-MIT",
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    },
+    {
+      "cratePath": "LICENSE-THIRD-PARTY",
+      "origin": "cargo-registry-cache",
+      "path": "futures-lite-2.6.1/LICENSE-THIRD-PARTY",
+      "sha256": "6226d0632e2e1a80c23597e964da9812ae193c535fe058154afb034e94167aa5"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "226ce18976d8714d6bd9700b61dcc81d7200bc9a"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "2.6.1"
+}

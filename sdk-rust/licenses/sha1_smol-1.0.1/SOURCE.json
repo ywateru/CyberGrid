@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Armin Ronacher <armin.ronacher@active-4.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "bbfa15b3dddfee50a0fff136974b3e1bde555604ba463834a7eb7deb6417705d",
+  "declaredLicense": "BSD-3-Clause",
+  "name": "sha1_smol",
+  "repository": "https://github.com/mitsuhiko/sha1-smol",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "AUTHORS",
+      "origin": "cargo-registry-cache",
+      "path": "sha1_smol-1.0.1/AUTHORS",
+      "sha256": "613ce6df827bdbab4f498700a141548396b6ff26488f263654159ada4b04f78e"
+    },
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "sha1_smol-1.0.1/LICENSE",
+      "sha256": "282a21b0710441c364025461a447362daf18f5798a7b72ae2f801a2aa536da51"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "f9d88bd70e9bd577c7c3afdc6acd0313af605324"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.0.1"
+}

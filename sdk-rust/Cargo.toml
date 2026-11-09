@@ -2,7 +2,7 @@
 name = "cybergrid-sdk"
 version = "0.2.0"
 edition = "2021"
-rust-version = "1.88"
+rust-version = "1.91"
 description = "Native Rust CyberGrid device discovery and authenticated TCP mapping SDK"
 license-file = "LICENSE"
 
@@ -13,6 +13,7 @@ chrono = { version = "0.4", features = ["serde"] }
 futures-util = { version = "0.3", features = ["sink"] }
 fs2 = "0.4"
 hex = "0.4"
+iroh = { version = "=1.4.1", default-features = false, features = ["tls-ring"] }
 libc = "0.2"
 rcgen = { version = "0.14", default-features = false, features = ["crypto", "ring"] }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }

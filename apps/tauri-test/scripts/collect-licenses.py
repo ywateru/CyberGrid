@@ -42,6 +42,25 @@ def upstream_texts(package, vcs, folder):
     commit = vcs.get("git", {}).get("sha1") if vcs else None
     if not repository.startswith("https://github.com/") or not commit:
         return {}
+    if package["name"] == "enum-assoc" and package["version"] == "1.4.2":
+        sdk_root = APP.parents[1] / "sdk-rust" / "licenses"
+        source = json.loads((sdk_root / "enum-assoc-1.4.2/SOURCE.json").read_text())
+        if source.get("vcs") != vcs or source.get("licenseSelection", {}).get("selectedLicense") != "Apache-2.0" or not source["licenseSelection"].get("upstreamOriginalLicenseTextAbsent"):
+            raise RuntimeError("Run SDK license collection and review enum-assoc provenance first")
+        hashes, sources = {}, {}
+        for text in source["texts"]:
+            path = sdk_root / text["path"]
+            data = path.read_bytes()
+            if hashlib.sha256(data).hexdigest() != text["sha256"]:
+                raise RuntimeError("SDK license text checksum mismatch")
+            relative = Path(text["path"]).relative_to("enum-assoc-1.4.2")
+            destination = folder / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(data)
+            hashes[str(relative)] = text["sha256"]
+            sources[str(relative)] = text["url"]
+        (folder / "UPSTREAM.json").write_text(json.dumps({"gitCommit": commit, "sources": sources, "licenseSelection": source["licenseSelection"], "authors": source["authors"]}, indent=2) + "\n")
+        return hashes
     existing = folder / "UPSTREAM.json"
     if existing.is_file():
         cached = json.loads(existing.read_text())
@@ -115,11 +134,20 @@ def main():
         files = record(root, texts(root, package.get("license_file")), folder)
         vcs = root / ".cargo_vcs_info.json"
         vcs_info = json.loads(vcs.read_text()) if vcs.is_file() else None
-        if not files and "--fetch-upstream" in sys.argv:
+        primary_iroh_missing = package["name"] in ["iroh", "iroh-relay"] and package["version"] == "1.4.1"
+        if primary_iroh_missing and (vcs_info or {}).get("git", {}).get("sha1") != "d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940":
+            raise RuntimeError("Review changed iroh workspace license provenance")
+        if (not files or primary_iroh_missing) and "--fetch-upstream" in sys.argv:
+            # The packaged BSD3 text is supplemental socket-code licensing,
+            # not the workspace's primary MIT/Apache declarations.
             files.update(upstream_texts(package, vcs_info, folder))
         checksum_file = root / ".cargo-checksum.json"
         checksum = json.loads(checksum_file.read_text()).get("package") if checksum_file.is_file() else None
         item = {"ecosystem": "cargo", "name": package["name"], "version": package["version"], "license": package.get("license"), "source": package["source"], "crateArchiveChecksumSha256": checksum, "repository": package.get("repository"), "vcs": vcs_info, "texts": files}
+        if package["name"] == "enum-assoc" and package["version"] == "1.4.2" and (folder / "UPSTREAM.json").exists():
+            exception = json.loads((folder / "UPSTREAM.json").read_text())
+            item["licenseSelection"] = exception["licenseSelection"]
+            item["authors"] = exception["authors"]
         index.append(item)
         if not files:
             missing.append(f'{package["name"]}-{package["version"]}')
@@ -164,6 +192,7 @@ def main():
         "Actual LICENSE / COPYING / COPYRIGHT / NOTICE texts copied unchanged from the locked Cargo registry and installed npm packages. "
         "dependency-index.json records package version, upstream source and SHA256 of each copied file. "
         "The collection includes build/target-specific dependencies, so it may be broader than either binary. "
+        "enum-assoc 1.4.2 has no original license text at its exact published commit: this distribution selects its declared Apache-2.0 alternative and includes explicitly labelled canonical standard text plus its original Cargo declaration and published author attribution, without inventing a copyright notice. "
         "Cloudflared's Apache-2.0 license, third-party notices, dual-platform resource manifest and exact upstream source/build records are copied unchanged from sdk-rust/provider-assets into notices/cloudflared. "
         "That folder's source-files-sha256.json binds the copied texts. The source archive also includes the SDK's pinned macOS/Android provider bytes and offline packaging/rebuild scripts.\n"
     )

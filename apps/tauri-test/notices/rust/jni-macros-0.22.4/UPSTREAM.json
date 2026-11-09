@@ -1,0 +1,7 @@
+{
+  "gitCommit": "33045a124105c939d1e2cbdcb5a39e5d868ffa03",
+  "sources": {
+    "upstream-repository-root/LICENSE-APACHE": "https://raw.githubusercontent.com/jni-rs/jni-rs/33045a124105c939d1e2cbdcb5a39e5d868ffa03/LICENSE-APACHE",
+    "upstream-repository-root/LICENSE-MIT": "https://raw.githubusercontent.com/jni-rs/jni-rs/33045a124105c939d1e2cbdcb5a39e5d868ffa03/LICENSE-MIT"
+  }
+}

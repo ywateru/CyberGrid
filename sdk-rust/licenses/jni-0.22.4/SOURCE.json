@@ -1,0 +1,34 @@
+{
+  "authors": [
+    "jni team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "5efd9a482cf3a427f00d6b35f14332adc7902ce91efb778580e180ff90fa3498",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "jni",
+  "repository": "https://github.com/jni-rs/jni-rs",
+  "targets": [
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "jni-0.22.4/upstream-repository-root/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7/LICENSE-APACHE"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "jni-0.22.4/upstream-repository-root/LICENSE-MIT",
+      "sha256": "fea1d5bf3dd71605ce5d7d2ff695c1837e914c77195e523a86b5391716477960",
+      "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7/LICENSE-MIT"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7"
+    },
+    "path_in_vcs": "crates/jni"
+  },
+  "version": "0.22.4"
+}

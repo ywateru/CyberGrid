@@ -1,0 +1,33 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "1167586491e2b18b8bfbb293e8180ec17c201c4f076d7cb3070ca964e7598f98",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "rustls-platform-verifier",
+  "repository": "https://github.com/rustls/rustls-platform-verifier",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "rustls-platform-verifier-0.7.1/LICENSE-APACHE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "rustls-platform-verifier-0.7.1/LICENSE-MIT",
+      "sha256": "1c7cf76689c837a68ed8d704994e52a0f2940c087958f860d17f3186afbdcc0c"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "252e25161a91af476cbea620e29d277592d27ec7"
+    },
+    "path_in_vcs": "rustls-platform-verifier"
+  },
+  "version": "0.7.1"
+}

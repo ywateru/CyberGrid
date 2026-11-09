@@ -1,0 +1,33 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "8d0160422832eea1cc11c34be04ee6d5a046452b0b46cfb14695d55a1f24c954",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "noq-udp",
+  "repository": "https://github.com/n0-computer/noq",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "noq-udp-1.4.0/LICENSE-APACHE",
+      "sha256": "a237a9d796dd30eebc8def7ee282c691be4c884454444510d702644f20669c15"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "noq-udp-1.4.0/LICENSE-MIT",
+      "sha256": "9e654cd17a17880f43a84c9c024f9ca7a320ed906d521072c15aa2e8daff8df0"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "34f75c49f93de5e2ff943483cabc5b6d0c5df918"
+    },
+    "path_in_vcs": "noq-udp"
+  },
+  "version": "1.4.0"
+}

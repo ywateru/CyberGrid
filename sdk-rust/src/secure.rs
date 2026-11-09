@@ -207,7 +207,19 @@ impl Client {
         device: &Device,
         path: &str,
     ) -> Result<Arc<Peer>> {
+        self.secure_client_fenced(raw, device, path, None).await
+    }
+    pub(crate) async fn secure_client_fenced(
+        self: &Arc<Self>,
+        raw: BoxIo,
+        device: &Device,
+        path: &str,
+        fence: Option<&crate::peer::DialFence>,
+    ) -> Result<Arc<Peer>> {
         let rt = self.active().await?;
+        if fence.is_some_and(|f| f.generation != rt.generation || f.cancel.is_cancelled()) {
+            return Err(Error::Cancelled);
+        }
         let pin = device
             .certificate_fingerprint
             .clone()
@@ -241,6 +253,13 @@ impl Client {
             .and_then(|c| c.first())
             .ok_or_else(|| protocol("TLS peer missing certificate"))?;
         let fresh = self.device(&device.id).await?;
+        if fresh.incarnation != device.incarnation
+            || (path == "iroh-direct" && fresh.iroh != device.iroh)
+        {
+            return Err(protocol(
+                "peer transport publication changed during handshake",
+            ));
+        }
         check_certificate(
             cert.as_ref(),
             &fresh.id,
@@ -253,9 +272,12 @@ impl Client {
         if rt.cancel.is_cancelled() || self.generation() != rt.generation {
             return Err(Error::Cancelled);
         }
+        if let Some(fence) = fence {
+            fence.claim()?;
+        }
         self.event("mutual-tls-ready", Some(path), Some(&device.id), None);
         let mux = Mux::start(Box::new(tls), true, rt.cancel.child_token());
-        self.remember_peer(device.id.clone(), path.into(), mux)
+        self.remember_peer(device.id.clone(), path.into(), mux, rt.generation, fence)
             .await
     }
     pub(crate) async fn secure_server(
@@ -263,12 +285,31 @@ impl Client {
         raw: BoxIo,
         path: &str,
     ) -> Result<Arc<Peer>> {
+        self.secure_server_bound(raw, path, None, None).await
+    }
+    pub(crate) async fn secure_server_bound(
+        self: &Arc<Self>,
+        raw: BoxIo,
+        path: &str,
+        expected: Option<&Device>,
+        generation: Option<u64>,
+    ) -> Result<Arc<Peer>> {
         let rt = self.active().await?;
+        if generation.is_some_and(|generation| generation != rt.generation) {
+            return Err(Error::Cancelled);
+        }
         let pins = self
             .devices()
             .await?
             .into_iter()
             .filter(|d| d.online)
+            .filter(|d| {
+                expected.is_none_or(|expected| {
+                    expected.id == d.id
+                        && expected.incarnation == d.incarnation
+                        && expected.iroh == d.iroh
+                })
+            })
             .filter_map(|d| d.certificate_fingerprint.map(|fp| (d.id, fp)))
             .collect();
         let config = rustls::ServerConfig::builder_with_provider(Arc::new(
@@ -294,6 +335,13 @@ impl Client {
             .ok_or_else(|| protocol("TLS peer missing certificate"))?;
         let id = certificate_id(cert.as_ref())?;
         let fresh = self.device(&id).await?;
+        if expected.is_some_and(|d| {
+            d.id != id || d.incarnation != fresh.incarnation || d.iroh != fresh.iroh
+        }) {
+            return Err(protocol(
+                "iroh endpoint no longer bound to authenticated device",
+            ));
+        }
         check_certificate(
             cert.as_ref(),
             &id,
@@ -308,6 +356,7 @@ impl Client {
         }
         self.event("mutual-tls-ready", Some(path), Some(&id), None);
         let mux = Mux::start(Box::new(tls), false, rt.cancel.child_token());
-        self.remember_peer(id, path.into(), mux).await
+        self.remember_peer(id, path.into(), mux, rt.generation, None)
+            .await
     }
 }

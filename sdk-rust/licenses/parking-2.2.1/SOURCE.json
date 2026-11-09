@@ -1,0 +1,42 @@
+{
+  "authors": [
+    "Stjepan Glavina <stjepang@gmail.com>",
+    "The Rust Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "f38d5652c16fde515bb1ecef450ab0f6a219d619a7274976324d5e377f7dceba",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "parking",
+  "repository": "https://github.com/smol-rs/parking",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "parking-2.2.1/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "parking-2.2.1/LICENSE-MIT",
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    },
+    {
+      "cratePath": "LICENSE-THIRD-PARTY",
+      "origin": "cargo-registry-cache",
+      "path": "parking-2.2.1/LICENSE-THIRD-PARTY",
+      "sha256": "9a6d7a3c1b8edcc706c4b6c37f8dae9a77f02c7f9051df603f975db136b55419"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "0ece32dbfd6cd1bc1510ede6ed56acb772edf83f"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "2.2.1"
+}

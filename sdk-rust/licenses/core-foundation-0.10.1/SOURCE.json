@@ -1,0 +1,34 @@
+{
+  "authors": [
+    "The Servo Project Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "b2a6cd9ae233e7f62ba4e9353e81a88df7fc8a5987b8d445b4d90c879bd156f6",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "core-foundation",
+  "repository": "https://github.com/servo/core-foundation-rs",
+  "targets": [
+    "aarch64-apple-darwin"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "core-foundation-0.10.1/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "core-foundation-0.10.1/LICENSE-MIT",
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "548b65cd3046bb46fc5cebb9f39e7bfd56eaeaa2"
+    },
+    "path_in_vcs": "core-foundation"
+  },
+  "version": "0.10.1"
+}

@@ -1,0 +1,33 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "cc4e190f5d26ca7051642629da2c52fc03bde85a03197c99408dcd291734c855",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "indexmap",
+  "repository": "https://github.com/indexmap-rs/indexmap",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "indexmap-2.14.2/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "indexmap-2.14.2/LICENSE-MIT",
+      "sha256": "ecc269ef87fd38a1d98e30bfac9ba964a9dbd9315c3770fed98d4d7cb5882055"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "41a870887c4c77adf665886e63df08f406bfe37a"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "2.14.2"
+}

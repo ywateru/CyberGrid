@@ -1,0 +1,31 @@
+{
+  "authors": [
+    "isis lovecruft <isis@patternsinthevoid.net>",
+    "Tony Arcieri <bascule@gmail.com>",
+    "Michael Rosenberg <michael@mrosenberg.pub>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "6ebaa1a2bf1290ab3bfe5a7b771d050ebffab2711c19a81691c683a5144a25de",
+  "declaredLicense": "BSD-3-Clause",
+  "name": "ed25519-dalek",
+  "repository": "https://github.com/dalek-cryptography/curve25519-dalek/tree/main/ed25519-dalek",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "ed25519-dalek-3.0.0/LICENSE",
+      "sha256": "7a313964a6e050794d2ad57f4863c11f6bbe055c0ae6ce2cf3b9fc45150bada3"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "07bef73ff85998a206cd2cea7f2605c801d0d1c9"
+    },
+    "path_in_vcs": "ed25519-dalek"
+  },
+  "version": "3.0.0"
+}

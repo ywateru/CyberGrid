@@ -4,7 +4,7 @@ import './style.css';
 
 type Port = { id: string; port: number; type: string; transport: string };
 type Device = { id: string; name: string; online: boolean; lastSeen: string; ports: Port[] };
-type Config = { baseUrl: string; appId: string; deviceName: string; forceFallback: boolean; cloudflaredPath: string };
+type Config = { baseUrl: string; appId: string; deviceName: string; forceFallback: boolean; directStrategy: 'sequential' | 'parallel'; cloudflaredPath: string };
 type RecordItem = { id: number; time: string; direction: string; peer: string; kind: string; message?: string; bytes?: number; sha256?: string; transport?: string };
 type View = {
   phase: string; config: Config; presetConfig: Config; canResume: boolean; error?: string | null;
@@ -16,7 +16,7 @@ type View = {
 };
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let view: View | null = null;
-let draft: Config = { baseUrl: '', appId: '', deviceName: '', forceFallback: false, cloudflaredPath: '' };
+let draft: Config = { baseUrl: '', appId: '', deviceName: '', forceFallback: false, directStrategy: 'sequential', cloudflaredPath: '' };
 let messageDraft = '';
 let selectedId = '';
 let pending = false;
@@ -26,7 +26,7 @@ let showAdvanced = false;
 let fingerprint = '';
 let initial = true;
 const escape = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, (s) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]!));
-const tag = (transport: string) => ['webrtc', 'webrtc-direct'].includes(transport) ? 'WebRTC 直连' : transport === 'cloudflare-tunnel' ? 'Cloudflare 回退 · 内层 mTLS' : escape(transport);
+const tag = (transport: string) => ['webrtc', 'webrtc-direct'].includes(transport) ? 'WebRTC 直连' : transport === 'iroh-direct' ? 'iroh 直连' : transport === 'cloudflare-tunnel' ? 'Cloudflare 回退 · 内层 mTLS' : escape(transport);
 const datetime = (value: string) => { const d = new Date(value); return Number.isNaN(+d) ? value : d.toLocaleTimeString('zh-CN', { hour12: false }); };
 const disabled = () => pending ? 'disabled' : '';
 
@@ -55,7 +55,7 @@ function render() {
           ${!authorizing && !busy && !initial ? '<button id="use-preset" type="button" class="text-button">使用预置测试配置</button>' : ''}
           <label for="device-name">本机名称</label><input id="device-name" name="deviceName" maxlength="80" value="${escape(draft.deviceName)}" placeholder="例如：我的 Mac" ${authorizing || busy ? 'disabled' : ''} required>
           <button id="advanced-toggle" type="button" class="text-button" aria-expanded="${showAdvanced}">${showAdvanced ? '收起连接配置' : '连接配置'}</button>
-          ${showAdvanced ? `<div class="advanced"><label for="server-url">中央服务</label><input id="server-url" name="baseUrl" type="url" value="${escape(draft.baseUrl)}" ${authorizing || busy ? 'disabled' : ''}><label for="app-id">Logto Native 应用 ID</label><input id="app-id" name="appId" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="21" value="${escape(draft.appId)}" ${authorizing || busy ? 'disabled' : ''}><p class="subtle">自定义服务与应用须通过可信认证配置核对，不能替换为个人控制台的 SPA 应用。</p><label for="transport-mode">连接策略</label><select id="transport-mode" ${authorizing || busy ? 'disabled' : ''}><option value="auto" ${!draft.forceFallback ? 'selected' : ''}>优先 WebRTC 直连，失败后回退</option><option value="fallback" ${draft.forceFallback ? 'selected' : ''}>强制 Cloudflare 回退（测试）</option></select><label for="provider-path">macOS cloudflared 路径（留空使用 SDK 内置）</label><input id="provider-path" value="${escape(draft.cloudflaredPath)}" placeholder="默认使用内置 provider；Android 忽略此项" ${authorizing || busy ? 'disabled' : ''}></div>` : ''}
+          ${showAdvanced ? `<div class="advanced"><label for="server-url">中央服务</label><input id="server-url" name="baseUrl" type="url" value="${escape(draft.baseUrl)}" ${authorizing || busy ? 'disabled' : ''}><label for="app-id">Logto Native 应用 ID</label><input id="app-id" name="appId" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="21" value="${escape(draft.appId)}" ${authorizing || busy ? 'disabled' : ''}><p class="subtle">自定义服务与应用须通过可信认证配置核对，不能替换为个人控制台的 SPA 应用。</p><label for="transport-mode">连接策略</label><select id="transport-mode" ${authorizing || busy ? 'disabled' : ''}><option value="auto" ${!draft.forceFallback && draft.directStrategy !== 'parallel' ? 'selected' : ''}>顺序：WebRTC → iroh 直连 → Cloudflare</option><option value="parallel" ${!draft.forceFallback && draft.directStrategy === 'parallel' ? 'selected' : ''}>并行：WebRTC / iroh 竞速，失败后 Cloudflare</option><option value="fallback" ${draft.forceFallback ? 'selected' : ''}>强制 Cloudflare 回退（测试）</option></select><label for="provider-path">macOS cloudflared 路径（留空使用 SDK 内置）</label><input id="provider-path" value="${escape(draft.cloudflaredPath)}" placeholder="默认使用内置 provider；Android 忽略此项" ${authorizing || busy ? 'disabled' : ''}></div>` : ''}
           ${authorizing ? `<div class="authorization" role="status"><h2>在系统浏览器完成网页登录</h2><p>浏览器完成登录后会返回本机。不要在测试 App 中输入账号密码；手机请保持 App 打开。</p><p class="subtle">等待期间可取消，本机将安全处理已取得的授权。</p><div class="actions"><button type="button" id="cancel-login" class="secondary">取消网页登录</button></div></div>` : `<div class="actions login-actions"><button type="submit" class="primary" ${busy || initial ? 'disabled' : ''}>${busy ? '正在处理…' : '网页登录'}</button>${view?.canResume ? `<button type="button" id="resume-login" class="secondary" ${busy ? 'disabled' : ''}>恢复本机授权</button><button type="button" id="revoke-saved" class="text-button" ${busy ? 'disabled' : ''}>退出并撤销本机授权</button>` : ''}${view?.phase === 'connecting' || busy ? '<button type="button" id="cancel-login" class="text-button">取消</button>' : ''}</div>`}
         </form>
         <p class="privacy">账号密码只输入 Logto 托管页面。网页登录使用官方 Logto SDK，授权交接后由原生 SDK 管理本机私有凭据。</p>
@@ -79,7 +79,7 @@ function bind() {
   on('device-name', 'input', (e) => draft.deviceName = (e.target as HTMLInputElement).value);
   on('server-url', 'input', (e) => draft.baseUrl = (e.target as HTMLInputElement).value);
   on('provider-path', 'input', (e) => draft.cloudflaredPath = (e.target as HTMLInputElement).value);
-  on('transport-mode', 'change', (e) => draft.forceFallback = (e.target as HTMLSelectElement).value === 'fallback');
+  on('transport-mode', 'change', (e) => { const mode = (e.target as HTMLSelectElement).value; draft.forceFallback = mode === 'fallback'; draft.directStrategy = mode === 'parallel' ? 'parallel' : 'sequential'; });
   on('message', 'input', (e) => messageDraft = (e.target as HTMLTextAreaElement).value);
   on('use-preset', 'click', () => { if (view && !pending && view.phase === 'signed_out') { draft = {...view.presetConfig}; localError = ''; showAdvanced = true; render(); } });
   on('advanced-toggle', 'click', () => { showAdvanced = !showAdvanced; render(); });

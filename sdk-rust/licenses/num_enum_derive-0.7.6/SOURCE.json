@@ -1,0 +1,43 @@
+{
+  "authors": [
+    "Daniel Wagner-Hall <dawagner@gmail.com>",
+    "Daniel Henry-Mantilla <daniel.henry.mantilla@gmail.com>",
+    "Vincent Esche <regexident@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "680998035259dcfcafe653688bf2aa6d3e2dc05e98be6ab46afb089dc84f1df8",
+  "declaredLicense": "BSD-3-Clause OR MIT OR Apache-2.0",
+  "name": "num_enum_derive",
+  "repository": "https://github.com/illicitonion/num_enum",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "num_enum_derive-0.7.6/LICENSE-APACHE",
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "cratePath": "LICENSE-BSD",
+      "origin": "cargo-registry-cache",
+      "path": "num_enum_derive-0.7.6/LICENSE-BSD",
+      "sha256": "0be96d891d00e0ae0df75d7f3289b12871c000a1f5ac744f3b570768d4bb277c"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "num_enum_derive-0.7.6/LICENSE-MIT",
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "f11d81c6cb644489f8a0fc24f9eea9a53d66f92e"
+    },
+    "path_in_vcs": "num_enum_derive"
+  },
+  "version": "0.7.6"
+}

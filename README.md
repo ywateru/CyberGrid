@@ -24,16 +24,19 @@ docker compose up --build -d
 
 | 模块 | 版本 | 用途 |
 | --- | --- | --- |
-| [Go SDK／CLI](sdk/README.md) | 0.4.0 | 端口声明、设备发现、TCP 映射、自动协调恢复 |
-| [Rust SDK](sdk-rust/README.md) | 0.2.0 | 原生 Rust API，与 Go 互通 |
-| [CyberGrid Lab](apps/tauri-test/README.md) | 0.3.0 源码 | Tauri 2 macOS／Android 测试程序，官方 SDK 网页登录 |
+| [Rust SDK](sdk-rust/README.md) | 0.2.0 | 主要开发方向，原生 Rust API，与 Go 互通 |
+| [Go SDK／CLI](sdk/README.md) | 0.4.0 | 保持兼容，端口声明、设备发现、TCP 映射、自动协调恢复 |
+| [JS／TypeScript SDK](sdk-js/README.md) | 0.1.0（项目 v0.7.0） | Logto 登录后只读查询设备与端口隧道地址 |
+| [CyberGrid Lab](apps/tauri-test/README.md) | 0.3.0（项目 v0.7.0） | Tauri 2 macOS／Android 测试程序，官方 SDK 网页登录 |
 | [内存协调服务](server/README.md) | memory-v1 | Logto 身份、设备与端口信令、只读管理后台 |
+
+后续 SDK 功能以 Rust 为主要实现。项目 v0.7.0 支持 WebRTC → iroh 直连 → Cloudflare 匿名隧道的三级连接，也可配置 WebRTC/iroh 并行直连；iroh 禁用中继，业务流仍由终端相互认证并加密。另有 [只读 JS SDK](sdk-js/README.md)，可在前端 Logto 登录后查看设备和端口主动申报的 Cloudflare 地址。已发布的 v0.6.0 下载包仍为原有两级连接，Go SDK 保持兼容。连接边界见 [架构说明](docs/architecture.md#rust-主-sdk-的连接顺序)。
 
 从 [GitHub Releases](https://github.com/ywateru/CyberGrid/releases) 下载平台测试包、SDK 源码和许可证。每次发布附 SHA256SUMS 与产物清单；Actions 从锁定依赖构建。Rust 当前使用本地 Cargo path dependency，尚未发布到 crates.io。macOS 测试包未公证，Android 为包含 ADB 控制入口的 debug-test 包。
 
 客户端传入中央 HTTPS 地址与 Logto Native Application ID。该 ID 就是 OAuth `client_id`，需在 Logto 创建普通 Native 应用并关闭 Device Flow。各设备独立完成 Logto 托管登录，不能复制另一台设备的授权文件。登录后声明本机 loopback 端口，列出同账号、同应用的设备，再将远端端口映射到本机。
 
-Lab 0.3.0 统一使用官方 Logto SDK 网页登录，已预置公开测试配置；Android 使用官方 Android SDK，Mac 的 Tauri 前端使用官方 JavaScript SDK。Device Flow 已关闭，不提供设备码入口。新协调服务和客户端需配套更新；项目发布 v0.6.0 提供 Lab 0.3.0，需与同版协调服务配套使用；GitHub v0.5.1 的 Lab 0.2.0 不适用于新认证策略。详见 [Lab 使用说明](apps/tauri-test/README.md)。
+Lab 0.3.0 统一使用官方 Logto SDK 网页登录，已预置公开测试配置；Android 使用官方 Android SDK，Mac 的 Tauri 前端使用官方 JavaScript SDK。Device Flow 已关闭，不提供设备码入口。新协调服务和客户端需配套更新；项目 v0.7.0 提供含新连接策略的 Lab 0.3.0，需与同版协调服务配套使用；v0.6.0 的 Lab 0.3.0 仍使用两级传输；GitHub v0.5.1 的 Lab 0.2.0 不适用于新认证策略。详见 [Lab 使用说明](apps/tauri-test/README.md)。
 
 ```sh
 # 已安装测试 APK、已启用 USB 调试，使用实际连接的 ADB 序列号

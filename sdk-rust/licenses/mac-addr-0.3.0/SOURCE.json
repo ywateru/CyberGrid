@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "shellrow <shellrow@foctal.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "d3d25b0e0b648a86960ac23b7ad4abb9717601dec6f66c165f5b037f3f03065f",
+  "declaredLicense": "MIT",
+  "name": "mac-addr",
+  "repository": "https://github.com/shellrow/mac-addr",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "mac-addr-0.3.0/LICENSE",
+      "sha256": "0c20ae83d984ec5508a358a90386b000d5b9a2fe15079dd7d39eae4d44cbf922"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "430a623012186dc43c808f171e414c278eb79dd8"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.3.0"
+}

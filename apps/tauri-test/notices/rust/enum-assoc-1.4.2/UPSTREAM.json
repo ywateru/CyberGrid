@@ -1,0 +1,15 @@
+{
+  "gitCommit": "5d732f47b429d382daffb0948770adbaa2de0b8c",
+  "sources": {
+    "standard-license-text/Apache-2.0.txt": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+    "declared-license-source/Cargo.toml.orig": "https://raw.githubusercontent.com/Eolu/enum-assoc/5d732f47b429d382daffb0948770adbaa2de0b8c/Cargo.toml"
+  },
+  "licenseSelection": {
+    "explanation": "The exact crate and upstream commit declare MIT OR Apache-2.0 but include no original license text. This distribution selects the offered Apache-2.0 alternative and includes the canonical versioned standard text, explicitly not an upstream original. Published authors are retained verbatim from Cargo metadata; no copyright year or notice is invented.",
+    "selectedLicense": "Apache-2.0",
+    "upstreamOriginalLicenseTextAbsent": true
+  },
+  "authors": [
+    "Griffin O'Neill <gsoneill1003@gmail.com>"
+  ]
+}

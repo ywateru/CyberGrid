@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "39da9cad5f23aa43401f09497d3b280e51b5feba115d9ffbf38ca35d6ff95e96",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "netwatch",
+  "repository": "https://github.com/n0-computer/net-tools",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "netwatch-0.19.3/upstream-repository-root/LICENSE-APACHE",
+      "sha256": "7986218ec4ea89de3511a843ae27fea2584a525036c220ff7b26589179f07888",
+      "url": "https://raw.githubusercontent.com/n0-computer/net-tools/0030e57fc70981895bb86212ff0f059cc41c8a4e/LICENSE-APACHE"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "netwatch-0.19.3/upstream-repository-root/LICENSE-MIT",
+      "sha256": "33616ec4c88b6e00de66e6c06f1a55d80bb32a9d7939f3aa83d28e673a1adcae",
+      "url": "https://raw.githubusercontent.com/n0-computer/net-tools/0030e57fc70981895bb86212ff0f059cc41c8a4e/LICENSE-MIT"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "0030e57fc70981895bb86212ff0f059cc41c8a4e"
+    },
+    "path_in_vcs": "netwatch"
+  },
+  "version": "0.19.3"
+}

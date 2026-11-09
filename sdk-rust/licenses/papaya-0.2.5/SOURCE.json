@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Ibraheem Ahmed <ibraheem@ibraheem.ca>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "da2442474a9404698c42509b8967f437249dbc7b50493e83020333d3943ec0ae",
+  "declaredLicense": "MIT",
+  "name": "papaya",
+  "repository": "https://github.com/ibraheemdev/papaya",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE.md",
+      "origin": "cargo-registry-cache",
+      "path": "papaya-0.2.5/LICENSE.md",
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "92b44993fa149e68f57cb7b143cd0fb908b6e466"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.2.5"
+}

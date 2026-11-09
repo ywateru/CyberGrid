@@ -1,0 +1,33 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "baa693a8032d7e1cada7d0041e96126df243179ff061456783ac7f12bda4744c",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "toml_parser",
+  "repository": "https://github.com/toml-rs/toml",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "toml_parser-1.1.5+spec-1.1.0/LICENSE-APACHE",
+      "sha256": "249fdb6694467dd615b259f7ddde07be3f8ae5a72cecebb0e24f6629af4215fe"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "toml_parser-1.1.5+spec-1.1.0/LICENSE-MIT",
+      "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "ceac6e4412420d5a5c19e4f7293ad005cf1a31b2"
+    },
+    "path_in_vcs": "crates/toml_parser"
+  },
+  "version": "1.1.5+spec-1.1.0"
+}

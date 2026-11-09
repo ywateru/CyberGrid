@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Frando <franz@n0.computer>",
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "1ae5f0c4405d1fbc9fb16ff422ca40620e93dc36c30ecaba0c2aee3992b7bd48",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "iroh-metrics-derive",
+  "repository": "https://github.com/n0-computer/iroh-metrics",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "iroh-metrics-derive-1.0.1/upstream-repository-root/LICENSE-APACHE",
+      "sha256": "7953ad8cebf4e01199521a5faa221ef59bec5cee0a9856b179590613a8560cbc",
+      "url": "https://raw.githubusercontent.com/n0-computer/iroh-metrics/a9afb7cd49bb3804fffefec61647993851f9b8c8/LICENSE-APACHE"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "iroh-metrics-derive-1.0.1/upstream-repository-root/LICENSE-MIT",
+      "sha256": "339060c99d5c80c2742cae417f765980afe6b0149a78f959bbf2a79f19ab3af5",
+      "url": "https://raw.githubusercontent.com/n0-computer/iroh-metrics/a9afb7cd49bb3804fffefec61647993851f9b8c8/LICENSE-MIT"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a9afb7cd49bb3804fffefec61647993851f9b8c8"
+    },
+    "path_in_vcs": "iroh-metrics-derive"
+  },
+  "version": "1.0.1"
+}

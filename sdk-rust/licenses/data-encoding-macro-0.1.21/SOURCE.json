@@ -1,0 +1,27 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "c6a127ecbb3c4632e1525380e04c0c3fcf8dcb44d32a79ea290d8a36906edcd8",
+  "declaredLicense": "MIT",
+  "name": "data-encoding-macro",
+  "repository": "https://github.com/ia0/data-encoding",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "data-encoding-macro-0.1.21/LICENSE",
+      "sha256": "b68ad1a3367b825447089e1f8d6829b97f47a89eb78d2f4ebaef4672f5606186"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "834737d9c3dc957ce1b653959e3f35061dd77ade"
+    },
+    "path_in_vcs": "lib/macro"
+  },
+  "version": "0.1.21"
+}

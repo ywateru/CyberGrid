@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Jelte Fennema <github-tech@jeltef.nl>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "799a97264921d8623a957f6c3b9011f3b5492f557bbb7a5a19b7fa6d06ba8dcb",
+  "declaredLicense": "MIT",
+  "name": "derive_more-impl",
+  "repository": "https://github.com/JelteF/derive_more",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "derive_more-impl-2.1.1/LICENSE",
+      "sha256": "8a35369f3ca263b3c62fbb5032947e53b6bfebc6c8a4d1bb982de1c069f6fba5"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "f7bb41ac054c060caaf5ff3212e74e42794cb4b4"
+    },
+    "path_in_vcs": "impl"
+  },
+  "version": "2.1.1"
+}

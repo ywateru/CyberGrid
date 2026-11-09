@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Lachlan Sneff <lachlan.sneff@gmail.com>",
+    "James Munns <james@onevariable.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "e0232bd009a197ceec9cc881ba46f727fcd8060a2d8d6a9dde7a69030a6fe2bb",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "postcard-derive",
+  "repository": "https://github.com/jamesmunns/postcard",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "postcard-derive-0.2.2/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "postcard-derive-0.2.2/LICENSE-MIT",
+      "sha256": "177540cad091a40e8071db310bc3b6115c4e329a92a234609b60c154b008a888"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "718aa6a6850456017c19eeff67303c633f875736"
+    },
+    "path_in_vcs": "source/postcard-derive"
+  },
+  "version": "0.2.2"
+}

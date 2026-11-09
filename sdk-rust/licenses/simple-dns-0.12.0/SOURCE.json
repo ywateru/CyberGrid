@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Ilson Roberto Balliego Junior <ilson.balliego@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "2b6f884fa9a8d48101774bfbd3aeb81e968dd22cffd19a372da69f183db22c1a",
+  "declaredLicense": "MIT",
+  "name": "simple-dns",
+  "repository": "https://github.com/balliegojr/simple-dns",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "simple-dns-0.12.0/LICENSE",
+      "sha256": "c6550232507f928b83ef50f4be1e64c434da5ac2f434cdf9a2d89344af33e8fd"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5c7ec98798d7c9f7d76df7aa3bbe754913ff5159"
+    },
+    "path_in_vcs": "simple-dns"
+  },
+  "version": "0.12.0"
+}

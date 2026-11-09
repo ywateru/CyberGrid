@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Frando <franz@n0.computer>",
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "26c59ea174675ce6bc196878851e5049e11b8b1f9af3ba87e4d6df8d828bb001",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "n0-error",
+  "repository": "https://github.com/n0-computer/n0-error",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "n0-error-1.0.1/LICENSE-APACHE",
+      "sha256": "7953ad8cebf4e01199521a5faa221ef59bec5cee0a9856b179590613a8560cbc"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "n0-error-1.0.1/LICENSE-MIT",
+      "sha256": "339060c99d5c80c2742cae417f765980afe6b0149a78f959bbf2a79f19ab3af5"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "2c0ee6b33ef6e2d452650812228060b659c80a97"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.0.1"
+}

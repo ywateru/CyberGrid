@@ -1,0 +1,28 @@
+{
+  "authors": [
+    "Markus Westerlind <marwes91@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "4356eba6976435498d05a311ee9fc486da3bc81c200d3f0d7dd9703b41913f92",
+  "declaredLicense": "MIT",
+  "name": "combine",
+  "repository": "https://github.com/Marwes/combine",
+  "targets": [
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "combine-4.6.9/LICENSE",
+      "sha256": "9bbc1b3dc4674a9ebb12c2a62f54fe3c08672539717f8d05828f684b6cc419a3"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "a2da738ca628bb2e2ef9881fce8e35cbafc455b2"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "4.6.9"
+}

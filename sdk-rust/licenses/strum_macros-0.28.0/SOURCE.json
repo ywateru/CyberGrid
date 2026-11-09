@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Peter Glotfelty <peter.glotfelty@microsoft.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "ab85eea0270ee17587ed4156089e10b9e6880ee688791d45a905f5b1ca36f664",
+  "declaredLicense": "MIT",
+  "name": "strum_macros",
+  "repository": "https://github.com/Peternator7/strum",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "strum_macros-0.28.0/LICENSE",
+      "sha256": "8bce3b45e49ecd1461f223b46de133d8f62cd39f745cfdaf81bee554b908bd42"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "7376771128834d28bb9beba5c39846cba62e71ec"
+    },
+    "path_in_vcs": "strum_macros"
+  },
+  "version": "0.28.0"
+}

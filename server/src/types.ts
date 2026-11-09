@@ -5,8 +5,10 @@ export interface Application {id:string;name:string;type:string;isDeviceFlow:boo
 export interface ApplicationDirectory {list():Promise<Application[]>}
 export interface User {id:string;email?:string}
 export interface VerifiedIdentity extends User {clientId:string}
-export interface Port {id:string;port:number;type:string;transport:'tcp'}
-export interface DeviceRow {id:string;userId:string;appId:string;name:string;lastSeen:number;ports:Port[];tunnelUrl:string|null;certificateFingerprint:string|null;incarnation?:string;publishRevision?:number}
+export interface Port {id:string;port:number;type:string;transport:'tcp';tunnelUrl?:string|null}
+export interface IrohReachability {endpointId:string;addresses:string[]}
+export interface DevicePublication {ports:Port[];tunnelUrl:string|null;certificateFingerprint:string|null;iroh?:IrohReachability|null}
+export interface DeviceRow extends DevicePublication {id:string;userId:string;appId:string;name:string;lastSeen:number;iroh:IrohReachability|null;incarnation?:string;publishRevision?:number}
 interface SessionBase {hash:string;userId:string;expiresAt:number;protocol?:'memory-v1';incarnation?:string;superseded?:boolean}
 export interface DeviceSession extends SessionBase {purpose:'device';appId:string;deviceId:string}
 export interface ConsoleSession extends SessionBase {purpose:'console';appId:null;deviceId:null}
@@ -31,7 +33,7 @@ export interface Store {
  close():void;
  current(s:Session,now:number):void;
  register(userId:string,appId:string|null,name:string,registrationKey:string|undefined,requestId:string,now:number,registrationRevision?:unknown):{session:Session;sessionKey:string};
- publish(s:DeviceSession,update:Pick<DeviceRow,'ports'|'tunnelUrl'|'certificateFingerprint'>,incarnation:unknown,revision:unknown,now:number):Promise<void>;
+ publish(s:DeviceSession,update:DevicePublication,incarnation:unknown,revision:unknown,now:number):Promise<void>;
  postSignal(s:DeviceSession,value:Omit<StoredSignal,'id'|'expiresAt'|'fromDeviceId'>,messageId:unknown,now:number):Promise<number>;
  wait(s:DeviceSession,after:number,seconds:number,now:()=>number,signal:AbortSignal):Promise<void>;
  cleanup(now:number):Promise<void>;
@@ -41,7 +43,7 @@ export interface Store {
  revoke(hash:string):Promise<void>;
  devices(userId:string,appId:string,now:number):Promise<Device[]>;
  device(id:string,now:number):Promise<(DeviceRow&{online:boolean})|undefined>;
- heartbeat(id:string,update:Pick<DeviceRow,'ports'|'tunnelUrl'|'certificateFingerprint'>,now:number):Promise<void>;
+ heartbeat(id:string,update:DevicePublication,now:number):Promise<void>;
  signal(value:Omit<StoredSignal,'id'>):Promise<number>;
  signals(to:string,after:number,now:number):Promise<Signal[]>;
  rate(key:string,now:number,limit:number):Promise<boolean>;

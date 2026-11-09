@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Tokio Contributors <team@tokio.rs>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "a3d06f0b082ba57c26b79407372e57cf2a1e28124f78e9479fe80322cf53420b",
+  "declaredLicense": "MIT",
+  "name": "tokio-stream",
+  "repository": "https://github.com/tokio-rs/tokio",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "tokio-stream-0.1.19/LICENSE",
+      "sha256": "253cd04c6714889df2d32f3f64d669179a1c95c76ac43c40882c52eb06bc3552"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "bc0933ccffb62e010d3ccb497abc22cec2e73f54"
+    },
+    "path_in_vcs": "tokio-stream"
+  },
+  "version": "0.1.19"
+}

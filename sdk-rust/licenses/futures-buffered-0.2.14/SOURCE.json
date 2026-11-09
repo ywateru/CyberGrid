@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Conrad Ludgate <conradludgate@gmail.com"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "1bf9d35e4228d3bef48dfd0ceb615166ee3eb869a5bfc1923d7d47340a1e5684",
+  "declaredLicense": "MIT",
+  "name": "futures-buffered",
+  "repository": "https://github.com/conradludgate/futures-buffered",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "futures-buffered-0.2.14/LICENSE",
+      "sha256": "dd36422306cd0c6e499f153996c655e3be88a575447cf2382c9625ef0d9cca53"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "aba6155e4c672f6787cd6720860f8dab076d0055"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.2.14"
+}

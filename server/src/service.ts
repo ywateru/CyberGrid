@@ -1,4 +1,6 @@
 import {requestAuthConfiguration} from './deployment-config.js';
+import {irohReachability} from './iroh.js';
+import {applyConsoleCors,consoleCors} from './console-cors.js';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import {adminVerifier,overviewQuery} from './admin.js';
 import {eligible} from './directory.js';
@@ -9,16 +11,16 @@ const fail=(message:string):never=>{throw new ApiError(400,'INVALID_INPUT',messa
 function text(v:unknown,name:string,max=128,min=1):string {if(typeof v!=='string'||v.length<min||v.length>max||v.includes('\0'))return fail(`${name} 格式不正确`);return v;}
 function object(v:unknown):Record<string,unknown>{if(!v||typeof v!=='object'||Array.isArray(v))return fail('需要 JSON 对象');return v as Record<string,unknown>;}
 function appID(v:unknown){if(v===undefined||v==='')throw new ApiError(400,'APP_ID_REQUIRED','请提供真实 Logto Application ID');return text(v,'appId',21);}
-function ports(v:unknown):Port[]{if(!Array.isArray(v)||v.length>32)return fail('每个设备最多发布 32 个端口');const ids=new Set<string>();return v.map(item=>{const p=object(item);const id=text(p.id,'端口 ID',64);if(ids.has(id))return fail('端口 ID 不能重复');ids.add(id);if(!Number.isInteger(p.port)||(p.port as number)<1||(p.port as number)>65535)return fail('端口应为 1–65535 的整数');if(p.transport!=='tcp')return fail('当前仅支持 tcp 传输');const type=text(p.type,'端口类型',128);return {id,port:p.port as number,type,transport:'tcp'};});}
+function ports(v:unknown):Port[]{if(!Array.isArray(v)||v.length>32)return fail('每个设备最多发布 32 个端口');const ids=new Set<string>();return v.map(item=>{const p=object(item);const id=text(p.id,'端口 ID',64);if(ids.has(id))return fail('端口 ID 不能重复');ids.add(id);if(!Number.isInteger(p.port)||(p.port as number)<1||(p.port as number)>65535)return fail('端口应为 1–65535 的整数');if(p.transport!=='tcp')return fail('当前仅支持 tcp 传输');const type=text(p.type,'端口类型',128),url=tunnel(p.tunnelUrl);return {id,port:p.port as number,type,transport:'tcp',...(url?{tunnelUrl:url}:{})};});}
 function tunnel(v:unknown):string|null{if(v===undefined||v===null)return null;const value=text(v,'隧道 URL',512);let u:URL;try{u=new URL(value);}catch{return fail('隧道 URL 无效');}if(u.protocol!=='https:'||!/^([a-z0-9]+-)*[a-z0-9]+\.trycloudflare\.com$/.test(u.hostname)||u.username||u.password||u.port||u.pathname!=='/'||u.search||u.hash)return fail('隧道须使用 https 的 trycloudflare.com 子域根地址');return u.origin;}
 function json(data:unknown,status=200){return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});}
-export interface ServiceOptions {store:Store;identity:Identity;directory:ApplicationDirectory;browserClientId:string;devMode?:boolean;now?:()=>number;authRateLimit?:number;adminKey?:string}
+function deviceDirectory(devices:unknown[]){const body=JSON.stringify({devices});if(Buffer.byteLength(body)>2*1024*1024)throw new ApiError(413,'DIRECTORY_TOO_LARGE','设备目录超过2MiB，请减少设备或公布内容');return new Response(body,{headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});}
+export interface ServiceOptions {store:Store;identity:Identity;directory:ApplicationDirectory;browserClientId:string;browserOrigins?:ReadonlySet<string>;devMode?:boolean;now?:()=>number;authRateLimit?:number;adminKey?:string}
 export function createService(options:ServiceOptions){
  const {store,identity,directory}=options;const verifyAdmin=adminVerifier(options.adminKey);const now=options.now??Date.now;const coordination=()=>({protocol:'memory-v1',epoch:store.epoch,heartbeatSeconds:20,leaseSeconds:65,signalTtlSeconds:120,maxSignalWaitSeconds:15});
  async function application(id:string,existing=false){const app=(await directory.list()).find(a=>a.id===id);if(existing&&(!app||!eligible(app)))throw new ApiError(401,'APPLICATION_UNAVAILABLE','Logto 应用已删除或不再支持网页登录，请重新授权');if(!app)throw new ApiError(404,'APPLICATION_NOT_FOUND','找不到此 Logto Application');if(!eligible(app))throw new ApiError(400,'UNSUPPORTED_APPLICATION_FLOW','应用须为关闭 Device Flow 的 Logto Native Application，请使用官方 SDK 网页登录');return app;}
- const inner=async function handle(request:Request,clientIP='unknown'):Promise<Response>{try{
+ const inner=async function handle(request:Request,clientIP='unknown',crossOrigin=false):Promise<Response>{try{
   const u=new URL(request.url),time=now();if(options.devMode&&!['localhost','127.0.0.1','[::1]'].includes(u.hostname))throw new ApiError(403,'DEV_LOOPBACK_ONLY','开发模式仅允许 loopback 地址');
-  const origin=request.headers.get('origin');if(origin&&origin!==u.origin)throw new ApiError(403,'ORIGIN_REJECTED','不允许跨站请求');if(request.headers.get('sec-fetch-site')==='cross-site')throw new ApiError(403,'ORIGIN_REJECTED','不允许跨站请求');
   const path=u.pathname.replace(/\/$/,''),method=request.method;if(!path.startsWith('/api/v1/'))throw new ApiError(404,'NOT_FOUND','接口不存在');
   if(path==='/api/v1/admin/apps'||path.startsWith('/api/v1/admin/apps/'))throw new ApiError(410,'APPLICATION_MANAGEMENT_REMOVED','请在 Logto 管理应用，CyberGrid 只读应用目录');
   if(path==='/api/v1/admin/overview'){
@@ -50,23 +52,26 @@ export function createService(options:ServiceOptions){
    const requested=appID(body.appId);if(verified.clientId!==requested||verified.clientId===options.browserClientId)throw new ApiError(401,'APPLICATION_MISMATCH','授权 client_id 必须与真实 Native AppID 完全一致');await application(verified.clientId);
    const name=text(body.deviceName,'设备名称',96),deviceId=randomUUID(),appId=verified.clientId;
    if(body.coordinationProtocol!==undefined){if(body.coordinationProtocol!=='memory-v1')return fail('不支持的coordinationProtocol');if(body.coordinatorEpoch!==store.epoch)throw new ApiError(409,'COORDINATOR_RESET','注册epoch已改变');const r=store.register(user.id,appId,name,text(body.registrationKey,'registrationKey',43,43),text(body.requestId,'requestId',36),now(),body.registrationRevision);return json({purpose:'device',appId,sessionKey:r.sessionKey,expiresAt:new Date(r.session.expiresAt).toISOString(),deviceId:r.session.deviceId,user,coordinatorEpoch:store.epoch,incarnation:r.session.incarnation});}
-   await store.createSession({purpose:'device',hash:hash(sessionKey),deviceId,userId:user.id,appId,expiresAt},{id:deviceId,userId:user.id,appId,name,lastSeen:time,ports:[],tunnelUrl:null,certificateFingerprint:null});return json({purpose:'device',appId,sessionKey,expiresAt:new Date(expiresAt).toISOString(),deviceId,user});
+   await store.createSession({purpose:'device',hash:hash(sessionKey),deviceId,userId:user.id,appId,expiresAt},{id:deviceId,userId:user.id,appId,name,lastSeen:time,ports:[],tunnelUrl:null,certificateFingerprint:null,iroh:null});return json({purpose:'device',appId,sessionKey,expiresAt:new Date(expiresAt).toISOString(),deviceId,user});
   }
   if(method!=='DELETE'&&request.headers.has('x-cybergrid-epoch')&&request.headers.get('x-cybergrid-epoch')!==store.epoch)throw new ApiError(409,'COORDINATOR_RESET','协调服务已重启，请重新注册');
   const authorization=request.headers.get('authorization');if(!authorization?.startsWith('Bearer ')||authorization.length>256)throw new ApiError(401,'INVALID_SESSION','会话已失效，请重新登录');
-  const session=await store.session(hash(authorization.slice(7)));if(path==='/api/v1/session'&&method==='DELETE'){await store.revoke(hash(authorization.slice(7)));return json({ok:true});}if(!session||session.expiresAt<=time)throw new ApiError(401,'INVALID_SESSION','会话已失效，请重新登录');
+  const session=await store.session(hash(authorization.slice(7)));if(crossOrigin&&session&&session.purpose!=='console')throw new ApiError(403,'FORBIDDEN','跨站接口仅允许控制台会话');
+  if(path==='/api/v1/console/session'&&method==='DELETE'){if(!session||session.expiresAt<=time)throw new ApiError(401,'INVALID_SESSION','会话已失效，请重新登录');if(session.purpose!=='console')throw new ApiError(403,'FORBIDDEN','此接口仅允许控制台会话');await store.revoke(session.hash);return json({ok:true});}
+  if(path==='/api/v1/session'&&method==='DELETE'){await store.revoke(hash(authorization.slice(7)));return json({ok:true});}if(!session||session.expiresAt<=time)throw new ApiError(401,'INVALID_SESSION','会话已失效，请重新登录');
   if(path==='/api/v1/session'&&method==='DELETE'){await store.revoke(session.hash);return json({ok:true});}
   store.current(session,time);if(session.protocol&&request.headers.get('x-cybergrid-epoch')!==store.epoch)throw new ApiError(409,'COORDINATOR_RESET','协调服务epoch不匹配');
   if(!await store.rate('api:'+session.hash,time,360))throw new ApiError(429,'RATE_LIMITED','请求过于频繁，请稍后重试');
   if(session.purpose==='device')await application(session.appId,true);store.current(session,now());
+  if(path==='/api/v1/console/apps'){if(session.purpose!=='console')throw new ApiError(403,'FORBIDDEN','此接口仅供只读控制台会话使用');if(method!=='GET')throw new ApiError(405,'METHOD_NOT_ALLOWED','请求方法不支持');return json({source:'logto',apps:(await directory.list()).filter(eligible).map(a=>({id:a.id,name:a.name,type:'Native',isDeviceFlow:a.isDeviceFlow}))});}
   if(path==='/api/v1/apps'&&method==='GET')return json({source:'logto',apps:(await directory.list()).filter(eligible).map(a=>({id:a.id,name:a.name,type:'Native',isDeviceFlow:a.isDeviceFlow}))});
   if(path==='/api/v1/console/devices'){
-   if(session.purpose!=='console')throw new ApiError(403,'FORBIDDEN','此接口仅供只读控制台会话使用');if(method!=='GET')throw new ApiError(405,'METHOD_NOT_ALLOWED','请求方法不支持');const id=appID(u.searchParams.get('appId')??undefined);await application(id);return json({devices:await store.devices(session.userId,id,time)});
+   if(session.purpose!=='console')throw new ApiError(403,'FORBIDDEN','此接口仅供只读控制台会话使用');if(method!=='GET')throw new ApiError(405,'METHOD_NOT_ALLOWED','请求方法不支持');const id=appID(u.searchParams.get('appId')??undefined);await application(id);const devices=(await store.devices(session.userId,id,time)).map(({iroh,...device})=>device);return deviceDirectory(devices);
   }
   if(session.purpose!=='device')throw new ApiError(403,'FORBIDDEN','控制台会话不能访问设备或信令接口');
-  if(path==='/api/v1/devices'&&method==='GET')return json({devices:await store.devices(session.userId,session.appId,time)});
+  if(path==='/api/v1/devices'&&method==='GET')return deviceDirectory(await store.devices(session.userId,session.appId,time));
   if(path==='/api/v1/devices/self'&&method==='PUT'){
-   const fingerprint=text(body.certificateFingerprint,'证书 fingerprint',64,64);if(!/^[a-f0-9]{64}$/.test(fingerprint))return fail('证书 fingerprint 须为小写 SHA256 十六进制');await store.publish(session,{ports:ports(body.ports),tunnelUrl:tunnel(body.tunnelUrl),certificateFingerprint:fingerprint},body.incarnation,body.publishRevision,now());const d=await store.device(session.deviceId,time);if(!d)throw new ApiError(401,'INVALID_SESSION','会话已失效，请重新登录');const {userId,appId,lastSeen,...device}=d;return json({device:{...device,lastSeen:new Date(lastSeen).toISOString()}});
+   const fingerprint=text(body.certificateFingerprint,'证书 fingerprint',64,64);if(!/^[a-f0-9]{64}$/.test(fingerprint))return fail('证书 fingerprint 须为小写 SHA256 十六进制');await store.publish(session,{ports:ports(body.ports),tunnelUrl:tunnel(body.tunnelUrl),certificateFingerprint:fingerprint,iroh:irohReachability(body.iroh)},body.incarnation,body.publishRevision,now());const d=await store.device(session.deviceId,time);if(!d)throw new ApiError(401,'INVALID_SESSION','会话已失效，请重新登录');const {userId,appId,lastSeen,...device}=d;return json({device:{...device,lastSeen:new Date(lastSeen).toISOString()}});
   }
   if(path==='/api/v1/signals'&&method==='POST'){
    const to=text(body.toDeviceId,'目标设备',96),connectionId=text(body.connectionId,'连接 ID',96),kind=body.kind;if(kind!=='offer'&&kind!=='answer'&&kind!=='candidate'&&kind!=='close')return fail('未知信令类型');const payload=text(body.payload,'信令 payload',65536,0);if(Buffer.byteLength(payload)>65536)return fail('信令 payload 超过 65536 字节');const [from,destination]=await Promise.all([store.device(session.deviceId,time),store.device(to,time)]);if(to===session.deviceId||!from?.online||!destination?.online||destination.userId!==session.userId||destination.appId!==session.appId)throw new ApiError(404,'PEER_UNAVAILABLE','目标设备不可用');return json({...(session.protocol?{coordinatorEpoch:store.epoch}:{}),id:await store.postSignal(session,{toDeviceId:to,connectionId,kind,payload,...(session.protocol?{toIncarnation:text(body.toIncarnation,'目标代际',96)}:{})},body.clientMessageId,now())},201);
@@ -76,5 +81,5 @@ export function createService(options:ServiceOptions){
   }
   throw new ApiError(404,'NOT_FOUND','接口不存在');
  }catch(e){if(e instanceof ApiError){const response=json({error:{code:e.code,message:e.message}},e.status);if(e.retryAfter)response.headers.set('retry-after',String(e.retryAfter));return response;}return json({error:{code:'INTERNAL_ERROR',message:'服务暂时不可用，请稍后重试'}},500);}};
- return async(request:Request,ip?:string)=>{const response=await inner(request,ip);response.headers.set('x-cybergrid-epoch',store.epoch);return response;};
+ return async(request:Request,ip?:string)=>{const policy=consoleCors(request,options.browserOrigins??new Set());const response=policy.blocked?json({error:{code:'ORIGIN_REJECTED',message:'不允许跨站请求'}},403):policy.preflight??await inner(request,ip,policy.crossOrigin);response.headers.set('x-cybergrid-epoch',store.epoch);return applyConsoleCors(response,policy);};
 }

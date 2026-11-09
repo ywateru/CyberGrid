@@ -31,6 +31,7 @@ pub trait AuthProvider: Send + Sync {
 }
 
 pub(crate) struct Runtime {
+    pub iroh: Option<Arc<crate::iroh_direct::DirectEndpoint>>,
     pub identity: Identity,
     pub cancel: CancellationToken,
     pub ports: RwLock<HashMap<String, Port>>,
@@ -506,8 +507,28 @@ impl Client {
         }
         let generation = self.generation.fetch_add(1, Ordering::SeqCst) + 1;
         let listener = TcpListener::bind("127.0.0.1:0").await?;
+        // iroh is an optional direct path. Unsupported interface constraints or
+        // local UDP failures must not prevent the existing paths from working.
+        let identity = Identity::new(&s.device_id)?;
+        let iroh = if self.cfg.iroh_enabled && self.cfg.interface_name.is_none() {
+            match tokio::time::timeout(
+                self.cfg.iroh_timeout,
+                crate::iroh_direct::DirectEndpoint::bind(),
+            )
+            .await
+            {
+                Ok(Ok(endpoint)) => Some(endpoint),
+                _ => {
+                    self.event("iroh-skipped", Some("iroh-direct"), None, None);
+                    None
+                }
+            }
+        } else {
+            None
+        };
         let runtime = Arc::new(Runtime {
-            identity: Identity::new(&s.device_id)?,
+            iroh,
+            identity,
             cancel: self.lifetime.child_token(),
             ports: RwLock::new(self.ports.read().await.clone()),
             tunnel_url: RwLock::new(None),
@@ -527,13 +548,20 @@ impl Client {
         }
         if let Err(e) = self.heartbeat().await {
             runtime.cancel.cancel();
+            if let Some(endpoint) = &runtime.iroh {
+                endpoint.close().await;
+            }
             return Err(e);
         }
         if self.closed.load(Ordering::SeqCst) {
             runtime.cancel.cancel();
+            if let Some(endpoint) = &runtime.iroh {
+                endpoint.close().await;
+            }
             return Err(Error::Cancelled);
         }
         runtime.ready.store(true, Ordering::SeqCst);
+        self.spawn_iroh(runtime.clone()).await;
         self.spawn_origin(listener, runtime.clone());
         self.spawn_background(runtime.clone(), s.expires_at);
         if let Some(p) = self.cfg.cloudflared.clone() {
@@ -673,10 +701,16 @@ impl Client {
         struct Devices {
             devices: Vec<Device>,
         }
-        Ok(self
+        let devices = self
             .api::<Devices>(Method::GET, "/devices", None, true)
             .await?
-            .devices)
+            .devices;
+        for device in &devices {
+            if let Some(iroh) = &device.iroh {
+                iroh.validate()?;
+            }
+        }
+        Ok(devices)
     }
     pub(crate) async fn device(&self, id: &str) -> Result<Device> {
         self.devices()
@@ -713,6 +747,25 @@ impl Client {
         }
         Ok(())
     }
+    /// Advertise or withdraw a host-managed HTTP tunnel for this business port.
+    /// This never starts a provider or substitutes the SDK's encrypted device tunnel.
+    pub async fn update_port_tunnel_url(&self, id: &str, url: Option<&str>) -> Result<()> {
+        if let Some(url) = url {
+            crate::validate_tunnel_url(url)?;
+        }
+        {
+            let mut ports = self.ports.write().await;
+            let port = ports
+                .get_mut(id)
+                .ok_or_else(|| protocol("port is not exposed"))?;
+            port.tunnel_url = url.map(str::to_owned);
+        }
+        if let Ok(rt) = self.active().await {
+            *rt.ports.write().await = self.ports.read().await.clone();
+            self.heartbeat().await?;
+        }
+        Ok(())
+    }
     pub(crate) async fn heartbeat(&self) -> Result<()> {
         let mut revision = self.publication.lock().await;
         let rt = self
@@ -736,7 +789,8 @@ impl Client {
         if *revision > 9_007_199_254_740_991 {
             return Err(protocol("publication revision exhausted"));
         }
-        let body = json!({"ports":ports,"certificateFingerprint":rt.identity.fingerprint,"tunnelUrl":*rt.tunnel_url.read().await,"incarnation":s.incarnation,"publishRevision":*revision});
+        let iroh = rt.iroh.as_ref().map(|endpoint| endpoint.info());
+        let body = json!({"ports":ports,"certificateFingerprint":rt.identity.fingerprint,"tunnelUrl":*rt.tunnel_url.read().await,"iroh":iroh,"incarnation":s.incarnation,"publishRevision":*revision});
         let _: Value = self
             .api(Method::PUT, "/devices/self", Some(body), true)
             .await?;
@@ -871,14 +925,8 @@ impl Client {
                     }
                 }
             }
-            for a in rt
-                .attempts
-                .lock()
-                .await
-                .values()
-                .cloned()
-                .collect::<Vec<_>>()
-            {
+            let attempts: Vec<_> = rt.attempts.lock().await.values().cloned().collect();
+            for a in attempts {
                 a.close().await;
             }
         });
@@ -886,6 +934,9 @@ impl Client {
     async fn stop_runtime(&self) {
         if let Some(rt) = self.runtime.read().await.clone() {
             rt.cancel.cancel();
+            if let Some(endpoint) = &rt.iroh {
+                endpoint.close().await;
+            }
             if let Some(task) = rt.provider_task.lock().await.take() {
                 let _ = task.await;
             }
@@ -893,14 +944,8 @@ impl Client {
                 p.close().await;
                 self.event("mapping-disconnected", None, Some(&p.device_id), None);
             }
-            for a in rt
-                .attempts
-                .lock()
-                .await
-                .values()
-                .cloned()
-                .collect::<Vec<_>>()
-            {
+            let attempts: Vec<_> = rt.attempts.lock().await.values().cloned().collect();
+            for a in attempts {
                 a.close().await;
             }
         }

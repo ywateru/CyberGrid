@@ -36,6 +36,8 @@ struct Login {
     name: Option<String>,
     #[serde(default)]
     force_fallback: bool,
+    #[serde(default)]
+    direct_strategy: cybergrid_sdk::DirectStrategy,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -114,6 +116,7 @@ fn parse(bytes: &[u8]) -> Result<(Request, Action), &'static str> {
                     app_id: app,
                     device_name: name,
                     force_fallback: p.force_fallback,
+                    direct_strategy: p.direct_strategy,
                     cloudflared_path: String::new(),
                 };
                 if r.action != "resume" {
@@ -289,7 +292,7 @@ fn public_projection(source: &Value) -> Value {
     let mut value = select(source, &["phase", "canResume", "platform", "authMode"]);
     value["config"] = select(
         &source["config"],
-        &["baseUrl", "appId", "deviceName", "forceFallback"],
+        &["baseUrl", "appId", "deviceName", "forceFallback", "directStrategy"],
     );
     value["local"] = select(
         &source["local"],
@@ -380,7 +383,11 @@ async fn safe_view(state: &LabState) -> Value {
 async fn dispatch(state: &Arc<LabState>, action: Action) -> Result<(), String> {
     match action {
         Action::Login(config, resume) => state.start_login(config, resume).await,
-        Action::WebLogin(config) => state.begin_web_login(config).await.map(|_| ()),
+        Action::WebLogin(config) => state
+            .begin_web_login(config)
+            .await
+            .map(|_| ())
+            .map_err(|error| error.message().to_string()),
         Action::Cancel => state.cancel_login().await,
         Action::Refresh => state.refresh_devices().await,
         Action::Connect(id) => state.connect_device(id).await,

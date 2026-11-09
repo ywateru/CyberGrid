@@ -36,6 +36,7 @@ pub(crate) struct Attempt {
     pub remote: String,
     pub pc: Arc<RTCPeerConnection>,
     client: std::sync::Weak<Client>,
+    runtime: std::sync::Weak<crate::client::Runtime>,
     remote_ready: Mutex<bool>,
     candidates: Mutex<Vec<RTCIceCandidateInit>>,
     ready_tx: mpsc::Sender<BoxIo>,
@@ -43,18 +44,28 @@ pub(crate) struct Attempt {
     signal_ready: watch::Sender<bool>,
     pub cancel: CancellationToken,
     closed: AtomicBool,
+    close_done: watch::Sender<bool>,
     pub connected: AtomicBool,
 }
 impl Attempt {
-    pub async fn close(&self) {
-        if self.closed.swap(true, Ordering::SeqCst) {
-            return;
+    pub async fn close(self: &Arc<Self>) {
+        let mut done = self.close_done.subscribe();
+        if !self.closed.swap(true, Ordering::SeqCst) {
+            self.cancel.cancel();
+            let a = self.clone();
+            // Own cleanup independently of callers that may themselves be
+            // cancelled. Every concurrent close waits for the same completion.
+            tokio::spawn(async move {
+                let _ = a.pc.close().await;
+                if let Some(rt) = a.runtime.upgrade() {
+                    rt.attempts.lock().await.remove(&a.id);
+                }
+                a.close_done.send_replace(true);
+            });
         }
-        self.cancel.cancel();
-        let _ = self.pc.close().await;
-        if let Some(c) = self.client.upgrade() {
-            if let Some(rt) = c.runtime.read().await.clone() {
-                rt.attempts.lock().await.remove(&self.id);
+        while !*done.borrow_and_update() {
+            if done.changed().await.is_err() {
+                break;
             }
         }
     }
@@ -126,6 +137,7 @@ impl Client {
         id: String,
         remote: String,
         initiator: bool,
+        allocated: Option<&std::sync::Mutex<Option<Arc<Attempt>>>>,
     ) -> Result<Arc<Attempt>> {
         let rt = self.active().await?;
         if rt.attempts.lock().await.len() >= 32 {
@@ -168,6 +180,7 @@ impl Client {
             remote: remote.clone(),
             pc: pc.clone(),
             client: Arc::downgrade(self),
+            runtime: Arc::downgrade(&rt),
             remote_ready: Mutex::new(false),
             candidates: Mutex::new(Vec::new()),
             ready_tx: tx,
@@ -175,8 +188,15 @@ impl Client {
             signal_ready,
             cancel: rt.cancel.child_token(),
             closed: AtomicBool::new(false),
+            close_done: watch::channel(false).0,
             connected: AtomicBool::new(false),
         });
+        // Install ownership before the first await after allocation: creation
+        // failure, timeout and a dropped caller must all retire the connection.
+        let mut cleanup = AttemptCleanup::new(a.clone());
+        if let Some(allocated) = allocated {
+            *allocated.lock().unwrap() = Some(a.clone());
+        }
         rt.attempts.lock().await.insert(id, a.clone());
         let w = Arc::downgrade(&a);
         pc.on_ice_candidate(Box::new(move|candidate|{
@@ -224,33 +244,63 @@ impl Client {
             }));
         }
         let t = a.clone();
-        let lifetime = self.cfg.direct_timeout.saturating_mul(2) + Duration::from_secs(15);
+        let lifetime = self
+            .cfg
+            .direct_timeout
+            .saturating_mul(2)
+            .saturating_add(Duration::from_secs(15));
         tokio::spawn(async move {
             tokio::select! {_=t.cancel.cancelled()=>{},_=tokio::time::sleep(lifetime)=>{if t.connected.load(Ordering::SeqCst){t.cancel.cancelled().await;}}}
             t.close().await;
         });
+        cleanup.armed = false;
         Ok(a)
     }
-    pub(crate) async fn dial_direct(self: &Arc<Self>, d: &Device) -> Result<Arc<Peer>> {
-        let a = self
-            .new_attempt(
-                uuid::Uuid::new_v4().simple().to_string(),
-                d.id.clone(),
-                true,
+    pub(crate) async fn dial_direct_fenced(
+        self: &Arc<Self>,
+        d: &Device,
+        fence: &crate::peer::DialFence,
+    ) -> Result<Arc<Peer>> {
+        let allocated = std::sync::Mutex::new(None);
+        let operation = tokio::time::timeout(self.cfg.direct_timeout, async {
+            let a = self
+                .new_attempt(
+                    uuid::Uuid::new_v4().simple().to_string(),
+                    d.id.clone(),
+                    true,
+                    Some(&allocated),
+                )
+                .await?;
+            let _cleanup = AttemptCleanup::new(a.clone());
+            let offer =
+                a.pc.create_offer(None)
+                    .await
+                    .map_err(|_| transport("create offer failed"))?;
+            a.pc.set_local_description(offer.clone())
+                .await
+                .map_err(|_| transport("local offer rejected"))?;
+            self.send_signal(
+                &a.remote,
+                &a.id,
+                "offer",
+                serde_json::to_value(offer).map_err(|_| protocol("cannot encode offer"))?,
             )
             .await?;
-        let result=tokio::time::timeout(self.cfg.direct_timeout,async{
-            let offer=a.pc.create_offer(None).await.map_err(|_|transport("create offer failed"))?;
-            a.pc.set_local_description(offer.clone()).await.map_err(|_|transport("local offer rejected"))?;
-            self.send_signal(&a.remote,&a.id,"offer",serde_json::to_value(offer).map_err(|_|protocol("cannot encode offer"))?).await?;
             a.signal_ready.send_replace(true);
-            let raw=tokio::select!{_=a.cancel.cancelled()=>return Err(transport("WebRTC connection closed")),r=async{a.ready_rx.lock().await.recv().await}=>r.ok_or_else(||transport("DataChannel did not open"))?};
-            let p=self.secure_client(raw,d,"webrtc-direct").await?;
-            a.connected.store(true,Ordering::SeqCst);*p.rtc.lock().await=Some(a.clone());Ok(p)
-        }).await.map_err(|_|Error::Timeout("WebRTC direct"));
-        let result = result.and_then(|v| v);
+            let raw = tokio::select! {_=a.cancel.cancelled()=>return Err(transport("WebRTC connection closed")),r=async{a.ready_rx.lock().await.recv().await}=>r.ok_or_else(||transport("DataChannel did not open"))?};
+            let p = self
+                .secure_client_fenced(raw, d, "webrtc-direct", Some(fence))
+                .await?;
+            *p.rtc.lock().await = Some(a.clone());
+            a.connected.store(true, Ordering::SeqCst);
+            Ok(p)
+        });
+        let result = tokio::select! { _ = fence.cancel.cancelled() => Err(Error::Cancelled), result = operation => result.map_err(|_|Error::Timeout("WebRTC direct")).and_then(|v| v) };
         if result.is_err() {
-            a.close().await;
+            let attempt = allocated.lock().unwrap().take();
+            if let Some(a) = attempt {
+                a.close().await;
+            }
         }
         result
     }
@@ -289,7 +339,7 @@ impl Client {
                 return Err(crate::Error::Cancelled);
             }
             let a = self
-                .new_attempt(s.connection_id, s.from_device_id, false)
+                .new_attempt(s.connection_id, s.from_device_id, false, None)
                 .await?;
             let result: Result<()> = async {
                 a.set_remote(offer).await?;
@@ -351,6 +401,30 @@ impl Client {
                 Ok(())
             }
             _ => Err(protocol("unknown signal kind")),
+        }
+    }
+}
+
+struct AttemptCleanup {
+    attempt: Arc<Attempt>,
+    armed: bool,
+}
+impl AttemptCleanup {
+    fn new(attempt: Arc<Attempt>) -> Self {
+        Self {
+            attempt,
+            armed: true,
+        }
+    }
+}
+impl Drop for AttemptCleanup {
+    fn drop(&mut self) {
+        if self.armed && !self.attempt.connected.load(Ordering::SeqCst) {
+            self.attempt.cancel.cancel();
+            let a = self.attempt.clone();
+            tokio::spawn(async move {
+                a.close().await;
+            });
         }
     }
 }

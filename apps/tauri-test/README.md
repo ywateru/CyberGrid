@@ -5,6 +5,8 @@ Tauri 2 测试 App，macOS 与 Android 共用原生 Rust SDK。两端独立完�
 本目录依赖同仓库 `../../sdk-rust`，不运行 Go CLI 或业务代理。完整源码和测试包见 [GitHub Releases](https://github.com/ywateru/CyberGrid/releases)。保留仓库目录结构以便 Cargo path dependency 正确解析。
 
 0.3.0 统一使用官方 SDK 网页登录，关闭 Device Flow 并移除设备码入口。已预置公开测试服务与普通 Native 应用 ID，不预置用户密码。新客户端和协调服务需配套更新；v0.6.0 发布提供本版源码和测试包，现有 v0.5.1 的 Lab 0.2.0 不适用于新服务认证策略。
+
+项目 v0.7.0 进一步增加 Rust SDK 的 iroh 直连阶段、并行连接策略与已有授权的明确恢复提示。v0.6.0 已下载的测试包不会自动获得这些更新。
 ## 构建
 
 依赖 Node.js22、Rust（`Cargo.lock`／Actions固定工具链）、Tauri CLI2；Android 使用 JDK17、SDK37、NDK27.2.12479018、`aarch64-linux-android` target，最低API28。Gradle与AGP版本以项目wrapper及配置为准。
@@ -34,7 +36,7 @@ sh scripts/build-test.sh android
 1. 默认已预置公开测试服务和同一个真实 Logto Native Application ID，可直接选择登录。设备名称按平台预设；两端分别登录同一用户即可互见。自己的部署可在高级连接配置中修改服务和应用；Native 应用需关闭 Device Flow。
 2. 点击 **网页登录**，在系统浏览器中打开 Logto 托管登录页。Android 使用官方 Android SDK，Mac 的 Tauri 前端使用官方 JavaScript SDK。Android 也可通过下述 ADB 命令发起。两端分别授权，不复制登录文件。
 3. 登录后刷新设备，选择在线对端并连接消息端口。发送必须收到对端ack才算成功；两端分别probe比较字节与SHA256。
-4. 默认优先WebRTC，失败回退Cloudflare与内层mTLS。实际transport显示在App中，不能根据设备在线状态推断业务已连接。
+4. 当前源码默认依次尝试 WebRTC、iroh 直连、Cloudflare 匿名隧道，也可在连接策略中选择 WebRTC/iroh 并行直连；三条路径均使用内层 mTLS。已发布 v0.6.0 包仍为 WebRTC → Cloudflare。实际 transport 显示在 App 中，不能根据设备在线状态推断业务已连接。“强制 Cloudflare 回退”测试策略会同时跳过 WebRTC 和 iroh 直连；它不是默认策略。
 5. 关闭短会话与撤销持久授权是不同操作。退出登录会关闭本轮服务／映射／provider后撤销本机授权；网络失败保留必要材料并如实显示错误，供后续重试。
 
 两平台均使用SDK随包预置并校验的Cloudflared，不需要额外下载。Mac可显式指定可信provider绝对路径作为外部覆盖；默认不搜索PATH。Android使用APK安装的原生库资源。

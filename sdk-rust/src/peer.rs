@@ -2,15 +2,80 @@ use crate::{
     client::Client,
     error::{protocol, transport},
     mux::{framed_stream, Mux},
-    Error, Result,
+    DirectStrategy, Error, Result,
 };
-use std::{net::SocketAddr, sync::Arc, time::Duration};
+use std::{
+    net::SocketAddr,
+    sync::{
+        atomic::{AtomicU8, Ordering},
+        Arc,
+    },
+    time::Duration,
+};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt, DuplexStream},
     net::{TcpListener, TcpStream},
     sync::Mutex,
 };
 use tokio_util::sync::CancellationToken;
+
+pub(crate) struct DialFence {
+    pub cancel: CancellationToken,
+    pub generation: u64,
+    winner: Option<(Arc<AtomicU8>, u8)>,
+}
+// A fully authenticated winner must remain owned while the losing attempt is
+// being joined. Dropping an in-flight connect also closes that winner.
+struct PendingPeer(Option<Arc<Peer>>);
+impl PendingPeer {
+    fn release(mut self) -> Arc<Peer> {
+        self.0.take().unwrap()
+    }
+}
+impl Drop for PendingPeer {
+    fn drop(&mut self) {
+        if let Some(peer) = self.0.take() {
+            peer.mux.cancel.cancel();
+            tokio::spawn(async move {
+                peer.close().await;
+            });
+        }
+    }
+}
+impl DialFence {
+    pub fn single(cancel: CancellationToken, generation: u64) -> Self {
+        Self {
+            cancel,
+            generation,
+            winner: None,
+        }
+    }
+    fn competing(
+        cancel: CancellationToken,
+        generation: u64,
+        winner: Arc<AtomicU8>,
+        path: u8,
+    ) -> Self {
+        Self {
+            cancel,
+            generation,
+            winner: Some((winner, path)),
+        }
+    }
+    pub fn claim(&self) -> Result<()> {
+        if self.cancel.is_cancelled() {
+            return Err(Error::Cancelled);
+        }
+        if let Some((winner, path)) = &self.winner {
+            match winner.compare_exchange(0, *path, Ordering::SeqCst, Ordering::SeqCst) {
+                Ok(_) => {}
+                Err(value) if value == *path => {}
+                _ => return Err(Error::Cancelled),
+            }
+        }
+        Ok(())
+    }
+}
 
 pub struct Peer {
     pub device_id: String,
@@ -19,6 +84,7 @@ pub struct Peer {
     pub(crate) mux: Arc<Mux>,
     client: std::sync::Weak<Client>,
     pub(crate) rtc: Mutex<Option<Arc<crate::rtc::Attempt>>>,
+    pub(crate) iroh: Mutex<Option<iroh::endpoint::Connection>>,
 }
 impl Client {
     pub(crate) async fn remember_peer(
@@ -26,8 +92,17 @@ impl Client {
         id: String,
         path: String,
         mux: Arc<Mux>,
+        generation: u64,
+        fence: Option<&DialFence>,
     ) -> Result<Arc<Peer>> {
         let rt = self.active().await?;
+        if rt.generation != generation
+            || rt.cancel.is_cancelled()
+            || fence.is_some_and(|f| f.cancel.is_cancelled())
+        {
+            mux.cancel.cancel();
+            return Err(Error::Cancelled);
+        }
         let peer = Arc::new(Peer {
             generation: rt.generation,
             device_id: id,
@@ -35,9 +110,17 @@ impl Client {
             mux,
             client: Arc::downgrade(self),
             rtc: Mutex::new(None),
+            iroh: Mutex::new(None),
         });
         {
             let mut peers = rt.peers.lock().await;
+            if self.generation() != generation
+                || rt.cancel.is_cancelled()
+                || fence.is_some_and(|f| f.claim().is_err())
+            {
+                peer.close().await;
+                return Err(Error::Cancelled);
+            }
             peers.retain(|p| !p.mux.cancel.is_cancelled());
             if peers.len() >= 64 {
                 peer.close().await;
@@ -64,7 +147,40 @@ impl Client {
         Ok(peer)
     }
     pub async fn connect(self: &Arc<Self>, id: &str) -> Result<Arc<Peer>> {
-        let d = self.device(id).await?;
+        self.connect_with_cancel(id, self.closed_token().child_token())
+            .await
+    }
+    async fn connect_with_cancel(
+        self: &Arc<Self>,
+        id: &str,
+        cancel: CancellationToken,
+    ) -> Result<Arc<Peer>> {
+        let _guard = cancel.clone().drop_guard();
+        let operation = self.connect_chain(id, cancel.clone());
+        tokio::pin!(operation);
+        tokio::select! {
+            result = &mut operation => {
+                if cancel.is_cancelled() {
+                    if let Ok(peer) = result { peer.close().await; }
+                    Err(Error::Cancelled)
+                } else { result }
+            },
+            _ = tokio::time::sleep(self.cfg.connection_budget()) => {
+                cancel.cancel();
+                // Both direct futures observe cancellation and finish their owned
+                // cleanup before the public operation returns a deadline error.
+                if let Ok(peer) = operation.await { peer.close().await; }
+                Err(Error::Timeout("peer connection budget"))
+            }
+        }
+    }
+    async fn connect_chain(
+        self: &Arc<Self>,
+        id: &str,
+        cancel: CancellationToken,
+    ) -> Result<Arc<Peer>> {
+        let rt = self.active().await?;
+        let d = tokio::select! { _ = cancel.cancelled() => return Err(Error::Cancelled), result = self.device(id) => result? };
         if self
             .device_session()
             .await
@@ -72,12 +188,80 @@ impl Client {
         {
             return Err(protocol("cannot connect to self"));
         }
+        let has_iroh = rt.iroh.is_some()
+            && d.iroh
+                .as_ref()
+                .is_some_and(|info| !info.addresses.is_empty());
         self.event("direct-attempt", Some("webrtc-direct"), Some(id), None);
-        let direct = self.dial_direct(&d).await;
-        if let Ok(p) = direct {
-            return Ok(p);
+        let direct = if self.cfg.direct_strategy == DirectStrategy::Parallel && has_iroh {
+            self.event("iroh-attempt", Some("iroh-direct"), Some(id), None);
+            let winner = Arc::new(AtomicU8::new(0));
+            let rtc_fence =
+                DialFence::competing(cancel.child_token(), rt.generation, winner.clone(), 1);
+            let iroh_fence = DialFence::competing(cancel.child_token(), rt.generation, winner, 2);
+            let rtc = self.dial_direct_fenced(&d, &rtc_fence);
+            let iroh = self.dial_iroh_fenced(&d, &iroh_fence);
+            tokio::pin!(rtc, iroh);
+            let (first_rtc, first) = tokio::select! { result = &mut rtc => (true, result), result = &mut iroh => (false, result) };
+            match first {
+                Ok(peer) => {
+                    let pending = PendingPeer(Some(peer));
+                    let loser = if first_rtc {
+                        iroh_fence.cancel.cancel();
+                        iroh.await
+                    } else {
+                        rtc_fence.cancel.cancel();
+                        rtc.await
+                    };
+                    if let Ok(loser) = loser {
+                        loser.close().await;
+                    }
+                    Ok(pending.release())
+                }
+                Err(_) => {
+                    if first_rtc {
+                        iroh.await
+                    } else {
+                        rtc.await
+                    }
+                }
+            }
+        } else {
+            let rtc_fence = DialFence::single(cancel.child_token(), rt.generation);
+            match self.dial_direct_fenced(&d, &rtc_fence).await {
+                Ok(peer) => Ok(peer),
+                Err(error) => {
+                    if cancel.is_cancelled()
+                        || rt.cancel.is_cancelled()
+                        || self.generation() != rt.generation
+                    {
+                        return Err(Error::Cancelled);
+                    }
+                    if has_iroh {
+                        self.event("iroh-attempt", Some("iroh-direct"), Some(id), None);
+                        self.dial_iroh_fenced(
+                            &d,
+                            &DialFence::single(cancel.child_token(), rt.generation),
+                        )
+                        .await
+                    } else {
+                        self.event("iroh-skipped", Some("iroh-direct"), Some(id), None);
+                        Err(error)
+                    }
+                }
+            }
+        };
+        if let Ok(peer) = direct {
+            if cancel.is_cancelled()
+                || rt.cancel.is_cancelled()
+                || self.generation() != rt.generation
+            {
+                peer.close().await;
+                return Err(Error::Cancelled);
+            }
+            return Ok(peer);
         }
-        if self.active().await?.cancel.is_cancelled() {
+        if cancel.is_cancelled() || rt.cancel.is_cancelled() || self.generation() != rt.generation {
             return Err(Error::Cancelled);
         }
         self.event(
@@ -86,13 +270,14 @@ impl Client {
             Some(id),
             None,
         );
-        tokio::time::timeout(self.cfg.fallback_timeout,async{
-            loop{
-                let current=self.device(id).await?;
-                if current.tunnel_url.is_some(){return self.dial_tunnel(&current).await;}
-                let rt=self.active().await?;tokio::select!{_=rt.cancel.cancelled()=>return Err(Error::Cancelled),_=tokio::time::sleep(Duration::from_millis(500))=>{}}
+        tokio::select! { _ = cancel.cancelled() => Err(Error::Cancelled), result = tokio::time::timeout(self.cfg.fallback_timeout, async {
+            loop {
+                let current = self.device(id).await?;
+                if self.generation() != rt.generation || rt.cancel.is_cancelled() { return Err(Error::Cancelled); }
+                if current.tunnel_url.is_some() { return self.dial_tunnel(&current).await; }
+                tokio::select! { _ = rt.cancel.cancelled() => return Err(Error::Cancelled), _ = tokio::time::sleep(Duration::from_millis(500)) => {} }
             }
-        }).await.map_err(|_|Error::Timeout("remote tunnel readiness or authentication"))?
+        }) => result.map_err(|_| Error::Timeout("remote tunnel readiness or authentication"))? }
     }
     pub async fn map(
         self: &Arc<Self>,
@@ -128,11 +313,12 @@ impl Client {
         let device = device.to_owned();
         let port = port.to_owned();
         let task = tokio::spawn(async move {
+            let mut work = tokio::task::JoinSet::new();
             loop {
-                tokio::select! {_=task_cancel.cancelled()=>break,accepted=listener.accept()=>{
+                tokio::select! {_=task_cancel.cancelled()=>break,_=work.join_next(),if !work.is_empty()=>{},accepted=listener.accept()=>{
                     let Ok((mut local,_))=accepted else{break};
                     let client=client.clone();let slot=slot.clone();let device=device.clone();let port=port.clone();let cancel=task_cancel.clone();
-                    tokio::spawn(async move {
+                    work.spawn(async move {
                         let Some(c)=client.upgrade()else{return};
                         // Serialize replacement per mapping. The listener survives a
                         // coordinator reset; existing flows are never replayed.
@@ -141,8 +327,8 @@ impl Client {
                             if current.as_ref().is_none_or(|p|p.is_closed()) {
                                 c.event("mapping-disconnected",None,Some(&device),None);
                                 *current=None;
-                                let result=tokio::select!{_=cancel.cancelled()=>return,r=tokio::time::timeout((c.cfg.direct_timeout+c.cfg.fallback_timeout+Duration::from_secs(2)).min(Duration::from_secs(90)),c.connect(&device))=>r};
-                                if let Ok(Ok(p))=result {c.event("mapping-ready",Some(&p.transport),Some(&device),None);*current=Some(p);}
+                                let result=c.connect_with_cancel(&device,cancel.child_token()).await;
+                                if let Ok(p)=result {c.event("mapping-ready",Some(&p.transport),Some(&device),None);*current=Some(p);}
                             }
                             current.clone()
                         };
@@ -152,6 +338,8 @@ impl Client {
                     });
                 }}
             }
+            task_cancel.cancel();
+            while work.join_next().await.is_some() {}
         });
         Ok(Mapping {
             addr,
@@ -237,6 +425,9 @@ impl Peer {
     }
     pub async fn close(&self) {
         self.mux.cancel.cancel();
+        if let Some(connection) = self.iroh.lock().await.take() {
+            connection.close(iroh::endpoint::VarInt::from_u32(0), b"peer closed");
+        }
         if let Some(a) = self.rtc.lock().await.take() {
             a.close().await;
         }

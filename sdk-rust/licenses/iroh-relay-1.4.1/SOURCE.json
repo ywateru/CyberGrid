@@ -1,0 +1,41 @@
+{
+  "authors": [
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "7e5589e7c1475700686603a970275687f760df853bc6525c7eb1347aa31d7230",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "iroh-relay",
+  "repository": "https://github.com/n0-computer/iroh",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-BSD3",
+      "origin": "cargo-registry-cache",
+      "path": "iroh-relay-1.4.1/LICENSE-BSD3",
+      "sha256": "bcaa9acadee6c20991d4b5eb56e226191411a3f6ceb92587b272f2ef0221ed71"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "iroh-relay-1.4.1/upstream-repository-root/LICENSE-APACHE",
+      "sha256": "903131e2786f073a942fbf8fae122d9e576e4dad758c6da7f9f2ba58fd8611ab",
+      "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-APACHE"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "iroh-relay-1.4.1/upstream-repository-root/LICENSE-MIT",
+      "sha256": "f169adb8124d3b005416d8485d00777c9a7bdd9099982c52a4493f9732e6d050",
+      "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-MIT"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940"
+    },
+    "path_in_vcs": "iroh-relay"
+  },
+  "version": "1.4.1"
+}

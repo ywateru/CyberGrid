@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "RustCrypto Developers"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "fd307490d624467aa6f74b0eabb77633d1f758a7b25f12bceb0b22e08d9726f6",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "base16ct",
+  "repository": "https://github.com/RustCrypto/formats",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "base16ct-1.0.0/LICENSE-APACHE",
+      "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "base16ct-1.0.0/LICENSE-MIT",
+      "sha256": "54fb6dfe99a6906f862aa40282f0e8e9d9d0f22d57d99ab8acbaf4c8ceaa70e0"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "071bfe69e2010e869397d27c63a88f188bd6477b"
+    },
+    "path_in_vcs": "base16ct"
+  },
+  "version": "1.0.0"
+}

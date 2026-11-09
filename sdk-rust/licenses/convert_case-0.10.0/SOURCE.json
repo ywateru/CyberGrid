@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "rutrum <dave@rutrum.net>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "633458d4ef8c78b72454de2d54fd6ab2e60f9e02be22f3c6104cdc8a4e0fceb9",
+  "declaredLicense": "MIT",
+  "name": "convert_case",
+  "repository": "https://github.com/rutrum/convert-case",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "convert_case-0.10.0/LICENSE",
+      "sha256": "aed7b1758e35afa0cd0fde059d61950747ca11cd0e5e169cb21c11608daed772"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "fbbca84796dfa288d5a7b8673858ca2867c0414a"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.10.0"
+}

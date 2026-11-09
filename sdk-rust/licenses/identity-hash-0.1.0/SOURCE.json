@@ -1,0 +1,33 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "dfdd7caa900436d8f13b2346fe10257e0c05c1f1f9e351f4f5d57c03bd5f45da",
+  "declaredLicense": "Apache-2.0 OR MIT",
+  "name": "identity-hash",
+  "repository": "https://github.com/offsetting/identity-hash",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "identity-hash-0.1.0/LICENSE-APACHE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "identity-hash-0.1.0/LICENSE-MIT",
+      "sha256": "3cfd22c93127a13f0fc1f9f60014026a8e90f1deb9d1abafde096f2b6180324a"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "dd418d46f895cfee897bbeef6b41434524ae0a60"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.1.0"
+}

@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "rklaehn <rklaehn@protonmail.com>",
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "ea06cc588e43c632923a55450401b8f25e628131571d4e1baea1bdfdb2b5ed06",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "sorted-index-buffer",
+  "repository": "https://github.com/n0-computer/iroh",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "sorted-index-buffer-0.2.1/LICENSE-APACHE",
+      "sha256": "903131e2786f073a942fbf8fae122d9e576e4dad758c6da7f9f2ba58fd8611ab"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "sorted-index-buffer-0.2.1/LICENSE-MIT",
+      "sha256": "f169adb8124d3b005416d8485d00777c9a7bdd9099982c52a4493f9732e6d050"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "cb37cc7ca20413e9f2ef44b0c719b21b605b960d"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.2.1"
+}

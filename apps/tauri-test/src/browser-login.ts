@@ -2,6 +2,7 @@ import LogtoClient, {decodeAccessToken, type ClientAdapter, type PersistKey, typ
 import {generateCodeChallenge, generateCodeVerifier, generateState} from '@logto/browser';
 import {invoke} from '@tauri-apps/api/core';
 import {nativeJwtVerifier} from './logto-jwt';
+import {browserLoginFailure, browserStartFailureMessage} from './browser-start-error';
 
 type LabConfig = {baseUrl:string;appId:string;deviceName:string;forceFallback:boolean;cloudflaredPath:string};
 type Transaction = {transactionId:string;generation:number;platform:'desktop'|'android';endpoint:string;issuer:string;appId:string;resource:string;scope:string;redirectUri:string};
@@ -13,7 +14,7 @@ let active = false;
 // A failed IPC acknowledgement must not discard the only remaining JS owner.
 // Native pending escrow survives independently and blocks conflicting starts.
 const unconfirmed = new Map<string, Owner>();
-const safeFailure = '网页登录未完成。请检查授权状态，恢复待处理授权后重试。';
+const safeFailure = browserLoginFailure;
 
 async function trace(phase:string,features?:{abortTimeout:boolean;abortAny:boolean;webCrypto:boolean}):Promise<void>{
   try {await invoke('browser_trace',{phase,features});}catch{/* Diagnostics never change grant ownership. */}
@@ -126,7 +127,8 @@ export async function startBrowserLogin(config: LabConfig): Promise<void> {
       failure = '授权已由本机接管，但私有保存尚未完成。请恢复存储后重试恢复或撤销；此时尚未登录就绪。';
       throw new Error(failure);
     }
-  } catch {
+  } catch (error) {
+    if (!transaction) failure = browserStartFailureMessage(error);
     await trace('failed');
     if (owner && !transferred) {
       unconfirmed.set(owner.transaction.transactionId, owner);

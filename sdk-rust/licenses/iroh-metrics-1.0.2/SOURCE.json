@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "arqu <asmir@n0.computer>",
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "8ede55536349842337f7cdc63012ec33dc637945f3259c98a0763aac364cdf09",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "iroh-metrics",
+  "repository": "https://github.com/n0-computer/iroh-metrics",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "iroh-metrics-1.0.2/LICENSE-APACHE",
+      "sha256": "7953ad8cebf4e01199521a5faa221ef59bec5cee0a9856b179590613a8560cbc"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "iroh-metrics-1.0.2/LICENSE-MIT",
+      "sha256": "339060c99d5c80c2742cae417f765980afe6b0149a78f959bbf2a79f19ab3af5"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "cc42b7d964d502880113e4338f7eb41e3d204ba1"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.0.2"
+}

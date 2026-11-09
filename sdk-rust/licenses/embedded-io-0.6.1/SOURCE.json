@@ -1,0 +1,33 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "embedded-io",
+  "repository": "https://github.com/rust-embedded/embedded-hal",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "embedded-io-0.6.1/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "embedded-io-0.6.1/LICENSE-MIT",
+      "sha256": "47674f8b7d98c232c6f81346c4cfe48933d913a9e257d7a522ad9f42e3dd61e1"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "244f2b929a5f51379e4c910d8ab6cfb58fe049f9"
+    },
+    "path_in_vcs": "embedded-io"
+  },
+  "version": "0.6.1"
+}

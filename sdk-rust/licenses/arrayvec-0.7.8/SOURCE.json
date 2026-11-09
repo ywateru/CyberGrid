@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "bluss"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "d3fb67a6e08acf24fdeccbac2cb6ac4305825bd1f117462e0e6f2f193345ad56",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "arrayvec",
+  "repository": "https://github.com/bluss/arrayvec",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "arrayvec-0.7.8/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "arrayvec-0.7.8/LICENSE-MIT",
+      "sha256": "4da95ec4ecb65b738d470b7d762894ad9c97da93e6cbfb18b570fc2c96f4b871"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "0cb664cf505844348538230479b0040b44f3faf1"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.7.8"
+}

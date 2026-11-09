@@ -1,0 +1,40 @@
+{
+  "authors": [
+    "Griffin O'Neill <gsoneill1003@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "378cfad7ff892555026001b3bb6c2becb98f0aafcd7ddccd5dfa506977f17c8a",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "licenseSelection": {
+    "explanation": "The exact crate and upstream commit declare MIT OR Apache-2.0 but include no original license text. This distribution selects the offered Apache-2.0 alternative and includes the canonical versioned standard text, explicitly not an upstream original. Published authors are retained verbatim from Cargo metadata; no copyright year or notice is invented.",
+    "selectedLicense": "Apache-2.0",
+    "upstreamOriginalLicenseTextAbsent": true
+  },
+  "name": "enum-assoc",
+  "repository": "https://github.com/Eolu/enum-assoc",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "standardized-license-text-not-upstream-original",
+      "path": "enum-assoc-1.4.2/standard-license-text/Apache-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+    },
+    {
+      "origin": "pinned-upstream-license-declaration",
+      "path": "enum-assoc-1.4.2/declared-license-source/Cargo.toml.orig",
+      "sha256": "3b44da589dcb0eec543a22ac562460f2c17bb79b7481d2eb3d5cd64442c92317",
+      "url": "https://raw.githubusercontent.com/Eolu/enum-assoc/5d732f47b429d382daffb0948770adbaa2de0b8c/Cargo.toml"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5d732f47b429d382daffb0948770adbaa2de0b8c"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.4.2"
+}

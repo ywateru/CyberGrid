@@ -3,6 +3,7 @@ import {LogtoIdentity} from './identity.js';
 import {LogtoDirectory} from './directory.js';
 import {coordinatorAuthConfiguration,publicOrigin} from './deployment-config.js';
 import {createService} from './service.js';
+import {browserOrigins} from './console-cors.js';
 export function createConfiguredCoordinator(env:NodeJS.ProcessEnv=process.env){
  const dev=env.CYBERGRID_DEV_MODE==='1';if(dev&&env.NODE_ENV==='production')throw Error('CYBERGRID_DEV_MODE is forbidden in production');
  const issuer=env.LOGTO_ISSUER,browser=env.LOGTO_BROWSER_CLIENT_ID,id=env.LOGTO_MANAGEMENT_CLIENT_ID,secret=env.LOGTO_MANAGEMENT_CLIENT_SECRET;
@@ -11,8 +12,9 @@ export function createConfiguredCoordinator(env:NodeJS.ProcessEnv=process.env){
  const config=coordinatorAuthConfiguration(env);
  const origin=publicOrigin(env.CYBERGRID_PUBLIC_ORIGIN);
  if(dev&&origin&&!['localhost','127.0.0.1','[::1]'].includes(new URL(origin).hostname))throw Error('CYBERGRID_DEV_MODE requires loopback request origins');
+ const origins=browserOrigins(env.CYBERGRID_BROWSER_ORIGINS);
  const store=new MemoryStore(limits);
- const handle=createService({store,identity:new LogtoIdentity(config),directory:new LogtoDirectory({issuer,clientId:id,clientSecret:secret}),browserClientId:browser,devMode:dev,adminKey:env.CYBERGRID_ADMIN_KEY});
+ const handle=createService({store,identity:new LogtoIdentity(config),directory:new LogtoDirectory({issuer,clientId:id,clientSecret:secret}),browserClientId:browser,devMode:dev,adminKey:env.CYBERGRID_ADMIN_KEY,browserOrigins:origins});
  return {handle,store,close:()=>store.close()};
 }
 export function createConfiguredService(env:NodeJS.ProcessEnv=process.env){return createConfiguredCoordinator(env).handle;}

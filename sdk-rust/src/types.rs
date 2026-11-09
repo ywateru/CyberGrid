@@ -9,6 +9,10 @@ pub struct Config {
     pub base_url: String,
     pub app_id: String,
     pub direct_timeout: Duration,
+    pub direct_strategy: DirectStrategy,
+    /// Enable only direct-IP iroh QUIC; no relay or address lookup service.
+    pub iroh_enabled: bool,
+    pub iroh_timeout: Duration,
     pub fallback_timeout: Duration,
     pub poll_interval: Duration,
     pub stun_servers: Vec<String>,
@@ -22,6 +26,9 @@ impl Default for Config {
             base_url: "https://cybergrid.aixgg.com".into(),
             app_id: String::new(),
             direct_timeout: Duration::from_secs(12),
+            direct_strategy: DirectStrategy::Sequential,
+            iroh_enabled: true,
+            iroh_timeout: Duration::from_secs(8),
             fallback_timeout: Duration::from_secs(35),
             poll_interval: Duration::from_secs(1),
             stun_servers: vec![
@@ -108,7 +115,11 @@ pub(crate) fn validate_config(c: &mut Config) -> Result<()> {
                 .into(),
         ));
     }
-    if c.direct_timeout.is_zero() || c.fallback_timeout.is_zero() || c.poll_interval.is_zero() {
+    if c.direct_timeout.is_zero()
+        || c.iroh_timeout.is_zero()
+        || c.fallback_timeout.is_zero()
+        || c.poll_interval.is_zero()
+    {
         return Err(Error::Config("timeouts must be positive".into()));
     }
     if c.stun_servers.iter().any(|s| !s.starts_with("stun:")) {
@@ -121,6 +132,8 @@ pub(crate) fn validate_config(c: &mut Config) -> Result<()> {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Port {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tunnel_url: Option<String>,
     pub id: String,
     pub port: u16,
     #[serde(rename = "type")]
@@ -130,6 +143,7 @@ pub struct Port {
 impl Port {
     pub fn tcp(id: impl Into<String>, port: u16, type_: impl Into<String>) -> Self {
         Self {
+            tunnel_url: None,
             id: id.into(),
             port,
             type_: type_.into(),
@@ -137,6 +151,9 @@ impl Port {
         }
     }
     pub(crate) fn validate(&self) -> Result<()> {
+        if let Some(url) = &self.tunnel_url {
+            crate::validate_tunnel_url(url)?;
+        }
         if self.id.is_empty()
             || self.id.len() > 64
             || self.port == 0
@@ -153,6 +170,8 @@ impl Port {
 #[serde(rename_all = "camelCase")]
 pub struct Device {
     #[serde(default)]
+    pub iroh: Option<IrohInfo>,
+    #[serde(default)]
     pub incarnation: String,
     #[serde(default)]
     pub publish_revision: u64,
@@ -163,6 +182,100 @@ pub struct Device {
     pub ports: Vec<Port>,
     pub tunnel_url: Option<String>,
     pub certificate_fingerprint: Option<String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct IrohInfo {
+    pub endpoint_id: String,
+    #[serde(deserialize_with = "deserialize_iroh_addresses")]
+    pub addresses: Vec<std::net::SocketAddr>,
+}
+fn deserialize_iroh_addresses<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> std::result::Result<Vec<std::net::SocketAddr>, D::Error> {
+    use serde::de::Error as _;
+    let addresses = Vec::<String>::deserialize(deserializer)?;
+    // SocketAddr discards textual details such as a zero IPv6 scope. Reject
+    // zone syntax before parsing and enforce the wire bound before normalizing.
+    if addresses.len() > 8
+        || serde_json::to_vec(&addresses).map_or(true, |json| json.len() + 94 > 1024)
+    {
+        return Err(D::Error::custom("direct iroh addresses exceed wire limit"));
+    }
+    addresses
+        .into_iter()
+        .map(|address| {
+            if address.contains('%') {
+                return Err(D::Error::custom("iroh IPv6 zones are not permitted"));
+            }
+            address
+                .parse()
+                .map_err(|_| D::Error::custom("iroh requires a numeric socket address"))
+        })
+        .collect()
+}
+impl IrohInfo {
+    pub(crate) fn validate(&self) -> Result<()> {
+        use std::collections::HashSet;
+        if self.endpoint_id.len() != 64
+            || !self
+                .endpoint_id
+                .bytes()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+            || self.addresses.len() > 8
+            || serde_json::to_vec(self).map_or(true, |bytes| bytes.len() > 1024)
+        {
+            return Err(crate::error::protocol("invalid direct iroh metadata"));
+        }
+        let mut seen = HashSet::new();
+        for addr in &self.addresses {
+            if !canonical_iroh_address(*addr).is_some_and(|addr| seen.insert(addr)) {
+                return Err(crate::error::protocol("invalid direct iroh address"));
+            }
+        }
+        Ok(())
+    }
+}
+
+impl Config {
+    pub(crate) fn connection_budget(&self) -> Duration {
+        let iroh = if self.iroh_enabled && self.interface_name.is_none() {
+            self.iroh_timeout
+        } else {
+            Duration::ZERO
+        };
+        let direct = match self.direct_strategy {
+            DirectStrategy::Sequential => self.direct_timeout.saturating_add(iroh),
+            DirectStrategy::Parallel => self.direct_timeout.max(iroh),
+        };
+        direct
+            .saturating_add(self.fallback_timeout)
+            .saturating_add(Duration::from_secs(2))
+            .min(Duration::from_secs(90))
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum DirectStrategy {
+    #[default]
+    Sequential,
+    Parallel,
+}
+
+pub(crate) fn canonical_iroh_address(
+    mut addr: std::net::SocketAddr,
+) -> Option<std::net::SocketAddr> {
+    if let std::net::SocketAddr::V6(v6) = addr {
+        if v6.scope_id() != 0 || v6.flowinfo() != 0 {
+            return None;
+        }
+        if let Some(v4) = v6.ip().to_ipv4_mapped() {
+            addr = std::net::SocketAddr::new(v4.into(), addr.port());
+        }
+    }
+    (addr.port() != 0 && !addr.ip().is_unspecified() && !addr.ip().is_multicast()).then_some(addr)
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct User {

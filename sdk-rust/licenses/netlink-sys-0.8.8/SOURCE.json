@@ -1,0 +1,34 @@
+{
+  "authors": [
+    "Corentin Henry <corentinhenry@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "cd6c30ed10fa69cc491d491b85cc971f6bdeb8e7367b7cde2ee6cc878d583fae",
+  "declaredLicense": "MIT",
+  "name": "netlink-sys",
+  "repository": "https://github.com/rust-netlink/netlink-sys",
+  "targets": [
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": ".github/workflows/license.yml",
+      "origin": "cargo-registry-cache",
+      "path": "netlink-sys-0.8.8/.github/workflows/license.yml",
+      "sha256": "9cd18ebe3dd0ef7dd60b56f70933399d0fd1d0029f0e88c8e8e8b333d1dd15c2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "netlink-sys-0.8.8/LICENSE-MIT",
+      "sha256": "964a53330f9cd970c1790311024281a994644f9b554ff6d37e233672287bf767"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "7b2743a514f88127c76de2567fd4e6c7d89e00ff"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.8.8"
+}

@@ -1,0 +1,23 @@
+{
+  "authors": [
+    "Eric Kidd <git@randomhacks.net>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "6d43a04d8753f35258c91f8ec639f792891f748a1edbd759cf1dcea3382ad83c",
+  "declaredLicense": "Apache-2.0/MIT",
+  "name": "cesu8",
+  "repository": "https://github.com/emk/cesu8-rs",
+  "targets": [
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "COPYRIGHT-RUST.txt",
+      "origin": "cargo-registry-cache",
+      "path": "cesu8-1.1.0/COPYRIGHT-RUST.txt",
+      "sha256": "5ca77347e58205d3b543c04a9c5bdd11d20a9f3108a7b246640edffa999b5f35"
+    }
+  ],
+  "vcs": null,
+  "version": "1.1.0"
+}

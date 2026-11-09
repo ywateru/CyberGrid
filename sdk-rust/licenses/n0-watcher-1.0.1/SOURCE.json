@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "dignifiedquire <me@dignifiedquire.com>",
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "64bf1ecb076a87e0e3f5edcf726e7d29e788c273bb0161ba30666b53f085906c",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "n0-watcher",
+  "repository": "https://github.com/n0-computer/n0-watcher",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "n0-watcher-1.0.1/LICENSE-APACHE",
+      "sha256": "7953ad8cebf4e01199521a5faa221ef59bec5cee0a9856b179590613a8560cbc"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "n0-watcher-1.0.1/LICENSE-MIT",
+      "sha256": "339060c99d5c80c2742cae417f765980afe6b0149a78f959bbf2a79f19ab3af5"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "aa31af3695c3326f687ad1f096ce81a71d0265ec"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.0.1"
+}

@@ -217,6 +217,41 @@
     },
     {
       "authors": [
+        "bluss"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "d3fb67a6e08acf24fdeccbac2cb6ac4305825bd1f117462e0e6f2f193345ad56",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "arrayvec",
+      "repository": "https://github.com/bluss/arrayvec",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "arrayvec-0.7.8/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "arrayvec-0.7.8/LICENSE-MIT",
+          "sha256": "4da95ec4ecb65b738d470b7d762894ad9c97da93e6cbfb18b570fc2c96f4b871"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "0cb664cf505844348538230479b0040b44f3faf1"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.7.8"
+    },
+    {
+      "authors": [
         "Pierre Chifflier <chifflier@wzdftpd.net>"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -557,6 +592,33 @@
       "version": "0.5.6"
     },
     {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "cffb0e931875b666fc4fcb20fee52e9bbd1ef836fd9e9e04ec21555f9f85f7ef",
+      "declaredLicense": "Apache-2.0",
+      "name": "backon",
+      "repository": "https://github.com/Xuanwo/backon",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "backon-1.6.0/LICENSE",
+          "sha256": "3e16583bb85121134f781623f64f72481a617f3c295182e60728804b05f0aeda"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "e24dc92742e201f7320868d46a12ff59eb82ef72"
+        },
+        "path_in_vcs": "backon"
+      },
+      "version": "1.6.0"
+    },
+    {
       "authors": [
         "RustCrypto Developers"
       ],
@@ -590,6 +652,41 @@
         "path_in_vcs": "base16ct"
       },
       "version": "0.2.0"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "fd307490d624467aa6f74b0eabb77633d1f758a7b25f12bceb0b22e08d9726f6",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "base16ct",
+      "repository": "https://github.com/RustCrypto/formats",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "base16ct-1.0.0/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "base16ct-1.0.0/LICENSE-MIT",
+          "sha256": "54fb6dfe99a6906f862aa40282f0e8e9d9d0f22d57d99ab8acbaf4c8ceaa70e0"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "071bfe69e2010e869397d27c63a88f188bd6477b"
+        },
+        "path_in_vcs": "base16ct"
+      },
+      "version": "1.0.0"
     },
     {
       "authors": [
@@ -833,6 +930,48 @@
     },
     {
       "authors": [
+        "Jack O'Connor <oconnor663@gmail.com>",
+        "Samuel Neves"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "6d9e454fc11f76977dc803893aff6304ed33d6a26efae8696573bea74baa27ae",
+      "declaredLicense": "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception",
+      "name": "blake3",
+      "repository": "https://github.com/BLAKE3-team/BLAKE3",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE_A2",
+          "origin": "cargo-registry-cache",
+          "path": "blake3-1.8.7/LICENSE_A2",
+          "sha256": "00fcc7a934ddbc9ece2a7cc063ac788e284b703b1d705ccbba72d462aa97921e"
+        },
+        {
+          "cratePath": "LICENSE_A2LLVM",
+          "origin": "cargo-registry-cache",
+          "path": "blake3-1.8.7/LICENSE_A2LLVM",
+          "sha256": "a5695f57ea0c221e0e8b7d784ff774c35e88c3d3270353646a925880bb3492cc"
+        },
+        {
+          "cratePath": "LICENSE_CC0",
+          "origin": "cargo-registry-cache",
+          "path": "blake3-1.8.7/LICENSE_CC0",
+          "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "f3149ec5bb5449af877ba20377a11008ff499fa2"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.8.7"
+    },
+    {
+      "authors": [
         "RustCrypto Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -871,6 +1010,41 @@
         "RustCrypto Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "d2f6c7dbe95a6ed67ad9f18e57daf93a2f034c524b99fd2b76d18fdfeb6660aa",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "block-buffer",
+      "repository": "https://github.com/RustCrypto/utils",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "block-buffer-0.12.1/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "block-buffer-0.12.1/LICENSE-MIT",
+          "sha256": "98181e7249d0c01737645ec982499ce99a0f07eb8f7d625b8840d799d10dbc01"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "cbd0963c685df025c42bed31f78c50d1bada3805"
+        },
+        "path_in_vcs": "block-buffer"
+      },
+      "version": "0.12.1"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
       "crateChecksum": "a8894febbff9f758034a5b8e12d87918f56dfc64a8e1fe757d65e29041538d93",
       "declaredLicense": "MIT OR Apache-2.0",
       "name": "block-padding",
@@ -900,6 +1074,34 @@
         "path_in_vcs": "block-padding"
       },
       "version": "0.3.3"
+    },
+    {
+      "authors": [
+        "Mads Marquart <mads@marquart.dk>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "cdeb9d870516001442e364c5220d3574d2da8dc765554b4a617230d33fa58ef5",
+      "declaredLicense": "MIT",
+      "name": "block2",
+      "repository": "https://github.com/madsmtm/objc2",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "block2-0.6.2/upstream-repository-root/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/b4167b582b2f75f9a1be75495c41b765344fd03c/LICENSE.md"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "b4167b582b2f75f9a1be75495c41b765344fd03c"
+        },
+        "path_in_vcs": "crates/block2"
+      },
+      "version": "0.6.2"
     },
     {
       "authors": [
@@ -1074,6 +1276,29 @@
         "path_in_vcs": "ccm"
       },
       "version": "0.5.0"
+    },
+    {
+      "authors": [
+        "Eric Kidd <git@randomhacks.net>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "6d43a04d8753f35258c91f8ec639f792891f748a1edbd759cf1dcea3382ad83c",
+      "declaredLicense": "Apache-2.0/MIT",
+      "name": "cesu8",
+      "repository": "https://github.com/emk/cesu8-rs",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "COPYRIGHT-RUST.txt",
+          "origin": "cargo-registry-cache",
+          "path": "cesu8-1.1.0/COPYRIGHT-RUST.txt",
+          "sha256": "5ca77347e58205d3b543c04a9c5bdd11d20a9f3108a7b246640edffa999b5f35"
+        }
+      ],
+      "vcs": null,
+      "version": "1.1.0"
     },
     {
       "authors": [
@@ -1311,6 +1536,140 @@
         "RustCrypto Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "0c9ea0ac24bc397ab3c98583a3c9ba74fa56b09a4449bbe172b9b1ddb016027a",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "cmov",
+      "repository": "https://github.com/RustCrypto/utils",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "cmov-0.5.4/LICENSE-APACHE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "cmov-0.5.4/LICENSE-MIT",
+          "sha256": "70c9d40f1f9545c3f133b8a67206e89da850f6468eed072281bb3701514114a9"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "5c7e4f9bb31af81bf766360e836b6d633b84dbff"
+        },
+        "path_in_vcs": "cmov"
+      },
+      "version": "0.5.4"
+    },
+    {
+      "authors": [
+        "Allen Welkie <>",
+        "James Munns <james@onevariable.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "0fa961b519f0b462e3a3b4a34b64d119eeaca1d59af726fe450bbba07a9fc0a1",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "cobs",
+      "repository": "https://github.com/jamesmunns/cobs.rs",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "cobs-0.3.0/LICENSE-APACHE",
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "cobs-0.3.0/LICENSE-MIT",
+          "sha256": "e0cfa1006a64520633de6bfbf563f5b1bea04ef0c5b73f049681931fa297dda3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "b86d5c1ace3d8c311d1db143f05f8083743700d1"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.3.0"
+    },
+    {
+      "authors": [
+        "Markus Westerlind <marwes91@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "4356eba6976435498d05a311ee9fc486da3bc81c200d3f0d7dd9703b41913f92",
+      "declaredLicense": "MIT",
+      "name": "combine",
+      "repository": "https://github.com/Marwes/combine",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "combine-4.6.9/LICENSE",
+          "sha256": "9bbc1b3dc4674a9ebb12c2a62f54fe3c08672539717f8d05828f684b6cc419a3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "a2da738ca628bb2e2ef9881fce8e35cbafc455b2"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "4.6.9"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "a6ef517f0926dd24a1582492c791b6a4818a4d94e789a334894aa15b0d12f55c",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "const-oid",
+      "repository": "https://github.com/RustCrypto/formats",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "const-oid-0.10.2/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "const-oid-0.10.2/LICENSE-MIT",
+          "sha256": "73b9dc2e79c7308998dd30296e073aefaefb944a68fb89aa412c23c0edcabcaa"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "385ef739bcec785472c7c971c57f26f87caca3b8"
+        },
+        "path_in_vcs": "const-oid"
+      },
+      "version": "0.10.2"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
       "crateChecksum": "c2459377285ad874054d797f3ccebf984978aa39129f6eafde5cdc8315b612f8",
       "declaredLicense": "Apache-2.0 OR MIT",
       "name": "const-oid",
@@ -1340,6 +1699,139 @@
         "path_in_vcs": "const-oid"
       },
       "version": "0.9.6"
+    },
+    {
+      "authors": [
+        "Cesar Eduardo Barros <cesarb@cesarb.eti.br>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "3d52eff69cd5e647efe296129160853a42795992097e8af39800e1060caeea9b",
+      "declaredLicense": "CC0-1.0 OR MIT-0 OR Apache-2.0",
+      "name": "constant_time_eq",
+      "repository": "https://github.com/cesarb/constant_time_eq",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "constant_time_eq-0.4.2/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "cratePath": "LICENSE-CC0",
+          "origin": "cargo-registry-cache",
+          "path": "constant_time_eq-0.4.2/LICENSE-CC0",
+          "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+        },
+        {
+          "cratePath": "LICENSE-MIT0",
+          "origin": "cargo-registry-cache",
+          "path": "constant_time_eq-0.4.2/LICENSE-MIT0",
+          "sha256": "9a3aeb3f63659c4c6302d315e1d98784d1e8559858a47ff9562e091bb922d28d"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "86f38ed9ad4d0500c5472bb8cb2ddc4fe5ac7143"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.4.2"
+    },
+    {
+      "authors": [
+        "rutrum <dave@rutrum.net>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "633458d4ef8c78b72454de2d54fd6ab2e60f9e02be22f3c6104cdc8a4e0fceb9",
+      "declaredLicense": "MIT",
+      "name": "convert_case",
+      "repository": "https://github.com/rutrum/convert-case",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "convert_case-0.10.0/LICENSE",
+          "sha256": "aed7b1758e35afa0cd0fde059d61950747ca11cd0e5e169cb21c11608daed772"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "fbbca84796dfa288d5a7b8673858ca2867c0414a"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.10.0"
+    },
+    {
+      "authors": [
+        "Eliza Weisman <eliza@elizas.website>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "5b9ab7e0ca1d179628fa0172b2b97203c7fa0cd81be2448bd446fb9559ca9261",
+      "declaredLicense": "MIT",
+      "name": "cordyceps",
+      "repository": "https://github.com/hawkw/mycelium",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "cordyceps-0.3.5/LICENSE",
+          "sha256": "d35f1d27734ebad4bd592c04709bb1fd666a0aeb65af5799fb911a55393bf362"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "6c6e4667beafef96123f0acbadf17d98d385c507"
+        },
+        "path_in_vcs": "cordyceps"
+      },
+      "version": "0.3.5"
+    },
+    {
+      "authors": [
+        "The Servo Project Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "b2a6cd9ae233e7f62ba4e9353e81a88df7fc8a5987b8d445b4d90c879bd156f6",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "core-foundation",
+      "repository": "https://github.com/servo/core-foundation-rs",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "core-foundation-0.10.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "core-foundation-0.10.1/LICENSE-MIT",
+          "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "548b65cd3046bb46fc5cebb9f39e7bfd56eaeaa2"
+        },
+        "path_in_vcs": "core-foundation"
+      },
+      "version": "0.10.1"
     },
     {
       "authors": [
@@ -1409,6 +1901,41 @@
         "path_in_vcs": "cpufeatures"
       },
       "version": "0.2.17"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "5ca28b0ae3115b884660db4118d803791fd6756b6e88f39c0f3f7859060d7566",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "cpufeatures",
+      "repository": "https://github.com/RustCrypto/utils",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "cpufeatures-0.3.1/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "cpufeatures-0.3.1/LICENSE-MIT",
+          "sha256": "73b9dc2e79c7308998dd30296e073aefaefb944a68fb89aa412c23c0edcabcaa"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "e3ac92bfd33051e146025baa2d0ce79891b7fc73"
+        },
+        "path_in_vcs": "cpufeatures"
+      },
+      "version": "0.3.1"
     },
     {
       "authors": [
@@ -1556,6 +2083,41 @@
         "RustCrypto Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "crypto-common",
+      "repository": "https://github.com/RustCrypto/traits",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "crypto-common-0.2.2/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "crypto-common-0.2.2/LICENSE-MIT",
+          "sha256": "d2e7ec5355c96eeade56b09187ceb48a6a30299da3ce7531a66d3d11405ab963"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "93dee26c6bde3741a197f1c5f6b7baac277705f3"
+        },
+        "path_in_vcs": "crypto-common"
+      },
+      "version": "0.2.2"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
       "crateChecksum": "0369ee1ad671834580515889b80f2ea915f23b8be8d0daa4bbaf2ac5c7590835",
       "declaredLicense": "MIT OR Apache-2.0",
       "name": "ctr",
@@ -1588,6 +2150,41 @@
     },
     {
       "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "261af4dc7a06ea8a527a8717d8cbba3417530d6ea14e1edb3de6b67806be474f",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "ctutils",
+      "repository": "https://github.com/RustCrypto/utils",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "ctutils-0.4.8/LICENSE-APACHE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "ctutils-0.4.8/LICENSE-MIT",
+          "sha256": "91585c36e4fb9ab4ca0d3dfac5d66d3c0c62cc51f640a0e1196542daf2267eae"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "ddefdcacb3414980b5105a967a1413eaaf385541"
+        },
+        "path_in_vcs": "ctutils"
+      },
+      "version": "0.4.8"
+    },
+    {
+      "authors": [
         "Isis Lovecruft <isis@patternsinthevoid.net>",
         "Henry de Valence <hdevalence@hdevalence.ca>"
       ],
@@ -1617,6 +2214,36 @@
       "version": "4.1.3"
     },
     {
+      "authors": [
+        "Isis Lovecruft <isis@patternsinthevoid.net>",
+        "Henry de Valence <hdevalence@hdevalence.ca>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "b5eed333089e2e1c1ac8c6c0398e5e2497b4c9926ca6d0365ed1e099afa5bc23",
+      "declaredLicense": "BSD-3-Clause",
+      "name": "curve25519-dalek",
+      "repository": "https://github.com/dalek-cryptography/curve25519-dalek/tree/main/curve25519-dalek",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "curve25519-dalek-5.0.0/LICENSE",
+          "sha256": "403c53069750101aeb9df7e15f127056ceaf7e4e92d0b919a1f4c084afd5f1d4"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "07bef73ff85998a206cd2cea7f2605c801d0d1c9"
+        },
+        "path_in_vcs": "curve25519-dalek"
+      },
+      "version": "5.0.0"
+    },
+    {
       "authors": [],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
       "crateChecksum": "4583a4551df46e2792f82ceeac45e850d2e2d5debba0b91f102385cda5b11f06",
@@ -1642,6 +2269,60 @@
         "path_in_vcs": "lib"
       },
       "version": "2.11.1"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "c6a127ecbb3c4632e1525380e04c0c3fcf8dcb44d32a79ea290d8a36906edcd8",
+      "declaredLicense": "MIT",
+      "name": "data-encoding-macro",
+      "repository": "https://github.com/ia0/data-encoding",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "data-encoding-macro-0.1.21/LICENSE",
+          "sha256": "b68ad1a3367b825447089e1f8d6829b97f47a89eb78d2f4ebaef4672f5606186"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "834737d9c3dc957ce1b653959e3f35061dd77ade"
+        },
+        "path_in_vcs": "lib/macro"
+      },
+      "version": "0.1.21"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "c54e03a951783e8b327515db3f2a2fd0e3bed362a96b066f341ce66ed49b4ead",
+      "declaredLicense": "MIT",
+      "name": "data-encoding-macro-internal",
+      "repository": "https://github.com/ia0/data-encoding",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "data-encoding-macro-internal-0.1.19/LICENSE",
+          "sha256": "b68ad1a3367b825447089e1f8d6829b97f47a89eb78d2f4ebaef4672f5606186"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "834737d9c3dc957ce1b653959e3f35061dd77ade"
+        },
+        "path_in_vcs": "lib/macro/internal"
+      },
+      "version": "0.1.19"
     },
     {
       "authors": [
@@ -1677,6 +2358,41 @@
         "path_in_vcs": "der"
       },
       "version": "0.7.10"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "6a996a108feb8b427a6e12fcf6af4aa83409b79d72c15337d7741368131ee004",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "der",
+      "repository": "https://github.com/RustCrypto/formats",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "der-0.8.3/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "der-0.8.3/LICENSE-MIT",
+          "sha256": "73b9dc2e79c7308998dd30296e073aefaefb944a68fb89aa412c23c0edcabcaa"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "ea3b305a38f96c03b49a54c9ec54ef2a2ca04629"
+        },
+        "path_in_vcs": "der"
+      },
+      "version": "0.8.3"
     },
     {
       "authors": [
@@ -1785,6 +2501,99 @@
     },
     {
       "authors": [
+        "Jelte Fennema <github-tech@jeltef.nl>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "d751e9e49156b02b44f9c1815bcb94b984cdcc4396ecc32521c739452808b134",
+      "declaredLicense": "MIT",
+      "name": "derive_more",
+      "repository": "https://github.com/JelteF/derive_more",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "derive_more-2.1.1/LICENSE",
+          "sha256": "8a35369f3ca263b3c62fbb5032947e53b6bfebc6c8a4d1bb982de1c069f6fba5"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "f7bb41ac054c060caaf5ff3212e74e42794cb4b4"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "2.1.1"
+    },
+    {
+      "authors": [
+        "Jelte Fennema <github-tech@jeltef.nl>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "799a97264921d8623a957f6c3b9011f3b5492f557bbb7a5a19b7fa6d06ba8dcb",
+      "declaredLicense": "MIT",
+      "name": "derive_more-impl",
+      "repository": "https://github.com/JelteF/derive_more",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "derive_more-impl-2.1.1/LICENSE",
+          "sha256": "8a35369f3ca263b3c62fbb5032947e53b6bfebc6c8a4d1bb982de1c069f6fba5"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "f7bb41ac054c060caaf5ff3212e74e42794cb4b4"
+        },
+        "path_in_vcs": "impl"
+      },
+      "version": "2.1.1"
+    },
+    {
+      "authors": [
+        "Asynchronics and contributors"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "ab03c107fafeb3ee9f5925686dbb7a73bc76e3932abb0d2b365cb64b169cf04c",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "diatomic-waker",
+      "repository": "https://github.com/asynchronics/diatomic-waker",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "diatomic-waker-0.2.3/LICENSE-APACHE",
+          "sha256": "97345ce38907b2d685c97211a85e50b994725530af4540198f1ff4e45cfaedf7"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "diatomic-waker-0.2.3/LICENSE-MIT",
+          "sha256": "9b7c8198d989e8f94fb137366d26696f2934bebbcac9b3594ee2e6ec5c47c4d1"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "b8011c29016e4c3409c619d6fff6ed6e8699ab35"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.2.3"
+    },
+    {
+      "authors": [
         "RustCrypto Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -1820,6 +2629,70 @@
     },
     {
       "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "digest",
+      "repository": "https://github.com/RustCrypto/traits",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "digest-0.11.3/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "digest-0.11.3/LICENSE-MIT",
+          "sha256": "af59cea35d7f5e2777a713b8d155d65efa2c339eb43f3c14e868c6ac8506edad"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "2fb9ed8922e244117040bb037a7d141a6a2b8228"
+        },
+        "path_in_vcs": "digest"
+      },
+      "version": "0.11.3"
+    },
+    {
+      "authors": [
+        "Mads Marquart <mads@marquart.dk>",
+        "Mary <mary@mary.zone>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "1e0e367e4e7da84520dedcac1901e4da967309406d1e51017ae1abfb97adbd38",
+      "declaredLicense": "Zlib OR Apache-2.0 OR MIT",
+      "name": "dispatch2",
+      "repository": "https://github.com/madsmtm/objc2",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "dispatch2-0.3.1/upstream-repository-root/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/8852b424193ca41602281b3d7540d7c8ed51e49a/LICENSE.md"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "8852b424193ca41602281b3d7540d7c8ed51e49a"
+        },
+        "path_in_vcs": "crates/dispatch2"
+      },
+      "version": "0.3.1"
+    },
+    {
+      "authors": [
         "Jane Lusby <jlusby@yaah.dev>"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -1852,6 +2725,36 @@
         "path_in_vcs": ""
       },
       "version": "0.2.7"
+    },
+    {
+      "authors": [
+        "Szymon Wieloch <szymon.wieloch@gmail.com>",
+        "Ahmed Masud <ahmed.masud@saf.ai>",
+        "OpenByte <development.openbyte@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "5e2c5bd4158e66d1e215c49b837e11d62f3267b30c92f1d171c4d3105e3dc4d4",
+      "declaredLicense": "MIT",
+      "name": "dlopen2",
+      "repository": "https://github.com/OpenByteDev/dlopen2",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "dlopen2-0.8.2/upstream-repository-root/LICENSE",
+          "sha256": "39fa265207450e77c62e90c5594a06c085b655d8374c7ced4bf7894b6bd95dd2",
+          "url": "https://raw.githubusercontent.com/OpenByteDev/dlopen2/cc80e4a0a90d499b677fdf7743699b4b3a43a989/LICENSE"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "cc80e4a0a90d499b677fdf7743699b4b3a43a989"
+        },
+        "path_in_vcs": "dlopen2"
+      },
+      "version": "0.8.2"
     },
     {
       "authors": [
@@ -1928,6 +2831,72 @@
         "RustCrypto Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "29fcf32e6c73d1079f83ab4d782de2d81620346a5f38c6237a86a22f8368980a",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "ed25519",
+      "repository": "https://github.com/RustCrypto/signatures",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "ed25519-3.0.0/LICENSE-APACHE",
+          "sha256": "78779d420019e6b4630376af8e86b6b335ee8a2f89ede6e0411e0469a326aaa4"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "ed25519-3.0.0/LICENSE-MIT",
+          "sha256": "9aa4f92bfcde293ebeca9e2379fa18d1d61f000977da144c7b74c2986c9b6466"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "f2b087c0f38fa67b62ad1bc16a2ea62a80227fc9"
+        },
+        "path_in_vcs": "ed25519"
+      },
+      "version": "3.0.0"
+    },
+    {
+      "authors": [
+        "isis lovecruft <isis@patternsinthevoid.net>",
+        "Tony Arcieri <bascule@gmail.com>",
+        "Michael Rosenberg <michael@mrosenberg.pub>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "6ebaa1a2bf1290ab3bfe5a7b771d050ebffab2711c19a81691c683a5144a25de",
+      "declaredLicense": "BSD-3-Clause",
+      "name": "ed25519-dalek",
+      "repository": "https://github.com/dalek-cryptography/curve25519-dalek/tree/main/ed25519-dalek",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "ed25519-dalek-3.0.0/LICENSE",
+          "sha256": "7a313964a6e050794d2ad57f4863c11f6bbe055c0ae6ce2cf3b9fc45150bada3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "07bef73ff85998a206cd2cea7f2605c801d0d1c9"
+        },
+        "path_in_vcs": "ed25519-dalek"
+      },
+      "version": "3.0.0"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
       "crateChecksum": "b5e6043086bf7973472e0c7dff2142ea0b680d30e18d9cc40f267efbf222bd47",
       "declaredLicense": "Apache-2.0 OR MIT",
       "name": "elliptic-curve",
@@ -1957,6 +2926,140 @@
         "path_in_vcs": "elliptic-curve"
       },
       "version": "0.13.8"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "ef1a6892d9eef45c8fa6b9e0086428a2cca8491aca8f787c534a3d6d0bcb3ced",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "embedded-io",
+      "repository": "https://github.com/embassy-rs/embedded-io",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "embedded-io-0.4.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "embedded-io-0.4.0/LICENSE-MIT",
+          "sha256": "423e1c4900b3fbb41cda3e34530b2597d50c2e61473e18c085756c507e46fe1c"
+        }
+      ],
+      "vcs": null,
+      "version": "0.4.0"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "embedded-io",
+      "repository": "https://github.com/rust-embedded/embedded-hal",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "embedded-io-0.6.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "embedded-io-0.6.1/LICENSE-MIT",
+          "sha256": "47674f8b7d98c232c6f81346c4cfe48933d913a9e257d7a522ad9f42e3dd61e1"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "244f2b929a5f51379e4c910d8ab6cfb58fe049f9"
+        },
+        "path_in_vcs": "embedded-io"
+      },
+      "version": "0.6.1"
+    },
+    {
+      "authors": [
+        "Griffin O'Neill <gsoneill1003@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "378cfad7ff892555026001b3bb6c2becb98f0aafcd7ddccd5dfa506977f17c8a",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "licenseSelection": {
+        "explanation": "The exact crate and upstream commit declare MIT OR Apache-2.0 but include no original license text. This distribution selects the offered Apache-2.0 alternative and includes the canonical versioned standard text, explicitly not an upstream original. Published authors are retained verbatim from Cargo metadata; no copyright year or notice is invented.",
+        "selectedLicense": "Apache-2.0",
+        "upstreamOriginalLicenseTextAbsent": true
+      },
+      "name": "enum-assoc",
+      "repository": "https://github.com/Eolu/enum-assoc",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "standardized-license-text-not-upstream-original",
+          "path": "enum-assoc-1.4.2/standard-license-text/Apache-2.0.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+        },
+        {
+          "origin": "pinned-upstream-license-declaration",
+          "path": "enum-assoc-1.4.2/declared-license-source/Cargo.toml.orig",
+          "sha256": "3b44da589dcb0eec543a22ac562460f2c17bb79b7481d2eb3d5cd64442c92317",
+          "url": "https://raw.githubusercontent.com/Eolu/enum-assoc/5d732f47b429d382daffb0948770adbaa2de0b8c/Cargo.toml"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "5d732f47b429d382daffb0948770adbaa2de0b8c"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.4.2"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "00d174d5400e5e8fd687ad1049e2f578285fa914201b1af7e8b112a4546bd826",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "equivalent",
+      "repository": "https://github.com/indexmap-rs/equivalent",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "equivalent-1.0.3/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "equivalent-1.0.3/LICENSE-MIT",
+          "sha256": "7365cc8878a1d7ce155a58c4ca09c3d7a6be413efa5334a80ea842912b669349"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "4ee88130bd4ab3229e785533da2af641be22deac"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.0.3"
     },
     {
       "authors": [
@@ -2099,6 +3202,70 @@
     },
     {
       "authors": [
+        "bluss"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "5905ec755cc8386d7928353e4d356d2be3e89e81e5ca01fe630a1ca4d08dc175",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "fixedbitset",
+      "repository": "https://github.com/petgraph/fixedbitset",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "fixedbitset-0.5.9/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "fixedbitset-0.5.9/LICENSE-MIT",
+          "sha256": "ce592787ff2321feab698a4c612237f4378cc658ebb1d472913e5802cc47afb4"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "c2aa9b71f6255699ef79788ecc29c31a777aca98"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.5.9"
+    },
+    {
+      "authors": [
+        "Orson Peters <orsonpeters@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb",
+      "declaredLicense": "Zlib",
+      "name": "foldhash",
+      "repository": "https://github.com/orlp/foldhash",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "foldhash-0.2.0/LICENSE",
+          "sha256": "b1181a40b2a7b25cf66fd01481713bc1005df082c53ef73e851e55071b102744"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "8f878c636fda9c9e93384824ea45e06d03f009f5"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.2.0"
+    },
+    {
+      "authors": [
         "The rust-url developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -2195,6 +3362,35 @@
         "path_in_vcs": "futures"
       },
       "version": "0.3.34"
+    },
+    {
+      "authors": [
+        "Conrad Ludgate <conradludgate@gmail.com"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "1bf9d35e4228d3bef48dfd0ceb615166ee3eb869a5bfc1923d7d47340a1e5684",
+      "declaredLicense": "MIT",
+      "name": "futures-buffered",
+      "repository": "https://github.com/conradludgate/futures-buffered",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "futures-buffered-0.2.14/LICENSE",
+          "sha256": "dd36422306cd0c6e499f153996c655e3be88a575447cf2382c9625ef0d9cca53"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "aba6155e4c672f6787cd6720860f8dab076d0055"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.2.14"
     },
     {
       "authors": [],
@@ -2327,6 +3523,48 @@
         "path_in_vcs": "futures-io"
       },
       "version": "0.3.34"
+    },
+    {
+      "authors": [
+        "Stjepan Glavina <stjepang@gmail.com>",
+        "Contributors to futures-rs"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "f78e10609fe0e0b3f4157ffab1876319b5b0db102a2c60dc4626306dc46b44ad",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "futures-lite",
+      "repository": "https://github.com/smol-rs/futures-lite",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "futures-lite-2.6.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "futures-lite-2.6.1/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        },
+        {
+          "cratePath": "LICENSE-THIRD-PARTY",
+          "origin": "cargo-registry-cache",
+          "path": "futures-lite-2.6.1/LICENSE-THIRD-PARTY",
+          "sha256": "6226d0632e2e1a80c23597e964da9812ae193c535fe058154afb034e94167aa5"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "226ce18976d8714d6bd9700b61dcc81d7200bc9a"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "2.6.1"
     },
     {
       "authors": [],
@@ -2672,6 +3910,72 @@
       "version": "0.13.0"
     },
     {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "hashbrown",
+      "repository": "https://github.com/rust-lang/hashbrown",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "hashbrown-0.17.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "hashbrown-0.17.1/LICENSE-MIT",
+          "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "c62a63a61b7caf2de8f9ecb7b06a66b0ab6bdf3d"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.17.1"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "heck",
+      "repository": "https://github.com/withoutboats/heck",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "heck-0.5.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "heck-0.5.0/LICENSE-MIT",
+          "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "070693322aee7c5c7fbee7c9964bf8d7d3a29c96"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.5.0"
+    },
+    {
       "authors": [
         "KokaKiwi <kokakiwi@kokakiwi.net>"
       ],
@@ -2945,6 +4249,41 @@
         "path_in_vcs": ""
       },
       "version": "1.0.3"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "27f864f10dfb56725ce5ce5472bc52252c8f93a4ab86327122cebf62c5f59a17",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "hybrid-array",
+      "repository": "https://github.com/RustCrypto/hybrid-array",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "hybrid-array-0.4.15/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "hybrid-array-0.4.15/LICENSE-MIT",
+          "sha256": "70c9d40f1f9545c3f133b8a67206e89da850f6468eed072281bb3701514114a9"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "09310c55b75e2cd408951c7e2e86dba16c63fc68"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.4.15"
     },
     {
       "authors": [
@@ -3284,6 +4623,39 @@
       "version": "2.4.0"
     },
     {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "dfdd7caa900436d8f13b2346fe10257e0c05c1f1f9e351f4f5d57c03bd5f45da",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "identity-hash",
+      "repository": "https://github.com/offsetting/identity-hash",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "identity-hash-0.1.0/LICENSE-APACHE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "identity-hash-0.1.0/LICENSE-MIT",
+          "sha256": "3cfd22c93127a13f0fc1f9f60014026a8e90f1deb9d1abafde096f2b6180324a"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "dd418d46f895cfee897bbeef6b41434524ae0a60"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.1.0"
+    },
+    {
       "authors": [
         "The rust-url developers"
       ],
@@ -3353,6 +4725,39 @@
         "path_in_vcs": ""
       },
       "version": "1.2.2"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "cc4e190f5d26ca7051642629da2c52fc03bde85a03197c99408dcd291734c855",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "indexmap",
+      "repository": "https://github.com/indexmap-rs/indexmap",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "indexmap-2.14.2/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "indexmap-2.14.2/LICENSE-MIT",
+          "sha256": "ecc269ef87fd38a1d98e30bfac9ba964a9dbd9315c3770fed98d4d7cb5882055"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "41a870887c4c77adf665886e63df08f406bfe37a"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "2.14.2"
     },
     {
       "authors": [
@@ -3461,6 +4866,231 @@
     },
     {
       "authors": [
+        "dignifiedquire <me@dignifiedquire.com>",
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "e3689cab508af9bcef7816c1201b403595ec6aa20e7d15e1f9683bb4be4a5b17",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "iroh",
+      "repository": "https://github.com/n0-computer/iroh",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-BSD3",
+          "origin": "cargo-registry-cache",
+          "path": "iroh-1.4.1/LICENSE-BSD3",
+          "sha256": "7c6c032bf8c84fb4cd99784965a39be9e836fb7f244b3cf40c42faf4b211c10a"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "iroh-1.4.1/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "903131e2786f073a942fbf8fae122d9e576e4dad758c6da7f9f2ba58fd8611ab",
+          "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "iroh-1.4.1/upstream-repository-root/LICENSE-MIT",
+          "sha256": "f169adb8124d3b005416d8485d00777c9a7bdd9099982c52a4493f9732e6d050",
+          "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940"
+        },
+        "path_in_vcs": "iroh"
+      },
+      "version": "1.4.1"
+    },
+    {
+      "authors": [
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "43b72366b16001af3a51574233df88ca6d62da0215807549a769e7de887da803",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "iroh-base",
+      "repository": "https://github.com/n0-computer/iroh",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "iroh-base-1.4.1/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "903131e2786f073a942fbf8fae122d9e576e4dad758c6da7f9f2ba58fd8611ab",
+          "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "iroh-base-1.4.1/upstream-repository-root/LICENSE-MIT",
+          "sha256": "f169adb8124d3b005416d8485d00777c9a7bdd9099982c52a4493f9732e6d050",
+          "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940"
+        },
+        "path_in_vcs": "iroh-base"
+      },
+      "version": "1.4.1"
+    },
+    {
+      "authors": [
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "7481d0792dde1035a2b06ec06ed3cf6d01fcb1a494e6931b489e32073382048d",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "iroh-dns",
+      "repository": "https://github.com/n0-computer/iroh",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "iroh-dns-1.4.1/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "903131e2786f073a942fbf8fae122d9e576e4dad758c6da7f9f2ba58fd8611ab",
+          "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "iroh-dns-1.4.1/upstream-repository-root/LICENSE-MIT",
+          "sha256": "f169adb8124d3b005416d8485d00777c9a7bdd9099982c52a4493f9732e6d050",
+          "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940"
+        },
+        "path_in_vcs": "iroh-dns"
+      },
+      "version": "1.4.1"
+    },
+    {
+      "authors": [
+        "arqu <asmir@n0.computer>",
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "8ede55536349842337f7cdc63012ec33dc637945f3259c98a0763aac364cdf09",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "iroh-metrics",
+      "repository": "https://github.com/n0-computer/iroh-metrics",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "iroh-metrics-1.0.2/LICENSE-APACHE",
+          "sha256": "7953ad8cebf4e01199521a5faa221ef59bec5cee0a9856b179590613a8560cbc"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "iroh-metrics-1.0.2/LICENSE-MIT",
+          "sha256": "339060c99d5c80c2742cae417f765980afe6b0149a78f959bbf2a79f19ab3af5"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "cc42b7d964d502880113e4338f7eb41e3d204ba1"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.0.2"
+    },
+    {
+      "authors": [
+        "Frando <franz@n0.computer>",
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "1ae5f0c4405d1fbc9fb16ff422ca40620e93dc36c30ecaba0c2aee3992b7bd48",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "iroh-metrics-derive",
+      "repository": "https://github.com/n0-computer/iroh-metrics",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "iroh-metrics-derive-1.0.1/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "7953ad8cebf4e01199521a5faa221ef59bec5cee0a9856b179590613a8560cbc",
+          "url": "https://raw.githubusercontent.com/n0-computer/iroh-metrics/a9afb7cd49bb3804fffefec61647993851f9b8c8/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "iroh-metrics-derive-1.0.1/upstream-repository-root/LICENSE-MIT",
+          "sha256": "339060c99d5c80c2742cae417f765980afe6b0149a78f959bbf2a79f19ab3af5",
+          "url": "https://raw.githubusercontent.com/n0-computer/iroh-metrics/a9afb7cd49bb3804fffefec61647993851f9b8c8/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "a9afb7cd49bb3804fffefec61647993851f9b8c8"
+        },
+        "path_in_vcs": "iroh-metrics-derive"
+      },
+      "version": "1.0.1"
+    },
+    {
+      "authors": [
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "7e5589e7c1475700686603a970275687f760df853bc6525c7eb1347aa31d7230",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "iroh-relay",
+      "repository": "https://github.com/n0-computer/iroh",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-BSD3",
+          "origin": "cargo-registry-cache",
+          "path": "iroh-relay-1.4.1/LICENSE-BSD3",
+          "sha256": "bcaa9acadee6c20991d4b5eb56e226191411a3f6ceb92587b272f2ef0221ed71"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "iroh-relay-1.4.1/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "903131e2786f073a942fbf8fae122d9e576e4dad758c6da7f9f2ba58fd8611ab",
+          "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "iroh-relay-1.4.1/upstream-repository-root/LICENSE-MIT",
+          "sha256": "f169adb8124d3b005416d8485d00777c9a7bdd9099982c52a4493f9732e6d050",
+          "url": "https://raw.githubusercontent.com/n0-computer/iroh/d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "d6c6963b9602d1b8dd2ba53b6519e7eb19cc7940"
+        },
+        "path_in_vcs": "iroh-relay"
+      },
+      "version": "1.4.1"
+    },
+    {
+      "authors": [
         "David Tolnay <dtolnay@gmail.com>"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -3493,6 +5123,209 @@
         "path_in_vcs": ""
       },
       "version": "1.0.18"
+    },
+    {
+      "authors": [
+        "Josh Chase <josh@prevoty.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "1a87aa2bb7d2af34197c04845522473242e1aa17c12f4935d5856491a7fb8c97",
+      "declaredLicense": "MIT/Apache-2.0",
+      "name": "jni",
+      "repository": "https://github.com/jni-rs/jni-rs",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "jni-0.21.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "jni-0.21.1/LICENSE-MIT",
+          "sha256": "fea1d5bf3dd71605ce5d7d2ff695c1837e914c77195e523a86b5391716477960"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "09a5911358ffa846b5c85451c050a0e64669e863"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.21.1"
+    },
+    {
+      "authors": [
+        "jni team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "5efd9a482cf3a427f00d6b35f14332adc7902ce91efb778580e180ff90fa3498",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "jni",
+      "repository": "https://github.com/jni-rs/jni-rs",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "jni-0.22.4/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "jni-0.22.4/upstream-repository-root/LICENSE-MIT",
+          "sha256": "fea1d5bf3dd71605ce5d7d2ff695c1837e914c77195e523a86b5391716477960",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7"
+        },
+        "path_in_vcs": "crates/jni"
+      },
+      "version": "0.22.4"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "a00109accc170f0bdb141fed3e393c565b6f5e072365c3bd58f5b062591560a3",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "jni-macros",
+      "repository": "https://github.com/jni-rs/jni-rs",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "jni-macros-0.22.4/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/33045a124105c939d1e2cbdcb5a39e5d868ffa03/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "jni-macros-0.22.4/upstream-repository-root/LICENSE-MIT",
+          "sha256": "fea1d5bf3dd71605ce5d7d2ff695c1837e914c77195e523a86b5391716477960",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/33045a124105c939d1e2cbdcb5a39e5d868ffa03/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "33045a124105c939d1e2cbdcb5a39e5d868ffa03"
+        },
+        "path_in_vcs": "crates/jni-macros"
+      },
+      "version": "0.22.4"
+    },
+    {
+      "authors": [
+        "Steven Fackler <sfackler@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "41a652e1f9b6e0275df1f15b32661cf0d4b78d4d87ddec5e0c3c20f097433258",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "jni-sys",
+      "repository": "https://github.com/jni-rs/jni-sys",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "jni-sys-0.3.1/LICENSE-APACHE",
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "jni-sys-0.3.1/LICENSE-MIT",
+          "sha256": "1d85bd754b04ceec93e98e890edd1fa3c6a22e81bcb32135806beeccefa51cd1"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "1985e8bdd087b768032e03bbc8b6cd574a574ffd"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.3.1"
+    },
+    {
+      "authors": [
+        "Steven Fackler <sfackler@gmail.com>",
+        "Robert Bragg <robert@sixbynine.org>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "c6377a88cb3910bee9b0fa88d4f42e1d2da8e79915598f65fb0c7ee14c878af2",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "jni-sys",
+      "repository": "https://github.com/jni-rs/jni-sys",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "jni-sys-0.4.1/LICENSE-APACHE",
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "jni-sys-0.4.1/LICENSE-MIT",
+          "sha256": "1d85bd754b04ceec93e98e890edd1fa3c6a22e81bcb32135806beeccefa51cd1"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "65ea279041232aec345dbd9483b3956c788862aa"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.4.1"
+    },
+    {
+      "authors": [
+        "Robert Bragg <robert@sixbynine.org>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "38c0b942f458fe50cdac086d2f946512305e5631e720728f2a61aabcd47a6264",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "jni-sys-macros",
+      "repository": "https://github.com/jni-rs/jni-sys",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "jni-sys-macros-0.4.1/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-sys/64d77b7a5f119d7b55b4e2c169a4668067ff59e6/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "jni-sys-macros-0.4.1/upstream-repository-root/LICENSE-MIT",
+          "sha256": "1d85bd754b04ceec93e98e890edd1fa3c6a22e81bcb32135806beeccefa51cd1",
+          "url": "https://raw.githubusercontent.com/jni-rs/jni-sys/64d77b7a5f119d7b55b4e2c169a4668067ff59e6/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "64d77b7a5f119d7b55b4e2c169a4668067ff59e6"
+        },
+        "path_in_vcs": "jni-sys-macros"
+      },
+      "version": "0.4.1"
     },
     {
       "authors": [
@@ -3709,6 +5542,35 @@
     },
     {
       "authors": [
+        "Jerome Froelich <jeromefroelic@hotmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "ef9ac18847474e638e3702b76c65d4eb93428471a74778ef0f1be711717f89b5",
+      "declaredLicense": "MIT",
+      "name": "lru",
+      "repository": "https://github.com/jeromefroe/lru-rs.git",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "lru-0.18.5/LICENSE",
+          "sha256": "061dc50af2cd9340703daf61978af3200cf681b12ea67a323c33ba109a23a45e"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "f1e972197053a6814e77b77afacb51f03fc03170"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.18.5"
+    },
+    {
+      "authors": [
         "Benjamin Saunders <ben.e.saunders@gmail.com>"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -3742,6 +5604,35 @@
       ],
       "vcs": null,
       "version": "0.1.3"
+    },
+    {
+      "authors": [
+        "shellrow <shellrow@foctal.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "d3d25b0e0b648a86960ac23b7ad4abb9717601dec6f66c165f5b037f3f03065f",
+      "declaredLicense": "MIT",
+      "name": "mac-addr",
+      "repository": "https://github.com/shellrow/mac-addr",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "mac-addr-0.3.0/LICENSE",
+          "sha256": "0c20ae83d984ec5508a358a90386b000d5b9a2fe15079dd7d39eae4d44cbf922"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "430a623012186dc43c808f171e414c278eb79dd8"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.3.0"
     },
     {
       "authors": [
@@ -3992,6 +5883,521 @@
     },
     {
       "authors": [
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "535c99c9a786bee714155d2ee4fc2477405c2c43536e1bc6a51de09a0d1448f7",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "n0-dns-resolver",
+      "repository": "https://github.com/n0-computer/iroh",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "n0-dns-resolver-0.1.0/LICENSE-APACHE",
+          "sha256": "903131e2786f073a942fbf8fae122d9e576e4dad758c6da7f9f2ba58fd8611ab"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "n0-dns-resolver-0.1.0/LICENSE-MIT",
+          "sha256": "f169adb8124d3b005416d8485d00777c9a7bdd9099982c52a4493f9732e6d050"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "16a791ce8cfd6456518970872ba3251b0756112d"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.1.0"
+    },
+    {
+      "authors": [
+        "Frando <franz@n0.computer>",
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "26c59ea174675ce6bc196878851e5049e11b8b1f9af3ba87e4d6df8d828bb001",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "n0-error",
+      "repository": "https://github.com/n0-computer/n0-error",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "n0-error-1.0.1/LICENSE-APACHE",
+          "sha256": "7953ad8cebf4e01199521a5faa221ef59bec5cee0a9856b179590613a8560cbc"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "n0-error-1.0.1/LICENSE-MIT",
+          "sha256": "339060c99d5c80c2742cae417f765980afe6b0149a78f959bbf2a79f19ab3af5"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "2c0ee6b33ef6e2d452650812228060b659c80a97"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.0.1"
+    },
+    {
+      "authors": [
+        "Frando <franz@n0.computer>",
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "4412346410d6616f3668c40e53c298e5320c7b856f7a960e5914e442601be79f",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "n0-error-macros",
+      "repository": "https://github.com/n0-computer/n0-error",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "n0-error-macros-1.0.1/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "7953ad8cebf4e01199521a5faa221ef59bec5cee0a9856b179590613a8560cbc",
+          "url": "https://raw.githubusercontent.com/n0-computer/n0-error/596f4113918712d545cbb25b7fa12c7153706f54/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "n0-error-macros-1.0.1/upstream-repository-root/LICENSE-MIT",
+          "sha256": "339060c99d5c80c2742cae417f765980afe6b0149a78f959bbf2a79f19ab3af5",
+          "url": "https://raw.githubusercontent.com/n0-computer/n0-error/596f4113918712d545cbb25b7fa12c7153706f54/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "596f4113918712d545cbb25b7fa12c7153706f54"
+        },
+        "path_in_vcs": "n0-error-macros"
+      },
+      "version": "1.0.1"
+    },
+    {
+      "authors": [
+        "Philipp Kr\u00fcger <philipp@n0.computer>",
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "e2ab99dfb861450e68853d34ae665243a88b8c493d01ba957321a1e9b2312bbe",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "n0-future",
+      "repository": "https://github.com/n0-computer/n0-future",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "n0-future-0.3.2/LICENSE-APACHE",
+          "sha256": "7986218ec4ea89de3511a843ae27fea2584a525036c220ff7b26589179f07888"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "n0-future-0.3.2/LICENSE-MIT",
+          "sha256": "33616ec4c88b6e00de66e6c06f1a55d80bb32a9d7939f3aa83d28e673a1adcae"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "5d960ac5aab484dc8fbaf0c5b2692fca37854e79"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.3.2"
+    },
+    {
+      "authors": [
+        "dignifiedquire <me@dignifiedquire.com>",
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "64bf1ecb076a87e0e3f5edcf726e7d29e788c273bb0161ba30666b53f085906c",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "n0-watcher",
+      "repository": "https://github.com/n0-computer/n0-watcher",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "n0-watcher-1.0.1/LICENSE-APACHE",
+          "sha256": "7953ad8cebf4e01199521a5faa221ef59bec5cee0a9856b179590613a8560cbc"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "n0-watcher-1.0.1/LICENSE-MIT",
+          "sha256": "339060c99d5c80c2742cae417f765980afe6b0149a78f959bbf2a79f19ab3af5"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "aa31af3695c3326f687ad1f096ce81a71d0265ec"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.0.1"
+    },
+    {
+      "authors": [
+        "The Rust Windowing contributors"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "27b02d87554356db9e9a873add8782d4ea6e3e58ea071a9adb9a2e8ddb884a8b",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "ndk-context",
+      "repository": "https://github.com/rust-windowing/android-ndk-rs",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "ndk-context-0.1.1/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "url": "https://raw.githubusercontent.com/rust-windowing/android-ndk-rs/10f2ba388fca20f7349996ebae26ccda7a6fda5c/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "ndk-context-0.1.1/upstream-repository-root/LICENSE-MIT",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+          "url": "https://raw.githubusercontent.com/rust-windowing/android-ndk-rs/10f2ba388fca20f7349996ebae26ccda7a6fda5c/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "10f2ba388fca20f7349996ebae26ccda7a6fda5c"
+        },
+        "path_in_vcs": "ndk-context"
+      },
+      "version": "0.1.1"
+    },
+    {
+      "authors": [
+        "shellrow <shellrow@foctal.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "c3c52c2584961c68f5a6e3356797344061f818c93b8acc9cd6d7e284795e563e",
+      "declaredLicense": "MIT",
+      "name": "netdev",
+      "repository": "https://github.com/shellrow/netdev",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "netdev-0.46.3/LICENSE",
+          "sha256": "766312a83b497b8b83b68df0dc3a99e87480ad9019f54d5a53a5deeb9150d635"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "4505d238696975a97b029c1b8607487453c0f86e"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.46.3"
+    },
+    {
+      "authors": [
+        "Corentin Henry <corentinhenry@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "b897d7bd4f0af82e68d40d0344cf37e97f9c97ddf74a098de3e4da05e96ca395",
+      "declaredLicense": "MIT",
+      "name": "netlink-packet-core",
+      "repository": "https://github.com/rust-netlink/netlink-packet-core",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": ".github/workflows/license.yml",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-packet-core-0.8.2/.github/workflows/license.yml",
+          "sha256": "9cd18ebe3dd0ef7dd60b56f70933399d0fd1d0029f0e88c8e8e8b333d1dd15c2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-packet-core-0.8.2/LICENSE-MIT",
+          "sha256": "964a53330f9cd970c1790311024281a994644f9b554ff6d37e233672287bf767"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "571d8bb5fa1dbaa875e8aede3f214c87f70b955b"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.8.2"
+    },
+    {
+      "authors": [
+        "Corentin Henry <corentinhenry@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "2d6e2daf9a8c2e21302714706860a0e6be02e03d17294ecc66b354ea7d4059dd",
+      "declaredLicense": "MIT",
+      "name": "netlink-packet-core",
+      "repository": "https://github.com/rust-netlink/netlink-packet-core",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": ".github/workflows/license.yml",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-packet-core-0.9.0/.github/workflows/license.yml",
+          "sha256": "9cd18ebe3dd0ef7dd60b56f70933399d0fd1d0029f0e88c8e8e8b333d1dd15c2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-packet-core-0.9.0/LICENSE-MIT",
+          "sha256": "964a53330f9cd970c1790311024281a994644f9b554ff6d37e233672287bf767"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "4652ced0cd685430a3df0207a50a95445d3b9aa5"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.9.0"
+    },
+    {
+      "authors": [
+        "Corentin Henry <corentinhenry@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "e2288fcb784eb3defd5fb16f4c4160d5f477de192eac730f43e1d11c24d9a007",
+      "declaredLicense": "MIT",
+      "name": "netlink-packet-route",
+      "repository": "https://github.com/rust-netlink/netlink-packet-route",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": ".github/workflows/license.yml",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-packet-route-0.31.0/.github/workflows/license.yml",
+          "sha256": "c5593ff9a2f0e638847681609214cb86989c2e43705ed3af3e04721a5bb6f913"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-packet-route-0.31.0/LICENSE-MIT",
+          "sha256": "d1a664187bf61b2e9711448db9656f7be12a5b6944e36ffaa94a3f215dbcabb3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "c71b30219967cdd0f2c3233f14ac485b48dd1a8d"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.31.0"
+    },
+    {
+      "authors": [
+        "Corentin Henry <corentinhenry@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "59d48ffc8b73a506e1ff0878528c72668f2bfbc3d875b6be890a96be5d0d5576",
+      "declaredLicense": "MIT",
+      "name": "netlink-packet-route",
+      "repository": "https://github.com/rust-netlink/netlink-packet-route",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": ".github/workflows/license.yml",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-packet-route-0.33.0/.github/workflows/license.yml",
+          "sha256": "af3c18526b87b341ce77e4ef1ed3f259a78c7b7b3e3465388aa7c220d20b70ec"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-packet-route-0.33.0/LICENSE-MIT",
+          "sha256": "d1a664187bf61b2e9711448db9656f7be12a5b6944e36ffaa94a3f215dbcabb3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "6d158e83376703f2125af5ad832b355aaec79eba"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.33.0"
+    },
+    {
+      "authors": [
+        "Corentin Henry <corentinhenry@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "93af8261786086024cd5e96e0a991dd65ced07bbf7c233a487bbc96b971d5539",
+      "declaredLicense": "MIT",
+      "name": "netlink-proto",
+      "repository": "https://github.com/rust-netlink/netlink-proto",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": ".github/workflows/license.yml",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-proto-0.12.2/.github/workflows/license.yml",
+          "sha256": "9cd18ebe3dd0ef7dd60b56f70933399d0fd1d0029f0e88c8e8e8b333d1dd15c2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-proto-0.12.2/LICENSE-MIT",
+          "sha256": "964a53330f9cd970c1790311024281a994644f9b554ff6d37e233672287bf767"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "93d4d6d48967965729dba4973e0bd2b16f877686"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.12.2"
+    },
+    {
+      "authors": [
+        "Corentin Henry <corentinhenry@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "cd6c30ed10fa69cc491d491b85cc971f6bdeb8e7367b7cde2ee6cc878d583fae",
+      "declaredLicense": "MIT",
+      "name": "netlink-sys",
+      "repository": "https://github.com/rust-netlink/netlink-sys",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": ".github/workflows/license.yml",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-sys-0.8.8/.github/workflows/license.yml",
+          "sha256": "9cd18ebe3dd0ef7dd60b56f70933399d0fd1d0029f0e88c8e8e8b333d1dd15c2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-sys-0.8.8/LICENSE-MIT",
+          "sha256": "964a53330f9cd970c1790311024281a994644f9b554ff6d37e233672287bf767"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "7b2743a514f88127c76de2567fd4e6c7d89e00ff"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.8.8"
+    },
+    {
+      "authors": [
+        "Corentin Henry <corentinhenry@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "c99d38e00b420df49e940fe0826e667c3dad82ac68eb4c2bbf754c1c14a83a10",
+      "declaredLicense": "MIT",
+      "name": "netlink-sys",
+      "repository": "https://github.com/rust-netlink/netlink-sys",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": ".github/workflows/license.yml",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-sys-0.9.0/.github/workflows/license.yml",
+          "sha256": "9cd18ebe3dd0ef7dd60b56f70933399d0fd1d0029f0e88c8e8e8b333d1dd15c2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "netlink-sys-0.9.0/LICENSE-MIT",
+          "sha256": "964a53330f9cd970c1790311024281a994644f9b554ff6d37e233672287bf767"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "e640839036b1bacb3e98bf1761c704083211bdde"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.9.0"
+    },
+    {
+      "authors": [
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "39da9cad5f23aa43401f09497d3b280e51b5feba115d9ffbf38ca35d6ff95e96",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "netwatch",
+      "repository": "https://github.com/n0-computer/net-tools",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "netwatch-0.19.3/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "7986218ec4ea89de3511a843ae27fea2584a525036c220ff7b26589179f07888",
+          "url": "https://raw.githubusercontent.com/n0-computer/net-tools/0030e57fc70981895bb86212ff0f059cc41c8a4e/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "netwatch-0.19.3/upstream-repository-root/LICENSE-MIT",
+          "sha256": "33616ec4c88b6e00de66e6c06f1a55d80bb32a9d7939f3aa83d28e673a1adcae",
+          "url": "https://raw.githubusercontent.com/n0-computer/net-tools/0030e57fc70981895bb86212ff0f059cc41c8a4e/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "0030e57fc70981895bb86212ff0f059cc41c8a4e"
+        },
+        "path_in_vcs": "netwatch"
+      },
+      "version": "0.19.3"
+    },
+    {
+      "authors": [
         "The nix-rust Project Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -4047,6 +6453,105 @@
         "path_in_vcs": ""
       },
       "version": "7.1.3"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "6249a065adc1edbc1704a95436f38dd60476064dbc3b7c47cf279e02d1590eb5",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "noq",
+      "repository": "https://github.com/n0-computer/noq",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "noq-1.4.0/LICENSE-APACHE",
+          "sha256": "a237a9d796dd30eebc8def7ee282c691be4c884454444510d702644f20669c15"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "noq-1.4.0/LICENSE-MIT",
+          "sha256": "9e654cd17a17880f43a84c9c024f9ca7a320ed906d521072c15aa2e8daff8df0"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "34f75c49f93de5e2ff943483cabc5b6d0c5df918"
+        },
+        "path_in_vcs": "noq"
+      },
+      "version": "1.4.0"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "c01a35be3ed37558c8db69554419f24eff8a63599b54f711bbe3863ec727c47d",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "noq-proto",
+      "repository": "https://github.com/n0-computer/noq",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "noq-proto-1.4.0/LICENSE-APACHE",
+          "sha256": "a237a9d796dd30eebc8def7ee282c691be4c884454444510d702644f20669c15"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "noq-proto-1.4.0/LICENSE-MIT",
+          "sha256": "9e654cd17a17880f43a84c9c024f9ca7a320ed906d521072c15aa2e8daff8df0"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "34f75c49f93de5e2ff943483cabc5b6d0c5df918"
+        },
+        "path_in_vcs": "noq-proto"
+      },
+      "version": "1.4.0"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "8d0160422832eea1cc11c34be04ee6d5a046452b0b46cfb14695d55a1f24c954",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "noq-udp",
+      "repository": "https://github.com/n0-computer/noq",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "noq-udp-1.4.0/LICENSE-APACHE",
+          "sha256": "a237a9d796dd30eebc8def7ee282c691be4c884454444510d702644f20669c15"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "noq-udp-1.4.0/LICENSE-MIT",
+          "sha256": "9e654cd17a17880f43a84c9c024f9ca7a320ed906d521072c15aa2e8daff8df0"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "34f75c49f93de5e2ff943483cabc5b6d0c5df918"
+        },
+        "path_in_vcs": "noq-udp"
+      },
+      "version": "1.4.0"
     },
     {
       "authors": [
@@ -4187,6 +6692,226 @@
         "path_in_vcs": ""
       },
       "version": "0.2.19"
+    },
+    {
+      "authors": [
+        "Daniel Wagner-Hall <dawagner@gmail.com>",
+        "Daniel Henry-Mantilla <daniel.henry.mantilla@gmail.com>",
+        "Vincent Esche <regexident@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "5d0bca838442ec211fa11de3a8b0e0e8f3a4522575b5c4c06ed722e005036f26",
+      "declaredLicense": "BSD-3-Clause OR MIT OR Apache-2.0",
+      "name": "num_enum",
+      "repository": "https://github.com/illicitonion/num_enum",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "num_enum-0.7.6/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "cratePath": "LICENSE-BSD",
+          "origin": "cargo-registry-cache",
+          "path": "num_enum-0.7.6/LICENSE-BSD",
+          "sha256": "0be96d891d00e0ae0df75d7f3289b12871c000a1f5ac744f3b570768d4bb277c"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "num_enum-0.7.6/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "f11d81c6cb644489f8a0fc24f9eea9a53d66f92e"
+        },
+        "path_in_vcs": "num_enum"
+      },
+      "version": "0.7.6"
+    },
+    {
+      "authors": [
+        "Daniel Wagner-Hall <dawagner@gmail.com>",
+        "Daniel Henry-Mantilla <daniel.henry.mantilla@gmail.com>",
+        "Vincent Esche <regexident@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "680998035259dcfcafe653688bf2aa6d3e2dc05e98be6ab46afb089dc84f1df8",
+      "declaredLicense": "BSD-3-Clause OR MIT OR Apache-2.0",
+      "name": "num_enum_derive",
+      "repository": "https://github.com/illicitonion/num_enum",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "num_enum_derive-0.7.6/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "cratePath": "LICENSE-BSD",
+          "origin": "cargo-registry-cache",
+          "path": "num_enum_derive-0.7.6/LICENSE-BSD",
+          "sha256": "0be96d891d00e0ae0df75d7f3289b12871c000a1f5ac744f3b570768d4bb277c"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "num_enum_derive-0.7.6/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "f11d81c6cb644489f8a0fc24f9eea9a53d66f92e"
+        },
+        "path_in_vcs": "num_enum_derive"
+      },
+      "version": "0.7.6"
+    },
+    {
+      "authors": [
+        "Mads Marquart <mads@marquart.dk>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "08849bbd4767dfae9457696856ae1c84fe4e0281bbe4a7abff2d0e06fb7981f8",
+      "declaredLicense": "MIT",
+      "name": "objc2",
+      "repository": "https://github.com/madsmtm/objc2",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "objc2-0.6.5/upstream-repository-root/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/d7d2fa23ceaa5e6096c923b081040e5d81b3b9df/LICENSE.md"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "d7d2fa23ceaa5e6096c923b081040e5d81b3b9df"
+        },
+        "path_in_vcs": "crates/objc2"
+      },
+      "version": "0.6.5"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "2a180dd8642fa45cdb7dd721cd4c11b1cadd4929ce112ebd8b9f5803cc79d536",
+      "declaredLicense": "Zlib OR Apache-2.0 OR MIT",
+      "name": "objc2-core-foundation",
+      "repository": "https://github.com/madsmtm/objc2",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "objc2-core-foundation-0.3.2/upstream-repository-root/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b"
+        },
+        "path_in_vcs": "framework-crates/objc2-core-foundation"
+      },
+      "version": "0.3.2"
+    },
+    {
+      "authors": [
+        "Mads Marquart <mads@marquart.dk>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "ef25abbcd74fb2609453eb695bd2f860d389e457f67dc17cafc8b8cbc89d0c33",
+      "declaredLicense": "MIT",
+      "name": "objc2-encode",
+      "repository": "https://github.com/madsmtm/objc2",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "objc2-encode-4.1.0/upstream-repository-root/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/8d214f5477365ffcbcbb7de058c86ed9a518efb7/LICENSE.md"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "8d214f5477365ffcbcbb7de058c86ed9a518efb7"
+        },
+        "path_in_vcs": "crates/objc2-encode"
+      },
+      "version": "4.1.0"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "709fe137109bd1e8b5a99390f77a7d8b2961dafc1a1c5db8f2e60329ad6d895a",
+      "declaredLicense": "Zlib OR Apache-2.0 OR MIT",
+      "name": "objc2-security",
+      "repository": "https://github.com/madsmtm/objc2",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "objc2-security-0.3.2/upstream-repository-root/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b"
+        },
+        "path_in_vcs": "framework-crates/objc2-security"
+      },
+      "version": "0.3.2"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "7216bd11cbda54ccabcab84d523dc93b858ec75ecfb3a7d89513fa22464da396",
+      "declaredLicense": "Zlib OR Apache-2.0 OR MIT",
+      "name": "objc2-system-configuration",
+      "repository": "https://github.com/madsmtm/objc2",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "objc2-system-configuration-0.3.2/upstream-repository-root/LICENSE.md",
+          "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54",
+          "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b"
+        },
+        "path_in_vcs": "framework-crates/objc2-system-configuration"
+      },
+      "version": "0.3.2"
     },
     {
       "authors": [
@@ -4401,6 +7126,77 @@
     },
     {
       "authors": [
+        "Ibraheem Ahmed <ibraheem@ibraheem.ca>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "da2442474a9404698c42509b8967f437249dbc7b50493e83020333d3943ec0ae",
+      "declaredLicense": "MIT",
+      "name": "papaya",
+      "repository": "https://github.com/ibraheemdev/papaya",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE.md",
+          "origin": "cargo-registry-cache",
+          "path": "papaya-0.2.5/LICENSE.md",
+          "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "92b44993fa149e68f57cb7b143cd0fb908b6e466"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.2.5"
+    },
+    {
+      "authors": [
+        "Stjepan Glavina <stjepang@gmail.com>",
+        "The Rust Project Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "f38d5652c16fde515bb1ecef450ab0f6a219d619a7274976324d5e377f7dceba",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "parking",
+      "repository": "https://github.com/smol-rs/parking",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "parking-2.2.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "parking-2.2.1/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        },
+        {
+          "cratePath": "LICENSE-THIRD-PARTY",
+          "origin": "cargo-registry-cache",
+          "path": "parking-2.2.1/LICENSE-THIRD-PARTY",
+          "sha256": "9a6d7a3c1b8edcc706c4b6c37f8dae9a77f02c7f9051df603f975db136b55419"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "0ece32dbfd6cd1bc1510ede6ed56acb772edf83f"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "2.2.1"
+    },
+    {
+      "authors": [
         "Amanieu d'Antras <amanieu@gmail.com>"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -4471,6 +7267,40 @@
     },
     {
       "authors": [
+        "David Tolnay <dtolnay@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "paste",
+      "repository": "https://github.com/dtolnay/paste",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "paste-1.0.15/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "paste-1.0.15/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "a2c7e27875277450ed28147623ba5218dd23e732"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.0.15"
+    },
+    {
+      "authors": [
         "Jonathan Creekmore <jonathan@thecreekmores.org>"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -4535,6 +7365,41 @@
     },
     {
       "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "a6305423e0e7738146434843d1694d621cce767262b2a86910beab705e4493d9",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "pem-rfc7468",
+      "repository": "https://github.com/RustCrypto/formats",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "pem-rfc7468-1.0.0/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "pem-rfc7468-1.0.0/LICENSE-MIT",
+          "sha256": "4148e7b027fba018131f297b4fe27995386ba317018d6855e182fd0e86cd754f"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "8526cc6195306aa0fe781004a648ccdb42ca81eb"
+        },
+        "path_in_vcs": "pem-rfc7468"
+      },
+      "version": "1.0.0"
+    },
+    {
+      "authors": [
         "The rust-url developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -4568,6 +7433,72 @@
         "path_in_vcs": "percent_encoding"
       },
       "version": "2.3.2"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "2466b2336ed02bcdca6b294417127b90ec92038d1d5c4fbeac971a922e0e0924",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "pin-project",
+      "repository": "https://github.com/taiki-e/pin-project",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "pin-project-1.1.13/LICENSE-APACHE",
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "pin-project-1.1.13/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "c3b6b85f7e1674602c0ed693da985b33b2452c3c"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.1.13"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "c96395f0a926bc13b1c17622aaddda1ecb55d49c8f1bf9777e4d877800a43f8b",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "pin-project-internal",
+      "repository": "https://github.com/taiki-e/pin-project",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "pin-project-internal-1.1.13/LICENSE-APACHE",
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "pin-project-internal-1.1.13/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "c3b6b85f7e1674602c0ed693da985b33b2452c3c"
+        },
+        "path_in_vcs": "pin-project-internal"
+      },
+      "version": "1.1.13"
     },
     {
       "authors": [],
@@ -4677,6 +7608,69 @@
         "RustCrypto Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "451913da69c775a56034ea8d9003d27ee8948e12443eae7c038ba100a4f21cb7",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "pkcs8",
+      "repository": "https://github.com/RustCrypto/formats",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "pkcs8-0.11.0/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "pkcs8-0.11.0/LICENSE-MIT",
+          "sha256": "73b9dc2e79c7308998dd30296e073aefaefb944a68fb89aa412c23c0edcabcaa"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "a582243775ec15a53ac1797b679e63344d0104d1"
+        },
+        "path_in_vcs": "pkcs8"
+      },
+      "version": "0.11.0"
+    },
+    {
+      "authors": [
+        "Ed Barnard <eabarnard@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "327a4cb2ad49dc48adfdc9da89e22c64d488b508c67a044d71ba729e4521a285",
+      "declaredLicense": "MIT",
+      "name": "plist",
+      "repository": "https://github.com/ebarnard/rust-plist/",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENCE",
+          "origin": "cargo-registry-cache",
+          "path": "plist-1.10.3/LICENCE",
+          "sha256": "5b0ae40d1a35f7ae6591a28e44771240e6a88cb03a66c9189a45b9681639b466"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "a2d3e61cb9956965e89b7541f21ab965cdb6d9fa"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.10.3"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
       "crateChecksum": "8159bd90725d2df49889a078b54f4f79e87f1f8a8444194cdca81d38f5393abf",
       "declaredLicense": "Apache-2.0 OR MIT",
       "name": "poly1305",
@@ -4774,6 +7768,77 @@
         "path_in_vcs": ""
       },
       "version": "1.15.0"
+    },
+    {
+      "authors": [
+        "James Munns <james@onevariable.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "6764c3b5dd454e283a30e6dfe78e9b31096d9e32036b5d1eaac7a6119ccb9a24",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "postcard",
+      "repository": "https://github.com/jamesmunns/postcard",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "postcard-1.1.3/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "postcard-1.1.3/LICENSE-MIT",
+          "sha256": "177540cad091a40e8071db310bc3b6115c4e329a92a234609b60c154b008a888"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "718aa6a6850456017c19eeff67303c633f875736"
+        },
+        "path_in_vcs": "source/postcard"
+      },
+      "version": "1.1.3"
+    },
+    {
+      "authors": [
+        "Lachlan Sneff <lachlan.sneff@gmail.com>",
+        "James Munns <james@onevariable.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "e0232bd009a197ceec9cc881ba46f727fcd8060a2d8d6a9dde7a69030a6fe2bb",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "postcard-derive",
+      "repository": "https://github.com/jamesmunns/postcard",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "postcard-derive-0.2.2/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "postcard-derive-0.2.2/LICENSE-MIT",
+          "sha256": "177540cad091a40e8071db310bc3b6115c4e329a92a234609b60c154b008a888"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "718aa6a6850456017c19eeff67303c633f875736"
+        },
+        "path_in_vcs": "source/postcard-derive"
+      },
+      "version": "0.2.2"
     },
     {
       "authors": [
@@ -4911,6 +7976,41 @@
     },
     {
       "authors": [
+        "Bastian K\u00f6cher <git@kchr.de>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "e67ba7e9b2b56446f1d419b1d807906278ffa1a658a8a5d8a39dcb1f5a78614f",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "proc-macro-crate",
+      "repository": "https://github.com/bkchr/proc-macro-crate",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "proc-macro-crate-3.5.0/LICENSE-APACHE",
+          "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "proc-macro-crate-3.5.0/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "8f3d8b04539f732e09c07907f138a248c8d0eed9"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "3.5.0"
+    },
+    {
+      "authors": [
         "David Tolnay <dtolnay@gmail.com>",
         "Alex Crichton <alex@alexcrichton.com>"
       ],
@@ -4944,6 +8044,32 @@
         "path_in_vcs": ""
       },
       "version": "1.0.107"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "41b1177fdf999d2321d3fb46ff47159d9c1fb9ad66a4879f8c50a0b504615e9b",
+      "declaredLicense": "MIT",
+      "name": "quick-xml",
+      "repository": "https://github.com/tafia/quick-xml",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-MIT.md",
+          "origin": "cargo-registry-cache",
+          "path": "quick-xml-0.42.0/LICENSE-MIT.md",
+          "sha256": "f0cf9b1c62bbe3bd3a69f5f79c7158f513f612b4940a0a812d1db39d605318bc"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "36a2c52a4f6c90878c3f60c3c3b5c62efaef28a9"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.42.0"
     },
     {
       "authors": [],
@@ -5578,6 +8704,41 @@
     },
     {
       "authors": [
+        "Sean McArthur <sean@seanmonstar.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "16a1cfa75cc186dd73d5818e510e042e40927bccc9c236b061cea97e1eb08029",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "reqwest",
+      "repository": "https://github.com/seanmonstar/reqwest",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "reqwest-0.13.5/LICENSE-APACHE",
+          "sha256": "751963a8b88c0e3a9f27e98933079fbcf09b9998b2c13ac49c2e4d58444520d6"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "reqwest-0.13.5/LICENSE-MIT",
+          "sha256": "dd87e27dfbaa888cb77ea34592648a7743636b8dce07e49543bddda0fcfc73bc"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "de55373434f07f42926599dbb5a88550d8e55112"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.13.5"
+    },
+    {
+      "authors": [
         "RustCrypto Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -5967,6 +9128,71 @@
     {
       "authors": [],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "1167586491e2b18b8bfbb293e8180ec17c201c4f076d7cb3070ca964e7598f98",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "rustls-platform-verifier",
+      "repository": "https://github.com/rustls/rustls-platform-verifier",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "rustls-platform-verifier-0.7.1/LICENSE-APACHE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "rustls-platform-verifier-0.7.1/LICENSE-MIT",
+          "sha256": "1c7cf76689c837a68ed8d704994e52a0f2940c087958f860d17f3186afbdcc0c"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "252e25161a91af476cbea620e29d277592d27ec7"
+        },
+        "path_in_vcs": "rustls-platform-verifier"
+      },
+      "version": "0.7.1"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "eec689c0bc40ff2458a5977b6619cb718087084a18e02a131c599b62d05e1a5f",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "rustls-platform-verifier-android",
+      "repository": "https://github.com/rustls/rustls-platform-verifier",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "rustls-platform-verifier-android-0.2.0/upstream-repository-root/LICENSE-APACHE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "url": "https://raw.githubusercontent.com/rustls/rustls-platform-verifier/252e25161a91af476cbea620e29d277592d27ec7/LICENSE-APACHE"
+        },
+        {
+          "origin": "pinned-upstream-repository",
+          "path": "rustls-platform-verifier-android-0.2.0/upstream-repository-root/LICENSE-MIT",
+          "sha256": "1c7cf76689c837a68ed8d704994e52a0f2940c087958f860d17f3186afbdcc0c",
+          "url": "https://raw.githubusercontent.com/rustls/rustls-platform-verifier/252e25161a91af476cbea620e29d277592d27ec7/LICENSE-MIT"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "252e25161a91af476cbea620e29d277592d27ec7"
+        },
+        "path_in_vcs": "android-release-support"
+      },
+      "version": "0.2.0"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
       "crateChecksum": "4443b1b6d39d7c663139942cc4558262562d2c84123bb6282ef177009ca8b281",
       "declaredLicense": "ISC",
       "name": "rustls-webpki",
@@ -6060,6 +9286,45 @@
         "path_in_vcs": ""
       },
       "version": "1.0.23"
+    },
+    {
+      "authors": [
+        "Andrew Gallant <jamslam@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502",
+      "declaredLicense": "Unlicense/MIT",
+      "name": "same-file",
+      "repository": "https://github.com/BurntSushi/same-file",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "COPYING",
+          "origin": "cargo-registry-cache",
+          "path": "same-file-1.0.6/COPYING",
+          "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "same-file-1.0.6/LICENSE-MIT",
+          "sha256": "cb3c929a05e6cbc9de9ab06a4c57eeb60ca8c724bef6c138c87d3a577e27aa14"
+        },
+        {
+          "cratePath": "UNLICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "same-file-1.0.6/UNLICENSE",
+          "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "5799cd323b8eefd17a089c950dac113f66c89c9e"
+        }
+      },
+      "version": "1.0.6"
     },
     {
       "authors": [
@@ -6168,6 +9433,105 @@
     },
     {
       "authors": [
+        "Steven Fackler <sfackler@gmail.com>",
+        "Kornel <kornel@geekhood.net>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "b7f4bc775c73d9a02cde8bf7b2ec4c9d12743edf609006c7facc23998404cd1d",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "security-framework",
+      "repository": "https://github.com/kornelski/rust-security-framework",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "security-framework-3.7.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "security-framework-3.7.0/LICENSE-MIT",
+          "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "5f6e65114b77d5bc161d2b099cad09f2a67609d2"
+        },
+        "path_in_vcs": "security-framework"
+      },
+      "version": "3.7.0"
+    },
+    {
+      "authors": [
+        "Steven Fackler <sfackler@gmail.com>",
+        "Kornel <kornel@geekhood.net>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "6ce2691df843ecc5d231c0b14ece2acc3efb62c0a398c7e1d875f3983ce020e3",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "security-framework-sys",
+      "repository": "https://github.com/kornelski/rust-security-framework",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "security-framework-sys-2.17.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "security-framework-sys-2.17.0/LICENSE-MIT",
+          "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "5f6e65114b77d5bc161d2b099cad09f2a67609d2"
+        },
+        "path_in_vcs": "security-framework-sys"
+      },
+      "version": "2.17.0"
+    },
+    {
+      "authors": [
+        "Ibraheem Ahmed <ibraheem@ibraheem.ca>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "5b55fb86dfd3a2f5f76ea78310a88f96c4ea21a3031f8d212443d56123fd0521",
+      "declaredLicense": "MIT",
+      "name": "seize",
+      "repository": "https://github.com/ibraheemdev/seize",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "seize-0.5.1/LICENSE",
+          "sha256": "de701d0618d694feb1af90f02181a1763d9b0bdeb70a3a592781e529077dba65"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "4e746342f6b8a383234b491d3cf4cae697fdad28"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.5.1"
+    },
+    {
+      "authors": [
         "David Tolnay <dtolnay@gmail.com>"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -6236,6 +9600,41 @@
         "path_in_vcs": "serde"
       },
       "version": "1.0.229"
+    },
+    {
+      "authors": [
+        "David Tolnay <dtolnay@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "a5d440709e79d88e51ac01c4b72fc6cb7314017bb7da9eeff678aa94c10e3ea8",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "serde_bytes",
+      "repository": "https://github.com/serde-rs/bytes",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "serde_bytes-0.11.19/LICENSE-APACHE",
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "serde_bytes-0.11.19/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "34f3c7d442716d0f28db7c3641882648ce387b60"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.11.19"
     },
     {
       "authors": [
@@ -6417,6 +9816,41 @@
         "RustCrypto Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "66cf8fedced2fcf12406bcb34223dffb92eaf34908ede12fed414c82b7f00b3e",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "serdect",
+      "repository": "https://github.com/RustCrypto/formats",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "serdect-0.4.3/LICENSE-APACHE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "serdect-0.4.3/LICENSE-MIT",
+          "sha256": "2ca9996043628ad4dea1408974e1d92d3932f6acf9db8ffb7faecbfa6d928997"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "deccb54c70fc9000255a7e1c0c285e1df2018133"
+        },
+        "path_in_vcs": "serdect"
+      },
+      "version": "0.4.3"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
       "crateChecksum": "a978451301f4db1d02937a4ab3ccce137717b81826e79b7d49ffe3244a13c3b8",
       "declaredLicense": "MIT OR Apache-2.0",
       "name": "sha1",
@@ -6446,6 +9880,41 @@
         "path_in_vcs": "sha1"
       },
       "version": "0.10.7"
+    },
+    {
+      "authors": [
+        "Armin Ronacher <armin.ronacher@active-4.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "bbfa15b3dddfee50a0fff136974b3e1bde555604ba463834a7eb7deb6417705d",
+      "declaredLicense": "BSD-3-Clause",
+      "name": "sha1_smol",
+      "repository": "https://github.com/mitsuhiko/sha1-smol",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "AUTHORS",
+          "origin": "cargo-registry-cache",
+          "path": "sha1_smol-1.0.1/AUTHORS",
+          "sha256": "613ce6df827bdbab4f498700a141548396b6ff26488f263654159ada4b04f78e"
+        },
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "sha1_smol-1.0.1/LICENSE",
+          "sha256": "282a21b0710441c364025461a447362daf18f5798a7b72ae2f801a2aa536da51"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "f9d88bd70e9bd577c7c3afdc6acd0313af605324"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.0.1"
     },
     {
       "authors": [
@@ -6481,6 +9950,41 @@
         "path_in_vcs": "sha2"
       },
       "version": "0.10.9"
+    },
+    {
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "sha2",
+      "repository": "https://github.com/RustCrypto/hashes",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "sha2-0.11.1/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "sha2-0.11.1/LICENSE-MIT",
+          "sha256": "831e0f43ad0bf014c1c4fec5767aae470434c1d66d6e671be2d823e729063e25"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "138dc5a05b93f8e49cda177fc6cfd7cc43673e5d"
+        },
+        "path_in_vcs": "sha2"
+      },
+      "version": "0.11.1"
     },
     {
       "authors": [
@@ -6595,6 +10099,139 @@
     },
     {
       "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "28d567dcbaf0049cb8ac2608a76cd95ff9e4412e1899d389ee400918ca7537f5",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "signature",
+      "repository": "https://github.com/RustCrypto/traits",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "signature-3.0.0/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "signature-3.0.0/LICENSE-MIT",
+          "sha256": "9aa4f92bfcde293ebeca9e2379fa18d1d61f000977da144c7b74c2986c9b6466"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "9488e7ea66763b5cbdc7a4814a96421e0114dc97"
+        },
+        "path_in_vcs": "signature"
+      },
+      "version": "3.0.0"
+    },
+    {
+      "authors": [
+        "Sean C. Roach <me@seancroach.dev>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "11031e251abf8611c80f460e19dbdeb54a66db918e49c65a7065b46ac7aec520",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "simd_cesu8",
+      "repository": "https://github.com/seancroach/simd_cesu8",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "simd_cesu8-1.2.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "simd_cesu8-1.2.0/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "b7977cfbebc962b6fa68969bac9c863ae55a8233"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.2.0"
+    },
+    {
+      "authors": [
+        "Hans Kratz <hans@appfour.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "simdutf8",
+      "repository": "https://github.com/rusticstuff/simdutf8",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-Apache",
+          "origin": "cargo-registry-cache",
+          "path": "simdutf8-0.1.5/LICENSE-Apache",
+          "sha256": "0cec06e0e55fbc3dc5cee4fca9b607f66cb8f4e4dbcf3b3c013594dd156732e9"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "simdutf8-0.1.5/LICENSE-MIT",
+          "sha256": "1847e0e0698142ed4347c1441a9fa81c8fbddd44b1d8bbcd5e3647f991759d7f"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "87ee8d9d20b849eae1974a82b248ee6fe7491bcc"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.1.5"
+    },
+    {
+      "authors": [
+        "Ilson Roberto Balliego Junior <ilson.balliego@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "2b6f884fa9a8d48101774bfbd3aeb81e968dd22cffd19a372da69f183db22c1a",
+      "declaredLicense": "MIT",
+      "name": "simple-dns",
+      "repository": "https://github.com/balliegojr/simple-dns",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "simple-dns-0.12.0/LICENSE",
+          "sha256": "c6550232507f928b83ef50f4be1e64c434da5ac2f434cdf9a2d89344af33e8fd"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "5c7ec98798d7c9f7d76df7aa3bbe754913ff5159"
+        },
+        "path_in_vcs": "simple-dns"
+      },
+      "version": "0.12.0"
+    },
+    {
+      "authors": [
         "Carl Lerche <me@carllerche.com>"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -6621,6 +10258,35 @@
         "path_in_vcs": ""
       },
       "version": "0.4.12"
+    },
+    {
+      "authors": [
+        "Orson Peters <orsonpeters@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "bdd58c3c93c3d278ca835519292445cb4b0d4dc59ccfdf7ceadaab3f8aeb4038",
+      "declaredLicense": "Zlib",
+      "name": "slotmap",
+      "repository": "https://github.com/orlp/slotmap",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "slotmap-1.1.1/LICENSE",
+          "sha256": "6cec81441b2ab2b5090954c1fb5d0bcca81b86487b5849061fa8952d20ef67d4"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "2d56154b9b628f7d7a506f24ebc4f55a13ec8fed"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.1.1"
     },
     {
       "authors": [
@@ -6766,6 +10432,102 @@
     },
     {
       "authors": [
+        "rklaehn <rklaehn@protonmail.com>",
+        "n0 team"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "ea06cc588e43c632923a55450401b8f25e628131571d4e1baea1bdfdb2b5ed06",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "sorted-index-buffer",
+      "repository": "https://github.com/n0-computer/iroh",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "sorted-index-buffer-0.2.1/LICENSE-APACHE",
+          "sha256": "903131e2786f073a942fbf8fae122d9e576e4dad758c6da7f9f2ba58fd8611ab"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "sorted-index-buffer-0.2.1/LICENSE-MIT",
+          "sha256": "f169adb8124d3b005416d8485d00777c9a7bdd9099982c52a4493f9732e6d050"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "cb37cc7ca20413e9f2ef44b0c719b21b605b960d"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.2.1"
+    },
+    {
+      "authors": [
+        "Mara Bos <m-ou.se@m-ou.se>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "c87e960f4dca2788eeb86bbdde8dd246be8948790b7618d656e68f9b720a86e8",
+      "declaredLicense": "BSD-2-Clause",
+      "name": "spez",
+      "repository": "https://github.com/m-ou-se/spez",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "spez-0.1.2/LICENSE",
+          "sha256": "26cdda6660b48c74b37d2ef1babd276de1d73f00f8756b9180448de99713a1a4"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "3691abecfdff9d4ae0d971524eea8a82b551cb6b"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.1.2"
+    },
+    {
+      "authors": [
+        "Mathijs van de Nes <git@mathijs.vd-nes.nl>",
+        "John Ericson <git@JohnEricson.me>",
+        "Joshua Barretto <joshua.s.barretto@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "023a211cb3138dbc438680b32560ad89f699977624c9f8dbb95a47d5b4c07dd3",
+      "declaredLicense": "MIT",
+      "name": "spin",
+      "repository": "https://github.com/mvdnes/spin-rs.git",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "spin-0.10.1/LICENSE",
+          "sha256": "6ac8711fb340c62ce0a4ecd463342d3fa0e8e70de697c863a2e1c0c53006003c"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "026d8e95bf03f90ad2067038df4c138ebc1ac4e7"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.10.1"
+    },
+    {
+      "authors": [
         "RustCrypto Developers"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -6801,6 +10563,41 @@
     },
     {
       "authors": [
+        "RustCrypto Developers"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "7ef958a98b9d5da290cfc78946e9f3e61e1e62a18db0d92cac0b83cc161491a9",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "name": "spki",
+      "repository": "https://github.com/RustCrypto/formats",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "spki-0.8.1/LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "spki-0.8.1/LICENSE-MIT",
+          "sha256": "57a4d75c1d095bb94754a478f3cd15e60ac66a5c5627d844be01a918eea5fe88"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "9e21af601bf08f1d8ccd9713d08d1aba832a9ca8"
+        },
+        "path_in_vcs": "spki"
+      },
+      "version": "0.8.1"
+    },
+    {
+      "authors": [
         "Robert Grosse <n210241048576@gmail.com>"
       ],
       "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
@@ -6833,6 +10630,64 @@
         "path_in_vcs": ""
       },
       "version": "1.2.1"
+    },
+    {
+      "authors": [
+        "Peter Glotfelty <peter.glotfelty@microsoft.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "9628de9b8791db39ceda2b119bbe13134770b56c138ec1d3af810d045c04f9bd",
+      "declaredLicense": "MIT",
+      "name": "strum",
+      "repository": "https://github.com/Peternator7/strum",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "strum-0.28.0/LICENSE",
+          "sha256": "8bce3b45e49ecd1461f223b46de133d8f62cd39f745cfdaf81bee554b908bd42"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "7376771128834d28bb9beba5c39846cba62e71ec"
+        },
+        "path_in_vcs": "strum"
+      },
+      "version": "0.28.0"
+    },
+    {
+      "authors": [
+        "Peter Glotfelty <peter.glotfelty@microsoft.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "ab85eea0270ee17587ed4156089e10b9e6880ee688791d45a905f5b1ca36f664",
+      "declaredLicense": "MIT",
+      "name": "strum_macros",
+      "repository": "https://github.com/Peternator7/strum",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "strum_macros-0.28.0/LICENSE",
+          "sha256": "8bce3b45e49ecd1461f223b46de133d8f62cd39f745cfdaf81bee554b908bd42"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "7376771128834d28bb9beba5c39846cba62e71ec"
+        },
+        "path_in_vcs": "strum_macros"
+      },
+      "version": "0.28.0"
     },
     {
       "authors": [
@@ -7089,6 +10944,74 @@
         "path_in_vcs": ""
       },
       "version": "0.14.0"
+    },
+    {
+      "authors": [
+        "Mullvad VPN"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "501336eb7ba9e417300a6a0fa985721065467aa83a6dcf0422a8e43e4c0328fa",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "system-configuration",
+      "repository": "https://github.com/mullvad/system-configuration-rs",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "system-configuration-0.8.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "system-configuration-0.8.0/LICENSE-MIT",
+          "sha256": "000cbb5bea6f21829c8f0d9e1fe87410bd5ef0453412ffc017845982a3e19824"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "53a45d9aecae7ac564e6c8c54e227335a44d1a57"
+        },
+        "path_in_vcs": "system-configuration"
+      },
+      "version": "0.8.0"
+    },
+    {
+      "authors": [
+        "Mullvad VPN"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "8e1d1b10ced5ca923a1fcb8d03e96b8d3268065d724548c0211415ff6ac6bac4",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "system-configuration-sys",
+      "repository": "https://github.com/mullvad/system-configuration-rs",
+      "targets": [
+        "aarch64-apple-darwin"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "system-configuration-sys-0.6.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "system-configuration-sys-0.6.0/LICENSE-MIT",
+          "sha256": "000cbb5bea6f21829c8f0d9e1fe87410bd5ef0453412ffc017845982a3e19824"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "fd43df6f57de954878d824c14c08b57045e46e76"
+        },
+        "path_in_vcs": "system-configuration-sys"
+      },
+      "version": "0.6.0"
     },
     {
       "authors": [
@@ -7539,6 +11462,35 @@
     },
     {
       "authors": [
+        "Tokio Contributors <team@tokio.rs>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "a3d06f0b082ba57c26b79407372e57cf2a1e28124f78e9479fe80322cf53420b",
+      "declaredLicense": "MIT",
+      "name": "tokio-stream",
+      "repository": "https://github.com/tokio-rs/tokio",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "tokio-stream-0.1.19/LICENSE",
+          "sha256": "253cd04c6714889df2d32f3f64d669179a1c95c76ac43c40882c52eb06bc3552"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "bc0933ccffb62e010d3ccb497abc22cec2e73f54"
+        },
+        "path_in_vcs": "tokio-stream"
+      },
+      "version": "0.1.19"
+    },
+    {
+      "authors": [
         "Daniel Abramov <dabramov@snapview.de>",
         "Alexey Galakhov <agalakhov@snapview.de>"
       ],
@@ -7595,6 +11547,132 @@
         "path_in_vcs": "tokio-util"
       },
       "version": "0.7.20"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "d52efb639344a7c6adb8e62c6f3d2c19c001ff1b79a5041ba1c6ed42e19c6aa5",
+      "declaredLicense": "MIT",
+      "name": "tokio-websockets",
+      "repository": "https://github.com/Gelbpunkt/tokio-websockets/",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "tokio-websockets-0.13.3/LICENSE",
+          "sha256": "86b056a8bec91d091d37990ffd767b3df48a5060374c52eda159045c245479b7"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "621988364f1f11c24e2dc7bb0018411e9d3f652e"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.13.3"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "173f25c883cd2176a2d8212155638c0a60d484a9d84546d270866f40f56b6e49",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "toml_datetime",
+      "repository": "https://github.com/toml-rs/toml",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "toml_datetime-1.1.3+spec-1.1.0/LICENSE-APACHE",
+          "sha256": "249fdb6694467dd615b259f7ddde07be3f8ae5a72cecebb0e24f6629af4215fe"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "toml_datetime-1.1.3+spec-1.1.0/LICENSE-MIT",
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "563cb1a5d133e39d1008d4d4148ef35d3bba379f"
+        },
+        "path_in_vcs": "crates/toml_datetime"
+      },
+      "version": "1.1.3+spec-1.1.0"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "dd43688c4858d7264ae1cf9a9f874a67c3feb74a883b1cd7bebd6a4ea8307218",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "toml_edit",
+      "repository": "https://github.com/toml-rs/toml",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "toml_edit-0.25.19+spec-1.1.0/LICENSE-APACHE",
+          "sha256": "249fdb6694467dd615b259f7ddde07be3f8ae5a72cecebb0e24f6629af4215fe"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "toml_edit-0.25.19+spec-1.1.0/LICENSE-MIT",
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "563cb1a5d133e39d1008d4d4148ef35d3bba379f"
+        },
+        "path_in_vcs": "crates/toml_edit"
+      },
+      "version": "0.25.19+spec-1.1.0"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "baa693a8032d7e1cada7d0041e96126df243179ff061456783ac7f12bda4744c",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "toml_parser",
+      "repository": "https://github.com/toml-rs/toml",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "toml_parser-1.1.5+spec-1.1.0/LICENSE-APACHE",
+          "sha256": "249fdb6694467dd615b259f7ddde07be3f8ae5a72cecebb0e24f6629af4215fe"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "toml_parser-1.1.5+spec-1.1.0/LICENSE-MIT",
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "ceac6e4412420d5a5c19e4f7293ad005cf1a31b2"
+        },
+        "path_in_vcs": "crates/toml_parser"
+      },
+      "version": "1.1.5+spec-1.1.0"
     },
     {
       "authors": [
@@ -7741,6 +11819,37 @@
         "path_in_vcs": "tracing"
       },
       "version": "0.1.44"
+    },
+    {
+      "authors": [
+        "Tokio Contributors <team@tokio.rs>",
+        "Eliza Weisman <eliza@buoyant.io>",
+        "David Barsky <dbarsky@amazon.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "7490cfa5ec963746568740651ac6781f701c9c5ea257c58e057f3ba8cf69e8da",
+      "declaredLicense": "MIT",
+      "name": "tracing-attributes",
+      "repository": "https://github.com/tokio-rs/tracing",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "tracing-attributes-0.1.31/LICENSE",
+          "sha256": "898b1ae9821e98daf8964c8d6c7f61641f5f5aa78ad500020771c0939ee0dea1"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "55086231ec4aaeffcaab9932e696f40278f06bd1"
+        },
+        "path_in_vcs": "tracing-attributes"
+      },
+      "version": "0.1.31"
     },
     {
       "authors": [
@@ -7991,6 +12100,91 @@
         "path_in_vcs": ""
       },
       "version": "1.0.27"
+    },
+    {
+      "authors": [
+        "kwantam <kwantam@gmail.com>",
+        "Manish Goregaokar <manishsmail@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "c6f5d3c3b1bf09027a88a6bc961fc00497d651009560b5463668dc81b0fa87a8",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "unicode-segmentation",
+      "repository": "https://github.com/unicode-rs/unicode-segmentation",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "COPYRIGHT",
+          "origin": "cargo-registry-cache",
+          "path": "unicode-segmentation-1.13.3/COPYRIGHT",
+          "sha256": "23860c2a7b5d96b21569afedf033469bab9fe14a1b24a35068b8641c578ce24d"
+        },
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "unicode-segmentation-1.13.3/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "unicode-segmentation-1.13.3/LICENSE-MIT",
+          "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "66a032fd8d667bc47ac5b640b151dff3f5356d07"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.13.3"
+    },
+    {
+      "authors": [
+        "erick.tryzelaar <erick.tryzelaar@gmail.com>",
+        "kwantam <kwantam@gmail.com>",
+        "Manish Goregaokar <manishsmail@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "name": "unicode-xid",
+      "repository": "https://github.com/unicode-rs/unicode-xid",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "COPYRIGHT",
+          "origin": "cargo-registry-cache",
+          "path": "unicode-xid-0.2.6/COPYRIGHT",
+          "sha256": "23860c2a7b5d96b21569afedf033469bab9fe14a1b24a35068b8641c578ce24d"
+        },
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "unicode-xid-0.2.6/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "unicode-xid-0.2.6/LICENSE-MIT",
+          "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "5d50587f19713cd35f1f48e5d4d011aa9c54dbff"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "0.2.6"
     },
     {
       "authors": [
@@ -8267,6 +12461,46 @@
         }
       },
       "version": "0.1.2"
+    },
+    {
+      "authors": [
+        "Andrew Gallant <jamslam@gmail.com>"
+      ],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "29790946404f91d9c5d06f9874efddea1dc06c5efe94541a7d6863108e3a5e4b",
+      "declaredLicense": "Unlicense/MIT",
+      "name": "walkdir",
+      "repository": "https://github.com/BurntSushi/walkdir",
+      "targets": [
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "COPYING",
+          "origin": "cargo-registry-cache",
+          "path": "walkdir-2.5.0/COPYING",
+          "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "walkdir-2.5.0/LICENSE-MIT",
+          "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f"
+        },
+        {
+          "cratePath": "UNLICENSE",
+          "origin": "cargo-registry-cache",
+          "path": "walkdir-2.5.0/UNLICENSE",
+          "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "4f26be4d450910916ea11533b2efc52b9a6483bc"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "2.5.0"
     },
     {
       "authors": [
@@ -8632,6 +12866,33 @@
       "version": "0.12.0"
     },
     {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "8c3b93199df0ab874cdf0c6a94f0a0dc3423fe41f1cafb62b8bd7b1deb277aef",
+      "declaredLicense": "MIT",
+      "name": "winnow",
+      "repository": "https://github.com/winnow-rs/winnow",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "winnow-1.0.5/LICENSE-MIT",
+          "sha256": "cb5aedb296c5246d1f22e9099f925a65146f9f0d6b4eebba97fd27a6cdbbab2d"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "21b3ab2535a675768a170a851efda83253b9eb21"
+        },
+        "path_in_vcs": ""
+      },
+      "version": "1.0.5"
+    },
+    {
       "authors": [
         "The ICU4X Project Developers"
       ],
@@ -8925,6 +13186,45 @@
           "sha1": "c55af491426ef53f35fb8c6e83f220fa07712e66"
         },
         "path_in_vcs": "zerocopy"
+      },
+      "version": "0.8.63"
+    },
+    {
+      "authors": [],
+      "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+      "crateChecksum": "863ad3ac83293fb4d740aedbfdc9240dd8d1a50c1099acd76ce80ce7c7230c7f",
+      "declaredLicense": "BSD-2-Clause OR Apache-2.0 OR MIT",
+      "name": "zerocopy-derive",
+      "repository": "https://github.com/google/zerocopy",
+      "targets": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android"
+      ],
+      "texts": [
+        {
+          "cratePath": "LICENSE-APACHE",
+          "origin": "cargo-registry-cache",
+          "path": "zerocopy-derive-0.8.63/LICENSE-APACHE",
+          "sha256": "9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3"
+        },
+        {
+          "cratePath": "LICENSE-BSD",
+          "origin": "cargo-registry-cache",
+          "path": "zerocopy-derive-0.8.63/LICENSE-BSD",
+          "sha256": "83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32"
+        },
+        {
+          "cratePath": "LICENSE-MIT",
+          "origin": "cargo-registry-cache",
+          "path": "zerocopy-derive-0.8.63/LICENSE-MIT",
+          "sha256": "1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df"
+        }
+      ],
+      "vcs": {
+        "git": {
+          "sha1": "c55af491426ef53f35fb8c6e83f220fa07712e66"
+        },
+        "path_in_vcs": "zerocopy/zerocopy-derive"
       },
       "version": "0.8.63"
     },

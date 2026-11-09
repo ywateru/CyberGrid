@@ -1,0 +1,27 @@
+{
+  "authors": [],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "d52efb639344a7c6adb8e62c6f3d2c19c001ff1b79a5041ba1c6ed42e19c6aa5",
+  "declaredLicense": "MIT",
+  "name": "tokio-websockets",
+  "repository": "https://github.com/Gelbpunkt/tokio-websockets/",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "tokio-websockets-0.13.3/LICENSE",
+      "sha256": "86b056a8bec91d091d37990ffd767b3df48a5060374c52eda159045c245479b7"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "621988364f1f11c24e2dc7bb0018411e9d3f652e"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.13.3"
+}

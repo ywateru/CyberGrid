@@ -1,0 +1,30 @@
+{
+  "authors": [
+    "Szymon Wieloch <szymon.wieloch@gmail.com>",
+    "Ahmed Masud <ahmed.masud@saf.ai>",
+    "OpenByte <development.openbyte@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "5e2c5bd4158e66d1e215c49b837e11d62f3267b30c92f1d171c4d3105e3dc4d4",
+  "declaredLicense": "MIT",
+  "name": "dlopen2",
+  "repository": "https://github.com/OpenByteDev/dlopen2",
+  "targets": [
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "dlopen2-0.8.2/upstream-repository-root/LICENSE",
+      "sha256": "39fa265207450e77c62e90c5594a06c085b655d8374c7ced4bf7894b6bd95dd2",
+      "url": "https://raw.githubusercontent.com/OpenByteDev/dlopen2/cc80e4a0a90d499b677fdf7743699b4b3a43a989/LICENSE"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "cc80e4a0a90d499b677fdf7743699b4b3a43a989"
+    },
+    "path_in_vcs": "dlopen2"
+  },
+  "version": "0.8.2"
+}

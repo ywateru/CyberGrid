@@ -1,0 +1,41 @@
+{
+  "authors": [
+    "Cesar Eduardo Barros <cesarb@cesarb.eti.br>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "3d52eff69cd5e647efe296129160853a42795992097e8af39800e1060caeea9b",
+  "declaredLicense": "CC0-1.0 OR MIT-0 OR Apache-2.0",
+  "name": "constant_time_eq",
+  "repository": "https://github.com/cesarb/constant_time_eq",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "constant_time_eq-0.4.2/LICENSE-APACHE",
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+    },
+    {
+      "cratePath": "LICENSE-CC0",
+      "origin": "cargo-registry-cache",
+      "path": "constant_time_eq-0.4.2/LICENSE-CC0",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+    },
+    {
+      "cratePath": "LICENSE-MIT0",
+      "origin": "cargo-registry-cache",
+      "path": "constant_time_eq-0.4.2/LICENSE-MIT0",
+      "sha256": "9a3aeb3f63659c4c6302d315e1d98784d1e8559858a47ff9562e091bb922d28d"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "86f38ed9ad4d0500c5472bb8cb2ddc4fe5ac7143"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.4.2"
+}

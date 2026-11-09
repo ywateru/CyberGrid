@@ -1,0 +1,40 @@
+{
+  "authors": [
+    "Andrew Gallant <jamslam@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "29790946404f91d9c5d06f9874efddea1dc06c5efe94541a7d6863108e3a5e4b",
+  "declaredLicense": "Unlicense/MIT",
+  "name": "walkdir",
+  "repository": "https://github.com/BurntSushi/walkdir",
+  "targets": [
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "COPYING",
+      "origin": "cargo-registry-cache",
+      "path": "walkdir-2.5.0/COPYING",
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "walkdir-2.5.0/LICENSE-MIT",
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f"
+    },
+    {
+      "cratePath": "UNLICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "walkdir-2.5.0/UNLICENSE",
+      "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "4f26be4d450910916ea11533b2efc52b9a6483bc"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "2.5.0"
+}

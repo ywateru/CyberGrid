@@ -54,6 +54,7 @@ npm start
 | `CYBERGRID_ADMIN_KEY` | 可选，独立随机 32–256 UTF8 字节；为空时管理 API 返回503 |
 | `LOGTO_RESOURCE` | 固定 OAuth audience；未显式指定时，有公开 origin 则默认其加 `/api`，否则为 `https://cybergrid.local/api` |
 | `CYBERGRID_CONSOLE_REDIRECT_URI` | 可选，同 origin 专用回跳；默认 `/console/callback/` |
+| `CYBERGRID_BROWSER_ORIGINS` | v0.7.0 的可选只读 JS SDK CORS 白名单，逗号分隔精确 HTTPS origin；开发允许 HTTP loopback，默认空表示只允许同源 |
 | `CYBERGRID_BIND` / `PORT` | Node 默认 `127.0.0.1:7400`；Compose 在容器内设为 `0.0.0.0:7400` |
 | `CYBERGRID_OWNER_LOCK` | 固定租约路径；默认当前目录 `.cybergrid-owner.lock` |
 | `CYBERGRID_MEMORY_LIMITS` | 可选 JSON 容量限制，必须符合 MemoryStore 的边界 |
@@ -71,6 +72,8 @@ JWT issuer、JWKS 和 audience 始终独立固定。已有部署删除 `CYBERGRI
 `GET /healthz` 和 `HEAD /healthz` 只报告进程存活，不调用 Logto、不泄露配置或协调状态。请求从读 body 到 handler / 响应读取共用25秒预算，body 上限100000字节、响应上限2MiB，信令长轮询最多15秒；客户端断连释放等待者。SIGTERM 停止接入、关闭协调等待者与连接并释放租约；SIGKILL 后 helper 通过 stdin EOF 自动释放内核锁。
 
 `/admin/` 使用同一服务 `.env` 中的独立管理密钥，只读查看协调状态；密钥只保存在当前页面内存，刷新后重新输入。`/console/` 使用 Logto，提供当前用户自己的只读设备视图。
+
+使用独立域名的前端和 JS SDK 时，除在 Logto SPA 登记该前端的精确回跳和 origin 外，还要把前端 origin 加入 `CYBERGRID_BROWSER_ORIGINS`。前端使用 `LOGTO_BROWSER_CLIENT_ID` 对应的受信 SPA 与固定 `LOGTO_RESOURCE`；不能把 Native 或 M2M ID 用作浏览器身份。白名单仅开放 console 读取、会话建立及 console 专用注销，不开放设备写入、信令或管理 API，也不允许 cookie credentials。留空不影响原有同源站点或原生 SDK。端口申报的 Quick Tunnel URL 由业务服务自行配置鉴权和浏览器 CORS，中央的白名单不为业务端口代配这些规则。
 
 ## SDK 与发布
 

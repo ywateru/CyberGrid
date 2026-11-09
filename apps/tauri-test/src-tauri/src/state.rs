@@ -2,7 +2,7 @@ use crate::{
     browser, platform, protocol,
     services::{Incoming, LocalServices},
 };
-use cybergrid_sdk::{Client, Config, CredentialStore, Device, Mapping, Port};
+use cybergrid_sdk::{Client, Config, CredentialStore, Device, DirectStrategy, Mapping, Port};
 use serde::{Deserialize, Serialize};
 use std::{
     path::{Path, PathBuf},
@@ -19,7 +19,38 @@ pub struct LabConfig {
     pub app_id: String,
     pub device_name: String,
     pub force_fallback: bool,
+    #[serde(default)]
+    pub direct_strategy: DirectStrategy,
     pub cloudflared_path: String,
+}
+
+// Only these fixed codes cross the browser-start IPC boundary. Never serialize
+// an underlying SDK, storage, or OAuth error into the frontend response.
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum BrowserStartError {
+    ExistingAuthorization,
+    Failed,
+}
+impl BrowserStartError {
+    pub fn message(&self) -> &'static str {
+        match self {
+            Self::ExistingAuthorization => {
+                "此应用已有本机授权，请选择“恢复本机授权”；如需重新网页登录，请先“退出并撤销本机授权”。"
+            }
+            Self::Failed => "无法启动网页登录，请核对配置或处理已有授权",
+        }
+    }
+}
+impl From<String> for BrowserStartError {
+    fn from(_: String) -> Self {
+        Self::Failed
+    }
+}
+impl From<&str> for BrowserStartError {
+    fn from(_: &str) -> Self {
+        Self::Failed
+    }
 }
 
 #[cfg(test)]
@@ -94,6 +125,7 @@ impl Default for LabConfig {
                 "Mac".into()
             },
             force_fallback: false,
+            direct_strategy: DirectStrategy::Sequential,
             cloudflared_path: String::new(),
         }
     }
@@ -407,6 +439,8 @@ impl LabState {
             } else {
                 Duration::from_secs(12)
             },
+            iroh_enabled: !config.force_fallback,
+            direct_strategy: config.direct_strategy,
             fallback_timeout: Duration::from_secs(45),
             cloudflared: Some(provider),
             ..Config::default()
@@ -437,7 +471,11 @@ impl LabState {
         resume: bool,
     ) -> Result<(), String> {
         if !resume {
-            return self.begin_web_login(config).await.map(|_| ());
+            return self
+                .begin_web_login(config)
+                .await
+                .map(|_| ())
+                .map_err(|error| error.message().to_string());
         }
         let _setup = self.auth_setup.lock().await;
         self.prepare_browser_cleanup().await?;
@@ -645,7 +683,7 @@ impl LabState {
     pub async fn begin_web_login(
         self: &Arc<Self>,
         mut config: LabConfig,
-    ) -> Result<browser::Begin, String> {
+    ) -> Result<browser::Begin, BrowserStartError> {
         // Reserve before the first await: native/ADB cancellation does not rely
         // on a JS caller remaining alive to cancel a late setup result.
         let cancel = CancellationToken::new();
@@ -672,7 +710,7 @@ impl LabState {
             g
         };
         self.browser_trace("native-reserved", None).await?;
-        let setup = async {
+        let setup: Result<browser::Begin, BrowserStartError> = async {
             let _setup = self.auth_setup.lock().await;
             self.prepare_browser_cleanup().await?;
             {
@@ -691,7 +729,7 @@ impl LabState {
             let client = self.create_client(&config)?;
             let store = CredentialStore::new(credential_path(&self.data_dir, &config));
             if store.exists() {
-                return Err("已有本机授权，请恢复或先撤销".into());
+                return Err(BrowserStartError::ExistingAuthorization);
             }
             self.browser_trace("native-config-await", None).await?;
             let expected = client
@@ -809,13 +847,14 @@ impl LabState {
             Ok(begin)
         }
         .await;
-        if setup.is_err() {
+        if let Err(error) = &setup {
             cancel.cancel();
             let mut s = self.inner.lock().await;
             if s.generation == generation {
                 s.pending = None;
                 s.phase = "signed_out".into();
-                s.error = Some("无法启动网页登录，请核对配置或处理已有授权".into());
+                s.error = Some(error.message().into());
+                s.status = error.message().into();
             }
         }
         setup
@@ -910,7 +949,9 @@ impl LabState {
                                 "provider-restarting"=>"匿名隧道异常，正在有限重启".into(),
                                 "provider-failed"=>"匿名隧道重启次数已用完；直连仍可尝试".into(),
                                 "direct-attempt"=>"正在尝试 WebRTC 直连".into(),
-                                "fallback-attempt"=>"直连未建立，正在尝试 Cloudflare 回退".into(),
+                                "iroh-attempt"=>"WebRTC 未建立，正在尝试 iroh 直连".into(),
+                                "iroh-skipped"=>"对端没有可用的 iroh 直连地址，继续检查回退通道".into(),
+                                "fallback-attempt"=>"直连未建立，正在尝试 Cloudflare 匿名隧道".into(),
                                 "tunnel-ready"=>"匿名隧道已就绪，可以接受另一端连接".into(),
                                 "port-open"=>"远端端口已打开".into(),
                                 "error"=>"连接发生错误，请查看提示".into(),
@@ -1290,6 +1331,65 @@ impl LabState {
 mod browser_setup_tests {
     use super::*;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    #[tokio::test]
+    async fn browser_boundary_existing_authorization_exits_setup_without_network_or_transaction() {
+        let root = std::env::temp_dir().join(format!(
+            "cybergrid-existing-authorization-{}",
+            hex::encode(rand::random::<[u8; 12]>())
+        ));
+        let state = LabState::new(root.join("data"), root.join("cache")).unwrap();
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let config = LabConfig {
+            base_url: format!("http://{}", listener.local_addr().unwrap()),
+            app_id: "fixture-native".into(),
+            cloudflared_path: "/usr/bin/true".into(),
+            ..Default::default()
+        };
+        // Only existence matters here. No credential parsing, refresh, overwrite,
+        // revocation, callback listener, or browser transaction may be attempted.
+        let path = credential_path(&state.data_dir, &config);
+        let original = b"fixture-existing-authorization-not-parsed";
+        std::fs::write(&path, original).unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).unwrap();
+        }
+        let result = tokio::time::timeout(Duration::from_secs(2), state.begin_web_login(config))
+            .await
+            .expect("existing authorization must fail before any HTTP request");
+        assert!(matches!(
+            result,
+            Err(BrowserStartError::ExistingAuthorization)
+        ));
+        assert!(
+            tokio::time::timeout(Duration::from_millis(20), listener.accept())
+                .await
+                .is_err()
+        );
+        assert!(state.browser.lock().await.is_none());
+        let inner = state.inner.lock().await;
+        assert!(inner.pending.is_none());
+        assert_eq!(inner.phase, "signed_out");
+        assert_eq!(
+            inner.status,
+            BrowserStartError::ExistingAuthorization.message()
+        );
+        assert_eq!(inner.error.as_deref(), Some(inner.status.as_str()));
+        drop(inner);
+        assert_eq!(std::fs::read(&path).unwrap(), original);
+        assert_eq!(
+            serde_json::to_value(BrowserStartError::ExistingAuthorization).unwrap(),
+            "EXISTING_AUTHORIZATION"
+        );
+        assert_eq!(
+            serde_json::to_value(BrowserStartError::from("untrusted-provider-detail")).unwrap(),
+            "FAILED"
+        );
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
     #[tokio::test]
     async fn browser_boundary_setup_cancel_fences_native_before_any_browser_start() {
         let root = std::env::temp_dir().join(format!(

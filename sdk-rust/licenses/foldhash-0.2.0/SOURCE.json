@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Orson Peters <orsonpeters@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb",
+  "declaredLicense": "Zlib",
+  "name": "foldhash",
+  "repository": "https://github.com/orlp/foldhash",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "foldhash-0.2.0/LICENSE",
+      "sha256": "b1181a40b2a7b25cf66fd01481713bc1005df082c53ef73e851e55071b102744"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "8f878c636fda9c9e93384824ea45e06d03f009f5"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.2.0"
+}

@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "535c99c9a786bee714155d2ee4fc2477405c2c43536e1bc6a51de09a0d1448f7",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "n0-dns-resolver",
+  "repository": "https://github.com/n0-computer/iroh",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "n0-dns-resolver-0.1.0/LICENSE-APACHE",
+      "sha256": "903131e2786f073a942fbf8fae122d9e576e4dad758c6da7f9f2ba58fd8611ab"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "n0-dns-resolver-0.1.0/LICENSE-MIT",
+      "sha256": "f169adb8124d3b005416d8485d00777c9a7bdd9099982c52a4493f9732e6d050"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "16a791ce8cfd6456518970872ba3251b0756112d"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "0.1.0"
+}

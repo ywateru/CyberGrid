@@ -1,0 +1,23 @@
+{
+  "name": "typescript",
+  "version": "5.9.3",
+  "scope": "development compiler only; the browser SDK has no runtime dependencies",
+  "npmResolved": "https://registry.npmmirror.com/typescript/-/typescript-5.9.3.tgz",
+  "npmIntegrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
+  "texts": [
+    {
+      "path": "LICENSE.txt",
+      "sha256": "a7d00bfd54525bc694b6e32f64c7ebcf5e6b7ae3657be5cc12767bce74654a47",
+      "origin": "npm-package",
+      "package": "typescript",
+      "version": "5.9.3"
+    },
+    {
+      "path": "ThirdPartyNoticeText.txt",
+      "sha256": "1af3c68039c57e539422da82a4faada506ce6d0ea6f90e0b699d02dbcdb7a90c",
+      "origin": "npm-package",
+      "package": "typescript",
+      "version": "5.9.3"
+    }
+  ]
+}

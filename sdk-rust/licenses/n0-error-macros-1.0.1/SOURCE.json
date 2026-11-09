@@ -1,0 +1,36 @@
+{
+  "authors": [
+    "Frando <franz@n0.computer>",
+    "n0 team"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "4412346410d6616f3668c40e53c298e5320c7b856f7a960e5914e442601be79f",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "n0-error-macros",
+  "repository": "https://github.com/n0-computer/n0-error",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "n0-error-macros-1.0.1/upstream-repository-root/LICENSE-APACHE",
+      "sha256": "7953ad8cebf4e01199521a5faa221ef59bec5cee0a9856b179590613a8560cbc",
+      "url": "https://raw.githubusercontent.com/n0-computer/n0-error/596f4113918712d545cbb25b7fa12c7153706f54/LICENSE-APACHE"
+    },
+    {
+      "origin": "pinned-upstream-repository",
+      "path": "n0-error-macros-1.0.1/upstream-repository-root/LICENSE-MIT",
+      "sha256": "339060c99d5c80c2742cae417f765980afe6b0149a78f959bbf2a79f19ab3af5",
+      "url": "https://raw.githubusercontent.com/n0-computer/n0-error/596f4113918712d545cbb25b7fa12c7153706f54/LICENSE-MIT"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "596f4113918712d545cbb25b7fa12c7153706f54"
+    },
+    "path_in_vcs": "n0-error-macros"
+  },
+  "version": "1.0.1"
+}

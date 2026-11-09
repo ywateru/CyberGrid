@@ -11,7 +11,7 @@ mod protocol;
 mod services;
 mod state;
 
-use state::{LabConfig, LabState, View};
+use state::{BrowserStartError, LabConfig, LabState, View};
 use std::sync::{atomic::Ordering, Arc};
 use tauri::Manager;
 
@@ -23,7 +23,7 @@ async fn lab_view(state: tauri::State<'_, Arc<LabState>>) -> Result<View, String
 async fn begin_web_login(
     state: tauri::State<'_, Arc<LabState>>,
     config: LabConfig,
-) -> Result<browser::Begin, String> {
+) -> Result<browser::Begin, BrowserStartError> {
     state.inner().begin_web_login(config).await
 }
 #[tauri::command]

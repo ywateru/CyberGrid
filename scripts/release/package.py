@@ -14,7 +14,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'dist' / 'release'
-VERSIONS = {'go': '0.4.0', 'rust': '0.2.0', 'lab': '0.3.0'}
+VERSIONS = {'go': '0.4.0', 'rust': '0.2.0', 'lab': '0.3.0', 'js': '0.1.0'}
 
 
 def sha(path):
@@ -84,18 +84,27 @@ def build_metadata(platform):
 
 
 def package_sources():
-    for prefix, name, version in [('sdk', 'cybergrid-sdk', VERSIONS['go']), ('sdk-rust', 'cybergrid-sdk-rust', VERSIONS['rust'])]:
+    for prefix, name, version in [('sdk', 'cybergrid-sdk', VERSIONS['go']), ('sdk-rust', 'cybergrid-sdk-rust', VERSIONS['rust']), ('sdk-js', 'cybergrid-sdk-js', VERSIONS['js'])]:
         files = tracked(prefix)
         mapping = source_map(prefix)
         meta = {'version': version, 'commit': build_metadata('sources')['commit'], 'sha256': mapping}
         write_json(name + '-source-manifest.json', meta)
         tar(f'{name}-{version}-source.tar.gz', [(p, p.relative_to(ROOT / prefix).as_posix()) for p in files], f'{name}-{version}', {'SOURCE-MANIFEST.json': (json.dumps(meta, indent=2, sort_keys=True) + '\n').encode()})
+    js_root = ROOT / 'sdk-js'
+    # The sources job builds these exact committed TypeScript inputs first.
+    # Only the allowlisted ESM and declaration outputs can enter the browser kit.
+    outputs = [js_root / 'dist/index.js', js_root / 'dist/index.d.ts']
+    if {p.name for p in (js_root / 'dist').iterdir()} != {'index.js', 'index.d.ts'} or any(p.is_symlink() or not p.is_file() for p in outputs):
+        raise RuntimeError('Build the exact JS ESM and types before source packaging')
+    js_files = tracked('sdk-js/package.json', 'sdk-js/README.md', 'sdk-js/LICENSE', 'sdk-js/notices') + outputs
+    js_meta = {**build_metadata('sources'), 'version': VERSIONS['js'], 'sourceManifestSha256': sha(OUT / 'cybergrid-sdk-js-source-manifest.json'), 'sha256': {p.relative_to(js_root).as_posix(): sha(p) for p in js_files}}
+    tar(f'cybergrid-sdk-js-{VERSIONS["js"]}-esm.tar.gz', [(p, p.relative_to(js_root).as_posix()) for p in js_files], f'cybergrid-sdk-js-{VERSIONS["js"]}', {'BUILD-INFO.json': (json.dumps(js_meta, indent=2, sort_keys=True) + '\n').encode()})
     app_files = tracked('apps/tauri-test', 'sdk-rust', 'tools/cloudflared', 'scripts/release', 'docs/lab-browser-login.md')
     mapping = {p.relative_to(ROOT).as_posix(): sha(p) for p in app_files}
     meta = {'version': VERSIONS['lab'], 'commit': build_metadata('sources')['commit'], 'sha256': mapping, 'sdkSourceManifestSha256': sha(OUT / 'cybergrid-sdk-rust-source-manifest.json')}
     write_json('lab-source-manifest.json', meta)
     tar('CyberGrid-Lab-0.3.0-source.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in app_files], 'CyberGrid-Lab-0.3.0', {'SOURCE-MANIFEST.json': (json.dumps(meta, indent=2, sort_keys=True) + '\n').encode()})
-    license_files = tracked('LICENSE', 'sdk/LICENSE', 'sdk/third_party', 'sdk/THIRD_PARTY_NOTICES.md', 'sdk-rust/LICENSE', 'sdk-rust/licenses', 'sdk-rust/THIRD_PARTY_NOTICES.md', 'apps/tauri-test/notices', 'tools/cloudflared/LICENSE', 'tools/cloudflared/BUNDLED_THIRD_PARTY_NOTICES.md')
+    license_files = tracked('LICENSE', 'sdk/LICENSE', 'sdk/third_party', 'sdk/THIRD_PARTY_NOTICES.md', 'sdk-rust/LICENSE', 'sdk-rust/licenses', 'sdk-rust/THIRD_PARTY_NOTICES.md', 'sdk-js/LICENSE', 'sdk-js/notices', 'apps/tauri-test/notices', 'tools/cloudflared/LICENSE', 'tools/cloudflared/BUNDLED_THIRD_PARTY_NOTICES.md')
     tar('CyberGrid-licenses.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in license_files], 'CyberGrid-licenses')
     write_json('build-sources.json', build_metadata('sources'))
 
@@ -182,6 +191,7 @@ def finalize():
     expected = {
         'cybergrid-sdk-0.4.0-source.tar.gz', 'cybergrid-sdk-source-manifest.json',
         'cybergrid-sdk-rust-0.2.0-source.tar.gz', 'cybergrid-sdk-rust-source-manifest.json',
+        'cybergrid-sdk-js-0.1.0-source.tar.gz', 'cybergrid-sdk-js-source-manifest.json', 'cybergrid-sdk-js-0.1.0-esm.tar.gz',
         'CyberGrid-Lab-0.3.0-source.tar.gz', 'lab-source-manifest.json', 'CyberGrid-licenses.tar.gz',
         'CyberGrid-Lab-0.3.0-macos-arm64-test.zip', 'cybergrid-sdk-0.4.0-macos-arm64.tar.gz',
         'CyberGrid-Lab-0.3.0-android-arm64-test.apk', 'CyberGrid-Lab-0.3.0-android-arm64-test.zip',

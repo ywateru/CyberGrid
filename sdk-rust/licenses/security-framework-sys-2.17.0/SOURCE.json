@@ -1,0 +1,35 @@
+{
+  "authors": [
+    "Steven Fackler <sfackler@gmail.com>",
+    "Kornel <kornel@geekhood.net>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "6ce2691df843ecc5d231c0b14ece2acc3efb62c0a398c7e1d875f3983ce020e3",
+  "declaredLicense": "MIT OR Apache-2.0",
+  "name": "security-framework-sys",
+  "repository": "https://github.com/kornelski/rust-security-framework",
+  "targets": [
+    "aarch64-apple-darwin"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE-APACHE",
+      "origin": "cargo-registry-cache",
+      "path": "security-framework-sys-2.17.0/LICENSE-APACHE",
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+    },
+    {
+      "cratePath": "LICENSE-MIT",
+      "origin": "cargo-registry-cache",
+      "path": "security-framework-sys-2.17.0/LICENSE-MIT",
+      "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "5f6e65114b77d5bc161d2b099cad09f2a67609d2"
+    },
+    "path_in_vcs": "security-framework-sys"
+  },
+  "version": "2.17.0"
+}

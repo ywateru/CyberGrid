@@ -1,0 +1,29 @@
+{
+  "authors": [
+    "Orson Peters <orsonpeters@gmail.com>"
+  ],
+  "cargoSource": "registry+https://github.com/rust-lang/crates.io-index",
+  "crateChecksum": "bdd58c3c93c3d278ca835519292445cb4b0d4dc59ccfdf7ceadaab3f8aeb4038",
+  "declaredLicense": "Zlib",
+  "name": "slotmap",
+  "repository": "https://github.com/orlp/slotmap",
+  "targets": [
+    "aarch64-apple-darwin",
+    "aarch64-linux-android"
+  ],
+  "texts": [
+    {
+      "cratePath": "LICENSE",
+      "origin": "cargo-registry-cache",
+      "path": "slotmap-1.1.1/LICENSE",
+      "sha256": "6cec81441b2ab2b5090954c1fb5d0bcca81b86487b5849061fa8952d20ef67d4"
+    }
+  ],
+  "vcs": {
+    "git": {
+      "sha1": "2d56154b9b628f7d7a506f24ebc4f55a13ec8fed"
+    },
+    "path_in_vcs": ""
+  },
+  "version": "1.1.1"
+}

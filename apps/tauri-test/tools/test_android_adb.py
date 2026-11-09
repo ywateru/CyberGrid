@@ -55,6 +55,14 @@ class ProtocolTests(unittest.TestCase):
                 control.main(["--serial", "fixture", "web-login", option, "forbidden"], lambda _: adb)
         self.assertEqual(len(adb.sent), 1)
 
+    def test_direct_strategy_is_an_optional_bounded_public_choice(self):
+        for strategy in ("sequential", "parallel"):
+            adb = FakeAdb("fixture")
+            control.main(["--serial", "fixture", "web-login", "--direct-strategy", strategy], lambda _: adb)
+            self.assertEqual(adb.sent[0]["payload"], {"forceFallback": False, "directStrategy": strategy})
+        with patch("sys.stderr"), self.assertRaises(SystemExit):
+            control.main(["--serial", "fixture", "web-login", "--direct-strategy", "relay"], FakeAdb)
+
     def test_real_command_envelope_and_config_whitelist(self):
         adb = FakeAdb("fixture")
         response = control.main(["--serial", "fixture", "login", "--server", "https://example.test", "--app", "id", "--name", "Android 4G"], lambda _: adb)
