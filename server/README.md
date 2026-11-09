@@ -21,7 +21,9 @@ npm run build
 npm start
 ```
 
-`start`、`dev`、`owner` 都使用同一 Node 入口。生产构建后可 `npm prune --omit=dev`；`tsx` 是运行依赖。配置 `REDIS_URL` 或一对 `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`，不能混用；缺少存储时不退回 RAM。`CYBERGRID_REDIS_PREFIX` 隔离环境，同 namespace 使用一致的 `CYBERGRID_LIMITS`。
+`start`、`dev`、`owner` 都使用同一 Node 入口。生产构建后可 `npm prune --omit=dev`；`tsx` 是运行依赖。普通 Node 可使用 `REDIS_URL` 或直接 Upstash REST。Vercel 使用 `CYBERGRID_REDIS_TRANSPORT=vercel-kv`，直接读取 Marketplace 注入的 `KV_REST_API_URL` / `KV_REST_API_TOKEN`。旧 Vercel KV 已迁移为 Upstash Redis，该选择器提供环境变量兼容接入，不需要 `@vercel/kv`。配置分组、部署按钮和迁移步骤见 [Vercel 配置](../docs/deployment.md#vercel-functions)。
+
+未设置选择器时只允许一组完整连接参数；显式选择后只采用所选组。所选参数缺失、选择器无效或存储不可用时拒绝请求，不改用其他存储，也不退回 RAM。`CYBERGRID_REDIS_PREFIX` 隔离环境，同 namespace 使用一致的 `CYBERGRID_LIMITS`。默认 Compose 使用内部 TCP Redis，不应设置 `vercel-kv`。
 
 `CYBERGRID_PUBLIC_ORIGIN` 可留空；设置时固定使用该 HTTPS origin，留空时从本次合法访问地址派生回跳。可信代理必须覆盖单值 X-Forwarded-Host / Proto。`LOGTO_RESOURCE` 是固定 audience，不随请求 Host 改变。已有部署移除公开 origin 前须显式保存原 resource。
 

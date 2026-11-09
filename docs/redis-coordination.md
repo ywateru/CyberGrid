@@ -11,7 +11,9 @@ CyberGrid 的生产协调状态由 Redis 保存。普通 Node.js / Docker 和 Ve
 
 ## 连接与生命周期
 
-- 配置标准 `REDIS_URL`，或成对配置 `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`，两种方式互斥。缺少或混合配置拒绝启动，不退回 RAM。
+- 支持三组连接配置：`REDIS_URL`（TCP/TLS）、`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`（REST），以及 Vercel Marketplace 注入的 `KV_REST_API_URL` / `KV_REST_API_TOKEN`（同一 REST 协议）。不使用已弃用的 `@vercel/kv` 包。
+- `CYBERGRID_REDIS_TRANSPORT` 可显式选择 `tcp`、`upstash-rest` 或 `vercel-kv`。Vercel 部署推荐 `vercel-kv`，只读取所选组；集成自动注入的其他连接变量不参与选择。未设置 selector 时，必须恰好配置一组完整连接信息；缺失、残缺或多组配置均拒绝启动。未知 selector 或所选组无效时不尝试其他组，也不退回 RAM。
+- `KV_URL` 和 `KV_REST_API_READ_ONLY_TOKEN` 不用于本服务的 REST 协调路径；需要可执行写入与 EVAL 的完整权限 token。Vercel KV 已由平台迁移至 Upstash Redis，此名称表示连接变量兼容方式，不是独立于 Redis 的新存储实现。
 - 生产、预览与测试使用独立 namespace；所有关联键使用一致的 Redis Cluster hash slot。关闭客户端只释放连接，不删除共享数据。
 - epoch 与注册回执所需的派生密钥在 Redis 中原子初始化，由所有实例共享。Node 重启或 Function 冷启动不改变 epoch。存储重置才创建新 epoch，实例不能无限缓存旧 epoch。
 - `Store` 的状态读取和写入全部异步。生产代码不得以本地 `current()`、revision 或计数器作为提交依据。

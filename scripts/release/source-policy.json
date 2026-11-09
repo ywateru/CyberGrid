@@ -51,7 +51,10 @@
     "docs/plan/tasks/redis-001.md",
     "docs/plan/tasks/redis-002.md",
     "docs/plan/tasks/redis-003.md",
-    "docs/plan/reviews/redis-003.md"
+    "docs/plan/reviews/redis-003.md",
+    "docs/plan/tasks/kv-001.md",
+    "docs/plan/tasks/wan-001.md",
+    "docs/plan/reviews/kv-001.md"
   ],
   "excludedParts": [
     ".git",

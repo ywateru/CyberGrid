@@ -51,13 +51,27 @@ npm start
 
 ## Vercel Functions
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid&env=LOGTO_ISSUER,LOGTO_RESOURCE,LOGTO_BROWSER_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_SECRET,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN&envDescription=Configure%20Logto%20and%20a%20dedicated%20Redis%20database&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid&env=LOGTO_ISSUER,LOGTO_RESOURCE,LOGTO_BROWSER_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_SECRET,CYBERGRID_REDIS_TRANSPORT,KV_REST_API_URL,KV_REST_API_TOKEN&envDescription=Set%20CYBERGRID_REDIS_TRANSPORT%20to%20vercel-kv%20and%20connect%20Marketplace%20Upstash&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md%23vercel-functions)
+
+本项目在 Vercel 上推荐使用 **Vercel KV 兼容配置**，由 Vercel Marketplace 的 **Upstash Redis** 提供托管存储。根据 [Vercel 官方说明](https://vercel.com/docs/redis)，旧版独立 Vercel KV 已停止提供，原实例于 2024 年 12 月自动迁移到 Upstash Redis。新项目在 Marketplace 创建或连接资源即可，无需自建 Redis；底层仍使用 Redis 协议与 Lua 原子操作，不是另一个独立 KV 引擎，也不需要安装已弃用的 `@vercel/kv`。
 
 1. 在 Vercel 导入仓库，项目根目录使用仓库根目录，采用仓库的 `vercel.json`，不要将 Root Directory 改成 `server/`。
-2. 创建或连接 Redis。可在 Vercel Marketplace 选择 Upstash Redis，也可使用自己可从 Functions 访问的 Redis。选择适合流量的方案，免费方案不要启用自动付费升级。REST URL / token 成对配置；若集成只提供 `KV_REST_API_URL` / `KV_REST_API_TOKEN`，将对应值填入本项目的两个 `UPSTASH_REDIS_REST_*` 变量。
-3. 填写下表的 Logto 与 Redis 参数。每个环境使用独立 Redis namespace，预览环境不能误用生产 namespace。项目无需 `CYBERGRID_OWNER_URL`、`CYBERGRID_PROXY_SECRET` 或旧服务的 rewrite 地址。
+2. 在项目 Storage / Marketplace 选择 [Upstash Redis](https://vercel.com/marketplace/upstash/upstash-kv)，创建或连接资源，选择要连接的 Vercel 环境。集成会注入 `KV_REST_API_URL`、`KV_REST_API_TOKEN` 等变量；直接使用它们，不必复制成 `UPSTASH_REDIS_REST_*`。需要完整写权限 token，不能使用 `KV_REST_API_READ_ONLY_TOKEN`。选择适合流量的方案，免费方案不要启用自动付费升级。
+3. 设置 `CYBERGRID_REDIS_TRANSPORT=vercel-kv`，并填写下表的 Logto 参数。部署按钮中的此项也填 `vercel-kv`；按钮不会自动创建存储资源。使用按钮首次创建项目时，可填已有资源的 KV 变量，或先导入项目、连接存储，再重新部署。每个环境使用独立 `CYBERGRID_REDIS_PREFIX`，预览不能误用生产 namespace。
 4. 部署后将实际 HTTPS origin 和完整 `/console/callback/` 回跳登记到 Logto SPA。首次部署可以暂不设置 `CYBERGRID_PUBLIC_ORIGIN`；设置后必须与实际访问域名一致。
 5. 绑定自己的域名并再次核对 Logto 回跳。打开官网、`/console/` 和 `/admin/`；`/healthz` 检查实例与 Redis 可用，还要通过配置/认证 API 验证 Logto。
+
+Vercel 服务端的存储变量如下，URL 与 token 由集成注入，不要提交真实值：
+
+```dotenv
+CYBERGRID_REDIS_TRANSPORT=vercel-kv
+# KV_REST_API_URL 和 KV_REST_API_TOKEN 由 Marketplace 集成注入
+CYBERGRID_REDIS_PREFIX=cybergrid:production
+```
+
+预览环境使用另一个 prefix，例如 `cybergrid:preview`。Marketplace 可能同时注入 TCP 和 REST 地址；显式 `vercel-kv` 只采用 KV REST 这一组，因此不会误选其他连接。`KV_URL` 和只读 token 不参与此模式。
+
+已有部署切换连接方式时，继续连接原资源并保留原 prefix 和容量配置，不要照抄示例 prefix 覆盖生产值。切换前后核对共享 epoch 一致，无需清空数据。Vercel 环境变量更新后重新部署才会生效；生产候选应先检查成功再切换正式域名。项目无需 `CYBERGRID_OWNER_URL`、`CYBERGRID_PROXY_SECRET` 或旧服务 rewrite 地址。平台的存储接入步骤见 [Marketplace Storage 官方文档](https://vercel.com/docs/marketplace-storage)。
 
 网站和 API 由同一个 Node Function 入口处理，包含安全头、静态路径校验和控制台回跳。Function 冷启动复用 Redis 里的会话，不通过隧道或代理转发到旧 Node 主机。Function 请求时限为 30 秒，内部 HTTP 预算 25 秒，信令等待不超过 15 秒。
 
@@ -67,8 +81,10 @@ Vercel 的环境变量修改需要重新部署后生效。免费 Redis 有存储
 
 | 配置 | 用途 |
 | --- | --- |
-| `REDIS_URL` | 标准 Redis TCP/TLS 连接，例如 Compose 的 `redis://redis:6379`；与 REST 配置互斥 |
-| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | 管理 Redis 的 REST 地址与完整权限 token，必须同时设置；不能使用只读 token |
+| `CYBERGRID_REDIS_TRANSPORT` | 可选，精确为 `vercel-kv`、`upstash-rest` 或 `tcp`；Vercel 推荐 `vercel-kv`，只采用所选组。留空不等于未设置；自动模式须完全不配置此变量 |
+| `KV_REST_API_URL` / `KV_REST_API_TOKEN` | `vercel-kv` 使用的 Vercel Marketplace 变量，HTTPS REST 地址与完整权限 token，必须成对存在 |
+| `REDIS_URL` | `tcp` 使用的标准 Redis TCP/TLS 连接，例如 Compose 的 `redis://redis:6379` |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | `upstash-rest` 使用的直接 REST 配置，必须成对存在；不能使用只读 token |
 | `CYBERGRID_REDIS_PREFIX` | 协调 namespace，默认 `cybergrid:v1`；生产、预览与测试分别设置，不含花括号 |
 | `CYBERGRID_LIMITS` | 可选 JSON 共享容量限制，只能下调以下硬上限；同 namespace 所有实例必须一致 |
 | `LOGTO_ISSUER` | 必填，可信租户 HTTPS issuer，以 `/oidc` 结尾；JWT 和 CSP 均固定使用它 |
@@ -82,6 +98,8 @@ Vercel 的环境变量修改需要重新部署后生效。免费 Redis 有存储
 | `CYBERGRID_BIND` / `PORT` | 普通 Node 默认 `127.0.0.1:7400`；Compose 容器内为 `0.0.0.0:7400`；Functions 无需配置 |
 
 回跳不能使用 `/`、`/api`、`/admin` 或 `/healthz` 保留路径；在 Logto SPA 注册精确 URI。已有部署删除公开 origin 前，显式保存原来的 `LOGTO_RESOURCE`，避免改变验签 audience。请求 Host 不选择 Logto 租户、JWKS 或 OAuth resource。
+
+未配置 `CYBERGRID_REDIS_TRANSPORT` 时，只允许一组完整连接配置；残缺 REST 配置或多组同时存在会拒绝启动。显式选择后只读取所选组，未知值、空值或所选组缺失时拒绝启动，不尝试其他存储组。Docker Compose 固定使用内部 TCP Redis；`.env` 中不要为该默认 Compose 设置 `vercel-kv`。使用外部托管存储请按上文直接 Node / 自定义 Compose 方式部署。
 
 共享存储默认容量也是本实现的硬上限。Lua 操作有锁内扫描，不能通过环境变量任意放大到数百万记录；更大规模需要调整索引与执行策略。容量配置在 namespace 创建时固定，不能在实例之间分别调整。
 

@@ -8,11 +8,11 @@ Rust 是主要 SDK，默认按 WebRTC → iroh 直连 → Cloudflare Quick Tunne
 
 ## 部署网站与 API
 
-网站、Logto 控制台、管理后台和 API 支持 Node.js 22 / Docker 或 Vercel Functions。各实例使用 Redis 共享协调状态，不依赖单进程内存。Docker Compose 包含带持久化卷的 Redis；Vercel 使用外部 Redis。
+网站、Logto 控制台、管理后台和 API 支持 Node.js 22 / Docker 或 Vercel Functions。各实例使用 Redis 共享协调状态，不依赖单进程内存。Docker Compose 包含带持久化卷的 Redis；Vercel 推荐使用 Vercel KV 兼容接入，由 Marketplace 的 Upstash Redis 提供托管存储。
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid&env=LOGTO_ISSUER,LOGTO_RESOURCE,LOGTO_BROWSER_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_SECRET,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN&envDescription=Configure%20Logto%20and%20a%20dedicated%20Redis%20database&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid&env=LOGTO_ISSUER,LOGTO_RESOURCE,LOGTO_BROWSER_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_SECRET,CYBERGRID_REDIS_TRANSPORT,KV_REST_API_URL,KV_REST_API_TOKEN&envDescription=Set%20CYBERGRID_REDIS_TRANSPORT%20to%20vercel-kv%20and%20connect%20Marketplace%20Upstash&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md)
 
-首次部署请阅读 [Vercel 配置步骤](docs/deployment.md#vercel-functions)，准备自己的 Logto 和 Redis 参数，并登记实际域名的登录回跳。
+首次部署请阅读 [Vercel 配置步骤](docs/deployment.md#vercel-functions)，连接 Marketplace Upstash 资源，设置 `CYBERGRID_REDIS_TRANSPORT=vercel-kv`，直接使用集成注入的 `KV_REST_API_URL` / `KV_REST_API_TOKEN`。部署按钮中的 transport 也填 `vercel-kv`；它不会自动创建存储。Logto 回跳需登记实际域名。旧独立 Vercel KV 已停止提供并迁移到 Upstash，因此无需自行维护 Redis，底层仍是 Redis 兼容存储。
 
 ```sh
 cd server
