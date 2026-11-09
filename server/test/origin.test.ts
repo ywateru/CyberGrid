@@ -60,8 +60,9 @@ test('real ES384 verifier retains fixed resource; a request-host audience cannot
 
 test('actual Node entrypoint starts without PUBLIC_ORIGIN and serves native HTTP plus HTTPS-forwarded config',{timeout:10000},async t=>{
  const {spawn}=await import('node:child_process'),{mkdtemp,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path'),{createServer}=await import('node:net');
+ const redis=await (await import('./redis-fixture.js')).redisFixture(t);if(!redis)return;
  const dir=await mkdtemp(join(tmpdir(),'cybergrid-optional-origin-')),probe=createServer();await new Promise<void>(r=>probe.listen(0,'127.0.0.1',r));const port=(probe.address() as {port:number}).port;await new Promise<void>(r=>probe.close(()=>r()));
- const childEnv:NodeJS.ProcessEnv={...process.env,...env,NODE_ENV:'test',CYBERGRID_BIND:'127.0.0.1',PORT:String(port),CYBERGRID_OWNER_LOCK:join(dir,'lease'),LOGTO_MANAGEMENT_CLIENT_ID:'FixtureDirectory',LOGTO_MANAGEMENT_CLIENT_SECRET:'fixture-not-used'};delete childEnv.CYBERGRID_PUBLIC_ORIGIN;delete childEnv.LOGTO_RESOURCE;
+ const childEnv:NodeJS.ProcessEnv={...process.env,...env,NODE_ENV:'test',CYBERGRID_BIND:'127.0.0.1',PORT:String(port),REDIS_URL:redis.url,CYBERGRID_REDIS_PREFIX:redis.prefix,LOGTO_MANAGEMENT_CLIENT_ID:'FixtureDirectory',LOGTO_MANAGEMENT_CLIENT_SECRET:'fixture-not-used'};delete childEnv.CYBERGRID_PUBLIC_ORIGIN;delete childEnv.LOGTO_RESOURCE;delete childEnv.UPSTASH_REDIS_REST_URL;delete childEnv.UPSTASH_REDIS_REST_TOKEN;
  const child=spawn(process.execPath,['--import','tsx','src/main.ts'],{env:childEnv,stdio:['ignore','pipe','pipe']});
  t.after(async()=>{if(child.exitCode===null&&child.signalCode===null){child.kill('SIGTERM');await once(child,'exit');}await rm(dir,{recursive:true,force:true});});
  child.stderr.resume();await new Promise<void>((r,reject)=>{let out='';child.stdout.on('data',c=>{out+=String(c);if(out.includes('Node service listening'))r();});child.once('exit',()=>reject(Error('entrypoint exited before ready')));});

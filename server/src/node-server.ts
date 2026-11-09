@@ -11,10 +11,11 @@ export interface WebsiteOptions {
  issuer:string;
  callbackUri:string;
  publicRoot?:string;
+ ready?:()=>Promise<void>;
 }
 const types:Record<string,string>={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.ico':'image/x-icon','.png':'image/png','.txt':'text/plain; charset=utf-8','.md':'text/plain; charset=utf-8'};
 /** Same-process website and API router. No network hop or alternate coordinator. */
-export function createNodeServer(api:Handler,options:WebsiteOptions){
+export function createWebsiteHandler(api:Handler,options:WebsiteOptions):Handler{
  const origin=publicOrigin(options.publicOrigin),issuer=new URL(options.issuer);
  if(issuer.protocol!=='https:'||issuer.username||issuer.password||issuer.search||issuer.hash)throw Error('Pinned HTTPS Logto issuer required');
  const callback=consoleCallback(options.callbackUri,origin);
@@ -22,6 +23,7 @@ export function createNodeServer(api:Handler,options:WebsiteOptions){
  const csp="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' "+issuer.origin+"; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
  const route:Handler=async(request,ip)=>{
   const url=new URL(request.url),path=url.pathname;
+  if(path==='/healthz'&&options.ready){try{await options.ready();}catch{return new Response('unavailable\n',{status:503,headers:{'cache-control':'no-store'}});}}
   if(path==='/healthz')return new Response(request.method==='HEAD'?null:'ok\n',{status:['GET','HEAD'].includes(request.method)?200:405,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});
   if(path==='/api'||path.startsWith('/api/'))return api(request,ip);
   const headers={'content-security-policy':csp,'x-content-type-options':'nosniff','referrer-policy':'no-referrer','cache-control':'no-store'};
@@ -51,6 +53,10 @@ export function createNodeServer(api:Handler,options:WebsiteOptions){
   }catch{return new Response(null,{status:404,headers});}
   finally{await file?.close();}
  };
+ return route;
+}
+export function createNodeServer(api:Handler,options:WebsiteOptions){
+ const route=createWebsiteHandler(api,options),origin=publicOrigin(options.publicOrigin);
  const server=createServer((req,res)=>void serveAPI(req,res,route,origin));
  server.requestTimeout=25000;server.headersTimeout=25000;
  return server;

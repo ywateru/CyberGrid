@@ -2,7 +2,7 @@ import {createHash,createHmac,randomBytes,randomUUID} from 'node:crypto';
 import {irohReachability} from './iroh.js';
 import {ApiError,ONLINE_TTL,SESSION_TTL,SIGNAL_TTL,type DeviceRow,type DevicePublication,type Session,type DeviceSession,type ConsoleSession,type StoredSignal,type Store,type AdminOverviewQuery,type AdminOverview,type AdminDevice} from './types.js';
 export interface MemoryLimits {sessions:number;sessionsPerUser:number;devices:number;devicesPerUser:number;signals:number;signalsPerDevice:number;signalsPerUser:number;signalBytes:number;signalBytesPerDevice:number;signalBytesPerUser:number;rateKeys:number;idempotency:number;waiters:number;waitersPerDevice:number;registrationKeys:number;registrationKeysPerUser:number}
-const defaults:MemoryLimits={sessions:10000,sessionsPerUser:128,devices:5000,devicesPerUser:64,signals:20000,signalsPerDevice:512,signalsPerUser:2048,signalBytes:33554432,signalBytesPerDevice:2097152,signalBytesPerUser:8388608,rateKeys:20000,idempotency:20000,waiters:1000,waitersPerDevice:2,registrationKeys:10000,registrationKeysPerUser:128};
+export const defaultLimits:MemoryLimits={sessions:10000,sessionsPerUser:128,devices:5000,devicesPerUser:64,signals:20000,signalsPerDevice:512,signalsPerUser:2048,signalBytes:33554432,signalBytesPerDevice:2097152,signalBytesPerUser:8388608,rateKeys:20000,idempotency:20000,waiters:1000,waitersPerDevice:2,registrationKeys:10000,registrationKeysPerUser:128};
 const digest=(v:unknown)=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const snapshotDigest=(v:DevicePublication)=>digest([v.ports,v.tunnelUrl,v.certificateFingerprint,v.iroh??null]);
 export const MAX_DEVICE_METADATA_BYTES=24*1024;
@@ -17,7 +17,7 @@ export class MemoryStore implements Store {
  private sessions=new Map<string,Session>();private peers=new Map<string,DeviceRow>();private messages:StoredSignal[]=[];private sequence=0;
  private rates=new Map<string,{start:number;count:number}>();private registrations=new Map<string,Registration>();private dedup=new Map<string,Dedup>();private waiters=new Set<Waiter>();private stopped=false;private fences=new Map<string,{user:string;revision:number;requestId:string;content:string}>();
  readonly limits:MemoryLimits;
- constructor(limits:Partial<MemoryLimits>={}){this.limits={...defaults,...limits};for(const [key,value] of Object.entries(this.limits))if(!(key in defaults)||!Number.isSafeInteger(value)||value<1||value>100000000)throw Error('Invalid memory capacity '+key);}
+ constructor(limits:Partial<MemoryLimits>={}){this.limits={...defaultLimits,...limits};for(const [key,value] of Object.entries(this.limits))if(!(key in defaultLimits)||!Number.isSafeInteger(value)||value<1||value>100000000)throw Error('Invalid memory capacity '+key);}
  close(){this.stopped=true;this.notify();this.boot.fill(0);this.sessions.clear();this.peers.clear();this.messages=[];this.registrations.clear();this.dedup.clear();this.rates.clear();this.fences.clear();}
  private available(){if(this.stopped)throw new ApiError(503,'COORDINATOR_UNAVAILABLE','协调服务暂不可用',1);}
  private capacity(ok:boolean,user=false){if(!ok)throw new ApiError(user?429:503,'CAPACITY_EXCEEDED','协调容量已满，请稍后重试',5);}

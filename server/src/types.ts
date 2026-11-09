@@ -27,12 +27,14 @@ export interface AdminOverview {
  devices:AdminDevice[];
 }
 export interface Store {
- adminOverview(now:number,query:AdminOverviewQuery):AdminOverview;
+ ready?():Promise<void>;
+ getRevision?():Promise<number>;
+ adminOverview(now:number,query:AdminOverviewQuery):AdminOverview|Promise<AdminOverview>;
  readonly epoch:string;
  readonly revision:number;
  close():void;
- current(s:Session,now:number):void;
- register(userId:string,appId:string|null,name:string,registrationKey:string|undefined,requestId:string,now:number,registrationRevision?:unknown):{session:Session;sessionKey:string};
+ current(s:Session,now:number):void|Promise<void>;
+ register(userId:string,appId:string|null,name:string,registrationKey:string|undefined,requestId:string,now:number,registrationRevision?:unknown,expectedEpoch?:string):{session:Session;sessionKey:string}|Promise<{session:Session;sessionKey:string}>;
  publish(s:DeviceSession,update:DevicePublication,incarnation:unknown,revision:unknown,now:number):Promise<void>;
  postSignal(s:DeviceSession,value:Omit<StoredSignal,'id'|'expiresAt'|'fromDeviceId'>,messageId:unknown,now:number):Promise<number>;
  wait(s:DeviceSession,after:number,seconds:number,now:()=>number,signal:AbortSignal):Promise<void>;
@@ -41,11 +43,11 @@ export interface Store {
  createConsoleSession(session:ConsoleSession):Promise<void>;
  session(hash:string):Promise<Session|undefined>;
  revoke(hash:string):Promise<void>;
- devices(userId:string,appId:string,now:number):Promise<Device[]>;
- device(id:string,now:number):Promise<(DeviceRow&{online:boolean})|undefined>;
+ devices(userId:string,appId:string,now:number,session?:Session):Promise<Device[]>;
+ device(id:string,now:number,session?:Session):Promise<(DeviceRow&{online:boolean})|undefined>;
  heartbeat(id:string,update:DevicePublication,now:number):Promise<void>;
  signal(value:Omit<StoredSignal,'id'>):Promise<number>;
- signals(to:string,after:number,now:number):Promise<Signal[]>;
+ signals(to:string,after:number,now:number,session?:Session):Promise<Signal[]>;
  rate(key:string,now:number,limit:number):Promise<boolean>;
 }
 export interface AuthConfiguration {provider:'logto';loginFlow?:'authorization_code';issuer:string;clientId:string;resource:string;scope:string;deviceAuthorizationEndpoint:string;tokenEndpoint:string;authorizationEndpoint:string;revocationEndpoint:string;redirectUri:string;jwksUri:string}

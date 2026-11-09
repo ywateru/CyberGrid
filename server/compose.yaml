@@ -9,11 +9,25 @@ services:
       NODE_ENV: production
       CYBERGRID_BIND: 0.0.0.0
       PORT: '7400'
-      CYBERGRID_OWNER_LOCK: /var/run/cybergrid/lease
+      REDIS_URL: redis://redis:6379
+      UPSTASH_REDIS_REST_URL: ''
+      UPSTASH_REDIS_REST_TOKEN: ''
     ports:
       - '127.0.0.1:7400:7400'
-    volumes:
-      - coordination-lease:/var/run/cybergrid
+    depends_on:
+      redis:
+        condition: service_healthy
     stop_grace_period: 10s
+  redis:
+    image: redis:7.4.3-alpine
+    command: ['redis-server', '--appendonly', 'yes', '--appendfsync', 'everysec', '--maxmemory-policy', 'noeviction']
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
 volumes:
-  coordination-lease:
+  redis-data:
