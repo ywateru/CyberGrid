@@ -1,0 +1,678 @@
+{
+  "packages": [
+    {
+      "name": "@esbuild/aix-ppc64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/aix-ppc64/-/aix-ppc64-0.28.2.tgz",
+      "integrity": "sha512-XExcO+dvLKvVtNTibSTBej1NCAbaGhWn9Ww1ZPx80qsahhPFe/8jgWP0IchNe0F3HwkU7n8ejhH8bjonqht8mQ==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/android-arm",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/android-arm/-/android-arm-0.28.2.tgz",
+      "integrity": "sha512-kXXoiPVVGQcnIYGOeaovwOURpniDBpSq4A03qkQ+BMQqtGG6HYap3xne9C1O1yo4TR3qxlCX5IqqmX6fFo2Lqg==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/android-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/android-arm64/-/android-arm64-0.28.2.tgz",
+      "integrity": "sha512-5YfKeeI8qWfBZIX+u2xZC3Zlb3Os/gLS2sbEKM+I4ZOcsWmHS2WLysCcQZDAFRslDUU5Oiq44gf6PYN1vGwG5A==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/android-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/android-x64/-/android-x64-0.28.2.tgz",
+      "integrity": "sha512-O387ite7SzUyCcy3JQX4P4bLtEA7bLLkx+esve5JHnyYfNTxcVpXZo9jhdB0lTKN44gztELTdU7nS8Nr16Fs1Q==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/darwin-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/darwin-arm64/-/darwin-arm64-0.28.2.tgz",
+      "integrity": "sha512-n4KqkOQrraxHJcgjM1RvwbigfQKIKJVpM7xp+KsxiyUSrRdIXnt73VhrPAx0fV44hgfmIVKjxMN9J1t5jySVkw==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/darwin-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/darwin-x64/-/darwin-x64-0.28.2.tgz",
+      "integrity": "sha512-uq6suIWYP37qzGddBKPw5QEQPi6HiLGsO7UmkpfyaYNQ3D+rN6w6WfwH+nuqcGXWvawGwxOEroO4YGnFh95azw==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/freebsd-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/freebsd-arm64/-/freebsd-arm64-0.28.2.tgz",
+      "integrity": "sha512-n+I0BTSRIoy+d6RPKnEVwql5UwBJolytvY4mAOIEJorKlqgPII8ix6slVVrfZ5Tnj7glIZvloylbB/EJPMWEXw==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/freebsd-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/freebsd-x64/-/freebsd-x64-0.28.2.tgz",
+      "integrity": "sha512-78XJTJkvPs0kz2w61301PJjXl4g7q3JqiYMZ/M/yVI73EHBrCRTgkhu9oqG7vPqq+a/yadEW8aD+agKlk5xrmg==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/linux-arm",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/linux-arm/-/linux-arm-0.28.2.tgz",
+      "integrity": "sha512-XlDnu2q5yoqems+xay6wSAcg9DDD7K9RLKZEBOMZm3ckNpJBvOX20tSfby8KfrrhINDyv9V2YVZKY/SpoGJI8w==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/linux-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/linux-arm64/-/linux-arm64-0.28.2.tgz",
+      "integrity": "sha512-pW4AC0P3it8c7do9MVM4p51FzHzdM/TZrerurgRcHJ2WTa1VQ1CIq18xncfpBJw4ojkiZZrKW2yIBWBP92j6Ug==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/linux-ia32",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/linux-ia32/-/linux-ia32-0.28.2.tgz",
+      "integrity": "sha512-CYbnj78HsIeA+DhgUKgFCfvNsTHFhMMrinUrMZpDXJXKN8T3XViTZ/+wtHeVxEWY8ewSzTFN+nRmSwO2tZaLUQ==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/linux-loong64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/linux-loong64/-/linux-loong64-0.28.2.tgz",
+      "integrity": "sha512-buwkd8nsph4R+ajRvw0qM5Hja/TXQow3ptzWO2EbG/cqcIkHloRrdlBtQlshyYGTNFvfkfJ5tpPLVkY4DtsPfQ==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/linux-mips64el",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/linux-mips64el/-/linux-mips64el-0.28.2.tgz",
+      "integrity": "sha512-ZVykbDyk7519VwiNb9Lcj9m8XM6v5V9uKPvrEMkkEedVewf+0itkhahp4HDpgERXhwLRpWFypsGbG/J8s0QjJA==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/linux-ppc64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/linux-ppc64/-/linux-ppc64-0.28.2.tgz",
+      "integrity": "sha512-CAXl+Dtd9UUuJd8pKKdwh6MLm3MUMiqMPmhZ3tTSXPqfyQ3vDl6R5hZdZ/kYojK4ofXtdfSv1tFq8XzWx3heNQ==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/linux-riscv64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/linux-riscv64/-/linux-riscv64-0.28.2.tgz",
+      "integrity": "sha512-GeXCej4IQtU1B+QlDV8W/RRvbzI3O/Stss+/bCXv4lZls5WGRtu2a+3JkA3i4qIUlMXpcHebWpF8AkJhATowuA==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/linux-s390x",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/linux-s390x/-/linux-s390x-0.28.2.tgz",
+      "integrity": "sha512-3H1weTYZPxt/WOhByszQZybS9w5lKzUn1FDMsgEChbHWQwHYQQRfBxgCcZvPhjHfKyJjIievvMmEUawJrdY9Dg==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/linux-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/linux-x64/-/linux-x64-0.28.2.tgz",
+      "integrity": "sha512-4xTZr1FUmSoQW4XIWmit3tzQrUTZM+N3P0XV8xROKYF50XfI7xeO90+1bZvNwxIufQ9hDQVRJH5YhgPVF8A/HQ==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/netbsd-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/netbsd-arm64/-/netbsd-arm64-0.28.2.tgz",
+      "integrity": "sha512-sSATRjPeDBg3pdgHoQfoYBob11Kk1FGa9lui5RIHZCoCkJa9QKlvl3/vKz2usCmYYjs7ymJR/2Nnsqe+Hjt5nw==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/netbsd-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/netbsd-x64/-/netbsd-x64-0.28.2.tgz",
+      "integrity": "sha512-lqnzCV+mM0gIADaKihiCg6ifgfU2L3h5E33rNQBN1Y4MaVGnzryzmvvf7UHxprpQdE8hpqLolJ9Rl+SkIRDpyw==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/openbsd-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/openbsd-arm64/-/openbsd-arm64-0.28.2.tgz",
+      "integrity": "sha512-AL2qJILH7lNjrDmCQDvdxMfAUIv8KMNZOvrwAQ8i8//ntL9FflhOyMJ8OZSMBb8/AWXe3/5v5S20y3zCoZWKoQ==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/openbsd-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/openbsd-x64/-/openbsd-x64-0.28.2.tgz",
+      "integrity": "sha512-QtiuPytchRyC4rwUKhexJdQKvDuZ6hWloi3igqPQNUJCS1/v9EiO3UTOXR6A3FoMo4fnAKbWJdqaIwhOzh8qEw==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/openharmony-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/openharmony-arm64/-/openharmony-arm64-0.28.2.tgz",
+      "integrity": "sha512-WkhYDmpTjLvGlScA1rwjRUmhl4k8oXR3cIbtqWmELgU/dFeHHlEllxDvdWcNJV9rbzCexB5vz8gtNewWLgCT7Q==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/sunos-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/sunos-x64/-/sunos-x64-0.28.2.tgz",
+      "integrity": "sha512-GPMSkTOtMnv2U2F8gxe4Io6qmVs+YKyp832Etqqxr0hFngmXQ3rzwytelm3GIn7T4VviRUlf3sOgBOiTdvaf7g==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/win32-arm64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/win32-arm64/-/win32-arm64-0.28.2.tgz",
+      "integrity": "sha512-PIhhEkE9uPBleRBrQEJpUn7MBnibZzbGzYWPmY3x+YoVg/95zbjB4CxPPOQ8l5tYYM4mMaCthF8/1DIfBQQyWQ==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/win32-ia32",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/win32-ia32/-/win32-ia32-0.28.2.tgz",
+      "integrity": "sha512-YmJbfTlvU7Sdn9BB+4PRES4oB6pxgS37MAONj+hBr/cpXS1aBPKXxNnDbu+QCWPj0o9dgyxeq79g6c5P8KeuYA==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@esbuild/win32-x64",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@esbuild/win32-x64/-/win32-x64-0.28.2.tgz",
+      "integrity": "sha512-5ebpxr3nWMzrL/rnUI755Jkuee0bHL/Gq0WTF9lvcpv73wAp5eu8MfBUgWK9bhWvZjj7yX8etf/8tI8Ney695g==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2",
+        "reason": "Same-version wrapper distributes the upstream platform binary license."
+      },
+      "texts": {
+        "upstream-wrapper/LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "@redis/bloom",
+      "version": "6.3.1",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@redis/bloom/-/bloom-6.3.1.tgz",
+      "integrity": "sha512-dpF9j2yJDoPzSCaZn0MSB3xzmnXQVJeTSAWJcQVcgbmluwhpFeemmII0cF1t+WYfoVS+shEFq79+MmUItgzJLg==",
+      "developmentOnly": false,
+      "optional": false,
+      "licenseSource": {
+        "package": "@redis/bloom",
+        "version": "6.3.1",
+        "archive": "https://registry.npmjs.org/@redis/bloom/-/bloom-6.3.1.tgz",
+        "gitCommit": "9902897535a84202d4a55ad72dad54ed2ebe1c87",
+        "licenseURL": "https://raw.githubusercontent.com/redis/node-redis/9902897535a84202d4a55ad72dad54ed2ebe1c87/LICENSE",
+        "reason": "Published npm archive omits license body; original MIT text from its exact npm gitHead."
+      },
+      "texts": {
+        "upstream-repository/LICENSE": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+      }
+    },
+    {
+      "name": "@redis/client",
+      "version": "6.3.1",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@redis/client/-/client-6.3.1.tgz",
+      "integrity": "sha512-masbfVKULdoAofwddepZxRhWa4w6zvBHn6TRn90TRPrRkVIlGCur3pFqwWaCbMxtYI9twepkz63e/T/tEH8GjA==",
+      "developmentOnly": false,
+      "optional": false,
+      "licenseSource": {
+        "package": "@redis/client",
+        "version": "6.3.1",
+        "archive": "https://registry.npmjs.org/@redis/client/-/client-6.3.1.tgz",
+        "gitCommit": "492cb2e62d4f857b1990e47ed6bbfc8467473698",
+        "licenseURL": "https://raw.githubusercontent.com/redis/node-redis/492cb2e62d4f857b1990e47ed6bbfc8467473698/LICENSE",
+        "reason": "Published npm archive omits license body; original MIT text from its exact npm gitHead."
+      },
+      "texts": {
+        "upstream-repository/LICENSE": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+      }
+    },
+    {
+      "name": "@redis/json",
+      "version": "6.3.1",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@redis/json/-/json-6.3.1.tgz",
+      "integrity": "sha512-fMz4kUwJzEftcU9EMaqsjZcUwzpTQLOYRqhQsAD6uKvZWeamblK13ZhgO5SzVSZVk31jmwLeTRpU5GAl5egfUw==",
+      "developmentOnly": false,
+      "optional": false,
+      "licenseSource": {
+        "package": "@redis/json",
+        "version": "6.3.1",
+        "archive": "https://registry.npmjs.org/@redis/json/-/json-6.3.1.tgz",
+        "gitCommit": "2c23509fdf4c33288430c1795e11d7120689ae95",
+        "licenseURL": "https://raw.githubusercontent.com/redis/node-redis/2c23509fdf4c33288430c1795e11d7120689ae95/LICENSE",
+        "reason": "Published npm archive omits license body; original MIT text from its exact npm gitHead."
+      },
+      "texts": {
+        "upstream-repository/LICENSE": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+      }
+    },
+    {
+      "name": "@redis/search",
+      "version": "6.3.1",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@redis/search/-/search-6.3.1.tgz",
+      "integrity": "sha512-T67pvPUpW82VrZLvihO8O2DFMC7eY2oMAzMzapCbiPZn7mdWqHMEIlohYim12gIawT5kn6qT/Cvmm4WulKB+kQ==",
+      "developmentOnly": false,
+      "optional": false,
+      "licenseSource": {
+        "package": "@redis/search",
+        "version": "6.3.1",
+        "archive": "https://registry.npmjs.org/@redis/search/-/search-6.3.1.tgz",
+        "gitCommit": "d0f8bbf789a5bb66b1150d81ba57f5f9951420e1",
+        "licenseURL": "https://raw.githubusercontent.com/redis/node-redis/d0f8bbf789a5bb66b1150d81ba57f5f9951420e1/LICENSE",
+        "reason": "Published npm archive omits license body; original MIT text from its exact npm gitHead."
+      },
+      "texts": {
+        "upstream-repository/LICENSE": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+      }
+    },
+    {
+      "name": "@redis/time-series",
+      "version": "6.3.1",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@redis/time-series/-/time-series-6.3.1.tgz",
+      "integrity": "sha512-MNDgrm+i63M/1a+XA+HcDsScwt4uBh/fGGJ84swTQZTFK5K5wMmxdlTRa4ZgmNJzjxMaszW/ipPScMUGV3aAMg==",
+      "developmentOnly": false,
+      "optional": false,
+      "licenseSource": {
+        "package": "@redis/time-series",
+        "version": "6.3.1",
+        "archive": "https://registry.npmjs.org/@redis/time-series/-/time-series-6.3.1.tgz",
+        "gitCommit": "63a9b6d90a9d1518c3bab44c1b889c64522c6099",
+        "licenseURL": "https://raw.githubusercontent.com/redis/node-redis/63a9b6d90a9d1518c3bab44c1b889c64522c6099/LICENSE",
+        "reason": "Published npm archive omits license body; original MIT text from its exact npm gitHead."
+      },
+      "texts": {
+        "upstream-repository/LICENSE": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+      }
+    },
+    {
+      "name": "@types/node",
+      "version": "22.20.5",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/@types/node/-/node-22.20.5.tgz",
+      "integrity": "sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==",
+      "developmentOnly": true,
+      "optional": false,
+      "licenseSource": {
+        "package": "@types/node",
+        "version": "22.20.5"
+      },
+      "texts": {
+        "LICENSE": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+      }
+    },
+    {
+      "name": "esbuild",
+      "version": "0.28.2",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/esbuild/-/esbuild-0.28.2.tgz",
+      "integrity": "sha512-HKVLS8dvII+xoKW9kmqxbRKrnWEXfJJr/FZhhJmiqIB0e053QNYFqOBouTMO/k5sID4MvCiUCvv8b9M4h32wIA==",
+      "developmentOnly": false,
+      "optional": false,
+      "licenseSource": {
+        "package": "esbuild",
+        "version": "0.28.2"
+      },
+      "texts": {
+        "LICENSE.md": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+      }
+    },
+    {
+      "name": "fsevents",
+      "version": "2.3.3",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/fsevents/-/fsevents-2.3.3.tgz",
+      "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==",
+      "developmentOnly": false,
+      "optional": true,
+      "licenseSource": {
+        "package": "fsevents",
+        "version": "2.3.3"
+      },
+      "texts": {
+        "LICENSE": "2a8a5d6197bb97a018b8a190dd3ed853d750ca87c8e80c17aad41d6c6ff448e1"
+      }
+    },
+    {
+      "name": "jose",
+      "version": "6.2.15",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/jose/-/jose-6.2.15.tgz",
+      "integrity": "sha512-qdF6ewcZARtef63fJ9AKKZPgxw+t7USH6HLXYcD4CrdmSvDp79rpJSPFEKc90QBeGS63u1KQtN2MZQHC0yDIzA==",
+      "developmentOnly": false,
+      "optional": false,
+      "licenseSource": {
+        "package": "jose",
+        "version": "6.2.15"
+      },
+      "texts": {
+        "LICENSE.md": "8078b0829d6c3e9ecde2f003e1966e4cad3efc6e7a640efbab0313cc166b1af1"
+      }
+    },
+    {
+      "name": "redis",
+      "version": "6.3.1",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/redis/-/redis-6.3.1.tgz",
+      "integrity": "sha512-mV96ZKxQ4CGn3SyEGaY0Lb9YA443mdVey3c+mdr0NAUaBxiOZGoYCWX8PoM55kictSOmxlJRtZJxIsmZm3jL+w==",
+      "developmentOnly": false,
+      "optional": false,
+      "licenseSource": {
+        "package": "redis",
+        "version": "6.3.1",
+        "archive": "https://registry.npmjs.org/redis/-/redis-6.3.1.tgz",
+        "gitCommit": "12bcff0ad9ebffdeed0365df2820ae385de7daaa",
+        "licenseURL": "https://raw.githubusercontent.com/redis/node-redis/12bcff0ad9ebffdeed0365df2820ae385de7daaa/LICENSE",
+        "reason": "Published npm archive omits license body; original MIT text from its exact npm gitHead."
+      },
+      "texts": {
+        "upstream-repository/LICENSE": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+      }
+    },
+    {
+      "name": "tsx",
+      "version": "4.23.15",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/tsx/-/tsx-4.23.15.tgz",
+      "integrity": "sha512-Yiex1Ovn8z2xPpOWckIiysV1SSyRMY9BkLF++q0yKiDxCqRhosKfMg3janKkiLBwZ5c/YryloKwGZcrEmtwxKw==",
+      "developmentOnly": false,
+      "optional": false,
+      "licenseSource": {
+        "package": "tsx",
+        "version": "4.23.15"
+      },
+      "texts": {
+        "LICENSE": "8dded67841a9261a622c739fb61c81785e93765de852828ceeb9403d20a74581"
+      }
+    },
+    {
+      "name": "typescript",
+      "version": "5.9.3",
+      "license": "Apache-2.0",
+      "archive": "https://registry.npmmirror.com/typescript/-/typescript-5.9.3.tgz",
+      "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
+      "developmentOnly": true,
+      "optional": false,
+      "licenseSource": {
+        "package": "typescript",
+        "version": "5.9.3"
+      },
+      "texts": {
+        "LICENSE.txt": "a7d00bfd54525bc694b6e32f64c7ebcf5e6b7ae3657be5cc12767bce74654a47"
+      }
+    },
+    {
+      "name": "undici-types",
+      "version": "6.21.0",
+      "license": "MIT",
+      "archive": "https://registry.npmmirror.com/undici-types/-/undici-types-6.21.0.tgz",
+      "integrity": "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==",
+      "developmentOnly": true,
+      "optional": false,
+      "licenseSource": {
+        "package": "undici-types",
+        "version": "6.21.0"
+      },
+      "texts": {
+        "LICENSE": "a6db8096b2707bc0102d256917d4d33f298ba36d8c3f25de067a2b5bb379db27"
+      }
+    }
+  ]
+}

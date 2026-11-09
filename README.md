@@ -1,14 +1,18 @@
 # CyberGrid
 
-CyberGrid 用于同一账号、同一应用的终端发现和 TCP 端口互通。用户与应用由 Logto 管理；中央只在内存中保存短会话、在线状态、端口和连接信令，不保存或转发应用数据。
+CyberGrid 用于同一账号、同一应用的终端发现和 TCP 端口互通。用户与应用由 Logto 管理；中央使用 Redis 保存有有效期的会话、在线状态、端口和连接信令，不保存或转发应用数据。
 
-Go 和 Rust SDK 优先建立 WebRTC 直连，失败后使用 Cloudflare Quick Tunnel 与内层双向 TLS。两语言 SDK 随包预置 macOS arm64／Android arm64 Cloudflared。Tauri 2 测试程序提供登录、设备发现、消息确认及 64 KiB 校验；Android 测试通过 ADB 命令控制。
+Rust 是主要 SDK，默认按 WebRTC → iroh 直连 → Cloudflare Quick Tunnel 连接，也支持 WebRTC / iroh 并行直连。Go SDK 保留 WebRTC → Quick Tunnel 策略。业务流使用内层双向 TLS。两语言 SDK 随包预置 macOS arm64／Android arm64 Cloudflared。Tauri 2 测试程序提供登录、设备发现、消息确认及 64 KiB 校验；Android 测试通过 ADB 命令控制。
 
 [使用文档](docs/getting-started.md) · [下载 SDK 和 App](https://github.com/ywateru/CyberGrid/releases) · [部署说明](docs/deployment.md) · [架构](docs/architecture.md)
 
 ## 部署网站与 API
 
-网站、Logto 控制台、管理后台和 API 由一个长期运行的 Node.js22 进程提供，协调状态只在同进程有界内存中。无需数据库，不使用多副本或 serverless Function。
+网站、Logto 控制台、管理后台和 API 支持 Node.js 22 / Docker 或 Vercel Functions。各实例使用 Redis 共享协调状态，不依赖单进程内存。Docker Compose 包含带持久化卷的 Redis；Vercel 使用外部 Redis。
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid&env=LOGTO_ISSUER,LOGTO_RESOURCE,LOGTO_BROWSER_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_SECRET,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN&envDescription=Configure%20Logto%20and%20a%20dedicated%20Redis%20database&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md)
+
+首次部署请阅读 [Vercel 配置步骤](docs/deployment.md#vercel-functions)，准备自己的 Logto 和 Redis 参数，并登记实际域名的登录回跳。
 
 ```sh
 cd server
@@ -28,7 +32,7 @@ docker compose up --build -d
 | [Go SDK／CLI](sdk/README.md) | 0.4.0 | 保持兼容，端口声明、设备发现、TCP 映射、自动协调恢复 |
 | [JS／TypeScript SDK](sdk-js/README.md) | 0.1.0（项目 v0.7.0） | Logto 登录后只读查询设备与端口隧道地址 |
 | [CyberGrid Lab](apps/tauri-test/README.md) | 0.3.0（项目 v0.7.0） | Tauri 2 macOS／Android 测试程序，官方 SDK 网页登录 |
-| [内存协调服务](server/README.md) | memory-v1 | Logto 身份、设备与端口信令、只读管理后台 |
+| [协调服务](server/README.md) | memory-v1 协议 | Logto 身份、Redis 共享设备与信令、只读管理后台 |
 
 后续 SDK 功能以 Rust 为主要实现。项目 v0.7.0 支持 WebRTC → iroh 直连 → Cloudflare 匿名隧道的三级连接，也可配置 WebRTC/iroh 并行直连；iroh 禁用中继，业务流仍由终端相互认证并加密。另有 [只读 JS SDK](sdk-js/README.md)，可在前端 Logto 登录后查看设备和端口主动申报的 Cloudflare 地址。已发布的 v0.6.0 下载包仍为原有两级连接，Go SDK 保持兼容。连接边界见 [架构说明](docs/architecture.md#rust-主-sdk-的连接顺序)。
 
@@ -57,7 +61,7 @@ python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" web-logi
 ## 项目结构
 
 ```text
-server/             单进程 Node 网站、API、内存协调与 Docker
+server/             Node / Functions 网站与 API、Redis 协调与 Docker
 sdk/                Go SDK、CLI、离线 provider 及许可
 sdk-rust/           Rust SDK、离线 provider 及许可
 apps/tauri-test/    Tauri 2 双平台测试 App 与 ADB 工具
@@ -71,10 +75,10 @@ docs/              接入、架构与部署文档
 
 ## 运行边界
 
-- owner 重启会清空内存并更换 epoch。SDK 保留本地服务和映射意图，协调恢复后新的 TCP 连接可重新握手；不重放业务字节，不承诺旧 TCP 无损续传。
+- Node 重启和 Function 冷启动保留 Redis 中的会话与 epoch。Redis 数据被清空或 namespace 重置时，SDK 重新注册与发布；不重放业务字节，不承诺旧 TCP 无损续传。`memory-v1` 是现有线协议标识，不代表生产状态仍保存在单进程 RAM。
 - 仅支持 TCP 端口映射；端口 `type` 是业务自定义字符串。默认只监听本机 loopback。
-- 真实 macOS Wi-Fi／Android 蜂窝测试完成了双向消息、64 KiB hash 与 owner 重启后原映射新 TCP 恢复。公网实际使用 Cloudflare 回退；尚无该网络下 WebRTC 直连成功证据。
-- Quick Tunnel 无 SLA。长期运行需自行选择可靠的 Node 宿主和 HTTPS 入口；Android 后台保活、商店发布、Apple 公证及无损网络切换不在当前交付范围。
+- 历史单进程版本的 macOS Wi-Fi／Android 蜂窝测试完成过双向消息、64 KiB hash 与协调重启后原映射新 TCP 恢复，实际使用 Cloudflare 回退。该记录不证明新增 iroh 或本轮 Redis 部署已通过同一网络验收；尚无该网络下 WebRTC 直连成功证据。
+- Quick Tunnel 无 SLA。长期运行需选择适合流量的 Node / Functions 和 Redis 方案；免费 Redis 命令额度可能被持续长轮询耗尽。Android 后台保活、商店发布、Apple 公证及无损网络切换不在当前交付范围。
 - Logto 租户方案和自定义 API resource 权限需自行确认。邮箱发件域在 Logto SMTP 连接器中配置；真实邮件投递／注册确认需使用自己的邮箱验证。
 
 源码公开不改变现有许可：原 CyberGrid 代码保留其权利声明，第三方依赖按各自许可证分发。完整声明随源码及发布包提供。

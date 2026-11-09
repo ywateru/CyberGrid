@@ -9,6 +9,8 @@
 !src/**
 !public/
 !public/**
+!notices/
+!notices/**
 !release/
 !release/build.mjs
 public/downloads/

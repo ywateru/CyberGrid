@@ -1,0 +1,11 @@
+{
+  "name": "cybergrid-deployment",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm --prefix server run build && node -e \"const fs=require('node:fs'); fs.mkdirSync('.vercel-static',{recursive:true}); fs.writeFileSync('.vercel-static/robots.txt','User-agent: *\\nAllow: /\\n')\""
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

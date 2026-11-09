@@ -1,6 +1,6 @@
 # 用自己的服务连接 Mac 与 Android
 
-这条流程对应关闭 Device Flow 后的当前源码：用一份服务端 `.env` 启动 CyberGrid，再使用 Lab 0.3.0 的官方 SDK 网页登录完成两端登录、设备互见和端口传输。项目发布 v0.6.0 提供本版源码和客户端；旧 v0.5.1 的 Lab 0.2.0 使用设备码，不适用于新认证策略。支持 Apple Silicon Mac、Android arm64（Android 9 / API 28 及以上）。
+这条流程对应关闭 Device Flow 后的当前源码：用一份服务端 `.env` 启动 CyberGrid，再使用 Lab 0.3.0 的官方 SDK 网页登录完成两端登录、设备互见和端口传输。项目发布 v0.7.0 提供三级连接的客户端；当前主分支服务改用 Redis 共享协调，支持 Docker 和 Vercel Functions；旧 v0.5.1 的 Lab 0.2.0 使用设备码，不适用于新认证策略。支持 Apple Silicon Mac、Android arm64（Android 9 / API 28 及以上）。
 
 准备 Docker / Compose、Git、Python 3，以及 Android Platform Tools 中的 `adb`。手机开启 USB 调试并认可这台电脑，`adb devices` 应显示 `device`。准备自己的 Logto 租户；用户、应用和登录页面由该租户提供。
 
@@ -22,10 +22,10 @@ Logto 应签发面向上述 API resource、包含 `connect` 的 ES384 用户 acc
 
 ## 2. 下载源码，用一份 `.env` 启动
 
-使用与 Lab 0.3.0 匹配的当前源码进入 `server/`。从 GitHub 下载 v0.6.0 对应源码与客户端，不能将旧客户端与新认证策略混用。下面使用精确项目 tag，避免主分支后续变更；已有同版本工作副本直接进入 `server/`。
+使用与 Lab 0.3.0 匹配的当前源码进入 `server/`。当前主分支使用 Redis，不要用历史 v0.6.0 的单进程部署说明配置新服务。客户端使用 Release v0.7.0；已有当前工作副本直接进入 `server/`。也可以按 [Vercel Functions 部署](deployment.md#vercel-functions) 完成服务部署后从第 4 步继续。
 
 ```sh
-git clone --branch v0.6.0 --single-branch https://github.com/ywateru/CyberGrid.git
+git clone --branch main --single-branch https://github.com/ywateru/CyberGrid.git
 cd CyberGrid/server
 cp .env.example .env
 chmod 600 .env
@@ -43,6 +43,9 @@ LOGTO_MANAGEMENT_CLIENT_SECRET=你的M2M应用secret
 CYBERGRID_ADMIN_KEY=
 CYBERGRID_BIND=127.0.0.1
 PORT=7400
+# Compose 使用内部 Redis，服务端只选择这一种连接方式
+REDIS_URL=redis://redis:6379
+CYBERGRID_REDIS_PREFIX=cybergrid:v1
 ```
 
 需要管理后台时，在同一文件填入独立随机的 32–256 UTF-8 字节 `CYBERGRID_ADMIN_KEY`，更新服务后访问 `/admin/`。不需要时保持空。不要把 secret 或管理密钥写进 Git、客户端或截图。
@@ -52,7 +55,7 @@ docker compose up --build -d
 curl --fail http://127.0.0.1:7400/healthz
 ```
 
-健康检查应返回 HTTP 200；本机浏览器打开 `http://127.0.0.1:7400/` 应看到官网。Compose 已包含服务运行依赖，不需要数据库、第二个 CyberGrid 服务或其他 CyberGrid 配置文件。也可改用 [直接运行 Node](deployment.md#直接运行-node) 的步骤。
+健康检查应返回 HTTP 200；本机浏览器打开 `http://127.0.0.1:7400/` 应看到官网。Compose 已包含 Node 与 Redis，Redis 使用持久化卷；不需要 PostgreSQL 或第二个 CyberGrid 协调服务。也可改用 [直接运行 Node](deployment.md#直接运行-node) 的步骤。
 
 ## 3. 取得两端都能访问的 HTTPS 地址
 
@@ -81,7 +84,7 @@ curl --fail "$CYBERGRID_SERVER/healthz"
 
 ## 4. 下载并安装两个测试客户端
 
-从 [Release v0.6.0](https://github.com/ywateru/CyberGrid/releases/tag/v0.6.0) 下载：
+从 [Release v0.7.0](https://github.com/ywateru/CyberGrid/releases/tag/v0.7.0) 下载：
 
 - `CyberGrid-Lab-0.3.0-macos-arm64-test.zip`
 - `CyberGrid-Lab-0.3.0-android-arm64-test.zip`，包含 APK、ADB 工具及完整许可
@@ -148,11 +151,12 @@ python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" status
 | 应用不存在或不支持 | Native ID 的大小写、是否误填 SPA / M2M ID、Device Flow 是否关闭、是否登记两平台精确回调 |
 | audience / permission 错误 | `LOGTO_RESOURCE` 与 Logto API resource 是否完全一致，测试用户角色是否包含该资源的 `connect` |
 | 应用目录不可用 | M2M ID / secret、内置 Management API `all` 权限及租户是否对应；用 `docker compose logs --tail=50` 查看错误，分享前去除私密信息 |
+| 协调服务不可用 | 检查 Redis 连接、两种连接配置是否混用、provider 配额与实例是否使用相同 namespace；不得靠切回 RAM 规避 |
 | 登录一直等待 | 是否在系统浏览器完成登录、是否用了正确租户页面；重新查 `status`，不要把受理回执当成功 |
 | 看不到对端 | 两端中央地址、Native ID、账号是否一致，对端是否仍前台运行；两端分别刷新 |
 | 看到设备但连接失败 | 读取 App 的连接错误，保持两端联网并等待完整连接预算。Quick Tunnel 可能不可用，不关闭 TLS 校验来解决 |
 | ADB 结果未知 | 先查询 `status` 确认实际状态，不自动重复发送消息 |
 
-测试结束可执行 ADB `close` 并关闭 Mac 窗口，下次可恢复本机登录。选择 **退出登录** / ADB `logout` 会撤销本机授权。服务可用 `cd server && docker compose down` 停止；重新启动后客户端自动重新注册，已中断的业务 TCP 需要重新连接。
+测试结束可执行 ADB `close` 并关闭 Mac 窗口，下次可恢复本机登录。选择 **退出登录** / ADB `logout` 会撤销本机授权。服务可用 `cd server && docker compose down` 停止；重新启动 Node 时 Redis 会话保留；若 Redis 数据被重置，客户端自动重新注册。`down` 默认保留 Redis 卷，`down -v` 会删除卷，不要用于普通升级。已中断的业务 TCP 需要重新连接。
 
 要集成自己的业务，再阅读 [Rust SDK](../sdk-rust/README.md) 或 [Go SDK / CLI](../sdk/README.md)：显式配置自己的中央地址与 Native ID，声明已运行的本机 TCP 服务，获取远端设备与端口，再映射到本地 loopback。平台与运行边界见 [Lab README](../apps/tauri-test/README.md)，内部设计见 [架构](architecture.md)。

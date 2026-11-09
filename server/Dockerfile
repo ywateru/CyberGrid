@@ -6,6 +6,7 @@ RUN npm ci --include=dev
 COPY tsconfig.json ./
 COPY src ./src
 COPY public ./public
+COPY notices ./notices
 COPY release/build.mjs ./release/build.mjs
 RUN npm run build && npm prune --omit=dev
 

@@ -1,80 +1,114 @@
-# 部署 CyberGrid Node 服务
+# 部署 CyberGrid
 
-CyberGrid 由一个长期运行的 Node.js 22 进程提供完整官网、管理后台、Logto 控制台和 `/api/v1/`。协调状态只在该进程的有界内存中，不需要数据库。不要配置多副本、Node cluster 或 serverless Function；外部 HTTPS 入口可以使用普通 Nginx、Caddy 或隧道，服务不依赖特定平台。
+CyberGrid 支持 Node.js 22 / Docker 和 Vercel Functions。两种入口使用同一套网站、API、Logto 校验与 Redis 协调逻辑。Redis 保存共享会话、设备、端口和信令；不需要 PostgreSQL，不依赖另一台 CyberGrid 服务器。实例重启不清空协调状态。
 
 ## 配置 Logto
 
 在自己的 Logto 租户中准备：
 
-- 一个 SPA Application，用于网站 `/console/`。登记完整的回跳 URI，默认 `https://你的域名/console/callback/`，以及该 HTTPS origin。
-- 关闭 Device Flow 的普通 Native Applications。两端使用相同的真实 Application ID，分别通过官方 SDK 网页授权。登记 Mac 回调 `http://127.0.0.1:17896/callback` 与 Android 回调 `tech.tinadev.cybergrid.lab://tech.tinadev.cybergrid.lab/callback`。Logto 不允许切换既有应用的 Device Flow 标志，旧 Device Flow 应用需替换为普通 Native，不能迁用旧 client 的 refresh token。
-- 一个固定 API resource，提供 `connect` scope；签发面向该 resource 的 ES384 用户 access token。优先使用显式 `LOGTO_RESOURCE`；未设置时，有公开 origin 则默认该 origin 加 `/api`，否则默认固定标识 `https://cybergrid.local/api`。该标识是 OAuth audience，不需要 DNS 或实际 HTTP 服务，但必须在 Logto 创建完全相同的 resource。
-- 读取应用目录的 M2M Management API 凭据。当前使用的 `all` 权限较宽，须只保存在服务端；运行代码只读取固定租户目录，不写入用户或应用。
+- 一个独立 SPA Application，用于网站 `/console/`。登记完整回跳 URI，默认 `https://你的域名/console/callback/`，以及该 HTTPS origin。
+- 关闭 Device Flow 的普通 Native Application。Mac 和 Android 使用同一个真实 `client_id`，各自独立授权。登记 Mac 回调 `http://127.0.0.1:17896/callback` 与 Android 回调 `tech.tinadev.cybergrid.lab://tech.tinadev.cybergrid.lab/callback`。已有 Device Flow 应用需要替换，不能迁用另一个 client 的 refresh token。
+- 一个固定 API resource，提供 `connect` 用户 scope，并向测试用户分配相应角色。显式设置 `LOGTO_RESOURCE` 最清楚，例如 `https://cybergrid.local/api`；它是 OAuth audience，不需要解析或实际 HTTP 服务。Logto 须签发面向该 resource 的 ES384 用户 access token。
+- 读取应用目录的 M2M Management API 凭据。当前使用内置 Management API 的 `all` 权限，须只保存在服务端；运行代码只读取目录。
 
-SMTP、用户注册和邮件验证在 Logto 中配置。不要把 M2M、SMTP 或管理后台密钥放进 SDK、前端或 Git。
+SMTP、用户注册、邮件验证与发件域在 Logto 配置。不要把 M2M、SMTP、Redis 凭据或管理后台密钥放进 SDK、前端或 Git。
 
-## Docker：一个命令启动
+## Docker
 
-安装 Docker Engine / Docker Desktop 与 Compose 后：
+安装 Docker Engine / Docker Desktop 与 Compose：
 
 ```sh
 cd server
 cp .env.example .env
 chmod 600 .env
-# 编辑 .env，填写 Logto 配置；公开 origin 可留空
+# 填写 Logto 配置，使用 Compose 内部 Redis
+# REDIS_URL=redis://redis:6379
 docker compose up --build -d
+curl --fail http://127.0.0.1:7400/healthz
 ```
 
-容器以非 root 用户运行 Node，包含 POSIX Python3 租约 helper。构建上下文只有 `server/` 的明确源码和站点文件，不包含真实 `.env`、SDK、provider 或测试制品。Compose 在运行时注入 `.env`，默认仅发布 `127.0.0.1:7400`，用宿主机 HTTPS 反向代理连接它。容器内的 HTTP 端口用于入口转发；`CYBERGRID_PUBLIC_ORIGIN` 可选，显式设置时必须是最终 HTTPS origin。不设置时，HTTPS 代理必须覆盖单值 `X-Forwarded-Host` / `X-Forwarded-Proto`，Node 用它们识别本次访问地址。
+Compose 启动 Node 和带健康检查、AOF 与持久化卷的 Redis。容器以非 root 用户运行 Node，默认发布宿主 `127.0.0.1:7400`，通过宿主 HTTPS 反向代理提供外部地址。构建上下文仅包含服务源码与站点文件，不包含真实 `.env`、SDK/provider、客户端授权或测试制品。
 
-Compose 的命名卷只保存固定租约 inode，不保存会话、设备或信令。保持一个服务实例，不要 `--scale`；不要删除运行中租约文件。停止或更新使用 `docker compose down` / `docker compose up --build -d`。更新会清空协调内存，SDK 按既有恢复协议重新注册。
+普通更新使用 `docker compose up --build -d`；停止使用 `docker compose down`，默认保留 Redis 卷。`docker compose down -v` 会删除协调数据，不用于常规更新。Redis AOF 和卷降低重启丢失风险，不能替代备份与宿主磁盘可靠性保证。
+
+Node 实例可以连接相同 Redis 和 namespace，对外负载均衡由宿主配置。Compose 默认的固定端口面向单容器便捷部署，扩容时须自行调整端口与入口。各实例容量配置必须一致。仓库 Compose 显式选择内部 Redis；使用外部 Redis 时，应采用下述直接运行方式，或修改自己的 Compose，移除内部 Redis 连接覆盖与依赖后注入外部配置。
 
 ## 直接运行 Node
 
-需要 Node.js22+、POSIX Python3 标准库 `fcntl`：
+需要 Node.js 22+ 和可用 Redis：
 
 ```sh
 cd server
 npm ci --include=dev
 cp .env.example .env
 chmod 600 .env
-# 编辑配置
+# 填写 Logto 与 Redis 配置
 npm run build
 npm start
 ```
 
-`npm start` 自动读取存在的 `.env`。`npm run dev`、`npm run owner` 和旧的 `src/owner.ts` / `src/local.ts` 都进入同一生命周期，不创建第二份协调服务。生产安装可在构建后 `npm prune --omit=dev`；运行依赖包含 `tsx`。
+`npm start` 自动读取存在的 `.env`。`dev`、`owner` 与 `start` 都进入同一 Node 生命周期；不再使用 Python / POSIX flock。生产安装可在构建后 `npm prune --omit=dev`，`tsx` 是运行依赖。
+
+## Vercel Functions
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid&env=LOGTO_ISSUER,LOGTO_RESOURCE,LOGTO_BROWSER_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_SECRET,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN&envDescription=Configure%20Logto%20and%20a%20dedicated%20Redis%20database&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md)
+
+1. 在 Vercel 导入仓库，项目根目录使用仓库根目录，采用仓库的 `vercel.json`，不要将 Root Directory 改成 `server/`。
+2. 创建或连接 Redis。可在 Vercel Marketplace 选择 Upstash Redis，也可使用自己可从 Functions 访问的 Redis。选择适合流量的方案，免费方案不要启用自动付费升级。REST URL / token 成对配置；若集成只提供 `KV_REST_API_URL` / `KV_REST_API_TOKEN`，将对应值填入本项目的两个 `UPSTASH_REDIS_REST_*` 变量。
+3. 填写下表的 Logto 与 Redis 参数。每个环境使用独立 Redis namespace，预览环境不能误用生产 namespace。项目无需 `CYBERGRID_OWNER_URL`、`CYBERGRID_PROXY_SECRET` 或旧服务的 rewrite 地址。
+4. 部署后将实际 HTTPS origin 和完整 `/console/callback/` 回跳登记到 Logto SPA。首次部署可以暂不设置 `CYBERGRID_PUBLIC_ORIGIN`；设置后必须与实际访问域名一致。
+5. 绑定自己的域名并再次核对 Logto 回跳。打开官网、`/console/` 和 `/admin/`；`/healthz` 检查实例与 Redis 可用，还要通过配置/认证 API 验证 Logto。
+
+网站和 API 由同一个 Node Function 入口处理，包含安全头、静态路径校验和控制台回跳。Function 冷启动复用 Redis 里的会话，不通过隧道或代理转发到旧 Node 主机。Function 请求时限为 30 秒，内部 HTTP 预算 25 秒，信令等待不超过 15 秒。
+
+Vercel 的环境变量修改需要重新部署后生效。免费 Redis 有存储、命令和带宽配额，持续长轮询与心跳可能耗尽命令额度；免费不表示可以无限持续在线。额度耗尽或 Redis 不可用时 API 拒绝协调请求，不退回本机内存。
+
+## 环境变量
 
 | 配置 | 用途 |
 | --- | --- |
-| `CYBERGRID_PUBLIC_ORIGIN` | 可选，留空按每次请求地址派生；配置时固定为对外 HTTPS origin，不含路径、凭据、query 或 fragment |
-| `LOGTO_ISSUER` | 固定租户 HTTPS issuer，以 `/oidc` 结尾；同时用于精确 CSP |
-| `LOGTO_BROWSER_CLIENT_ID` | 独立 SPA client_id |
-| `LOGTO_MANAGEMENT_CLIENT_ID` / `LOGTO_MANAGEMENT_CLIENT_SECRET` | 目录读取的 M2M 凭据，仅服务端保存 |
-| `CYBERGRID_ADMIN_KEY` | 可选，独立随机 32–256 UTF8 字节；为空时管理 API 返回503 |
-| `LOGTO_RESOURCE` | 固定 OAuth audience；未显式指定时，有公开 origin 则默认其加 `/api`，否则为 `https://cybergrid.local/api` |
+| `REDIS_URL` | 标准 Redis TCP/TLS 连接，例如 Compose 的 `redis://redis:6379`；与 REST 配置互斥 |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | 管理 Redis 的 REST 地址与完整权限 token，必须同时设置；不能使用只读 token |
+| `CYBERGRID_REDIS_PREFIX` | 协调 namespace，默认 `cybergrid:v1`；生产、预览与测试分别设置，不含花括号 |
+| `CYBERGRID_LIMITS` | 可选 JSON 共享容量限制，只能下调以下硬上限；同 namespace 所有实例必须一致 |
+| `LOGTO_ISSUER` | 必填，可信租户 HTTPS issuer，以 `/oidc` 结尾；JWT 和 CSP 均固定使用它 |
+| `LOGTO_BROWSER_CLIENT_ID` | 必填，独立控制台 SPA 的 client ID |
+| `LOGTO_MANAGEMENT_CLIENT_ID` / `LOGTO_MANAGEMENT_CLIENT_SECRET` | 必填，目录读取 M2M 凭据，仅服务端保存 |
+| `LOGTO_RESOURCE` | 固定 OAuth audience；建议显式设置。默认有公开 origin 则为该 origin 加 `/api`，否则 `https://cybergrid.local/api` |
+| `CYBERGRID_PUBLIC_ORIGIN` | 可选，对外 HTTPS origin，不含路径、凭据、query 或 fragment；留空按每次请求地址识别 |
+| `CYBERGRID_ADMIN_KEY` | 可选，独立随机 32–256 UTF-8 字节；未设置时管理 API 返回 503 |
 | `CYBERGRID_CONSOLE_REDIRECT_URI` | 可选，同 origin 专用回跳；默认 `/console/callback/` |
-| `CYBERGRID_BROWSER_ORIGINS` | v0.7.0 的可选只读 JS SDK CORS 白名单，逗号分隔精确 HTTPS origin；开发允许 HTTP loopback，默认空表示只允许同源 |
-| `CYBERGRID_BIND` / `PORT` | Node 默认 `127.0.0.1:7400`；Compose 在容器内设为 `0.0.0.0:7400` |
-| `CYBERGRID_OWNER_LOCK` | 固定租约路径；默认当前目录 `.cybergrid-owner.lock` |
-| `CYBERGRID_MEMORY_LIMITS` | 可选 JSON 容量限制，必须符合 MemoryStore 的边界 |
+| `CYBERGRID_BROWSER_ORIGINS` | 可选，逗号分隔精确 HTTPS origin，开发允许 HTTP loopback；仅开放只读 JS SDK 的 console 接口，默认只允许同源 |
+| `CYBERGRID_BIND` / `PORT` | 普通 Node 默认 `127.0.0.1:7400`；Compose 容器内为 `0.0.0.0:7400`；Functions 无需配置 |
 
-回跳不能使用 `/`、`/api`、`/admin` 或 `/healthz` 保留路径；在 Logto SPA 注册精确 URI。Node 直接返回控制台页面，保留 URL 中的 code/state query，不依赖平台 rewrite。`CYBERGRID_DEV_MODE=1` 只允许 loopback 请求 origin，显式公开 origin 也须 loopback，且生产环境拒绝此开关；不提供假登录。
+回跳不能使用 `/`、`/api`、`/admin` 或 `/healthz` 保留路径；在 Logto SPA 注册精确 URI。已有部署删除公开 origin 前，显式保存原来的 `LOGTO_RESOURCE`，避免改变验签 audience。请求 Host 不选择 Logto 租户、JWKS 或 OAuth resource。
+
+共享存储默认容量也是本实现的硬上限。Lua 操作有锁内扫描，不能通过环境变量任意放大到数百万记录；更大规模需要调整索引与执行策略。容量配置在 namespace 创建时固定，不能在实例之间分别调整。
+
+| 类别 | 全局上限 | 单用户 / 单设备上限 |
+| --- | --- | --- |
+| 会话 | 512 | 每用户 128 |
+| 设备 | 256 | 每用户 64 |
+| 信令 | 1024 条 / 2 MiB | 每用户 512 条 / 2 MiB；每设备 128 条 / 1 MiB |
+| 注册 fence | 2048 | 每用户 128，namespace 内永久保留 |
+| 幂等记录 | 4096 | 随相应有效期清理 |
+| 限流桶 | 2048 | 各接口按自身速率校验 |
+| 长轮询等待者 | 128 | 每设备 2 |
 
 ## HTTPS、限流与存活检查
 
-配置公开 origin 时，API URL、同源判断与默认回跳固定使用它，不让请求头覆盖。留空时，每个请求使用合法 Host 和 socket HTTP/TLS，或严格单值 `X-Forwarded-Host` / `X-Forwarded-Proto`（仅 `http` / `https`）；重复、多值、非法 authority、userinfo、control、非法端口均拒绝，Forwarded 不受支持。代理必须覆盖这两个头，不能追加或透传客户端自带值。派生地址仅用于本请求 URL、同源校验和回跳，不触发服务器向该地址 fetch，不缓存或首请求绑定。
+配置公开 origin 时，API URL、同源判断与默认回跳固定使用它；留空时采用合法 Host 和 socket HTTP/TLS，或严格单值 `X-Forwarded-Host` / `X-Forwarded-Proto`。代理必须覆盖这两个头，不能追加或透传客户端值。重复、多值、非法 authority、userinfo、非法端口与非 HTTP(S) scheme 均拒绝。派生 origin 仅用于本次请求，不缓存，不触发服务端向该地址 fetch。
 
-JWT issuer、JWKS 和 audience 始终独立固定。已有部署删除 `CYBERGRID_PUBLIC_ORIGIN` 前，将原来的 API resource 显式写进 `LOGTO_RESOURCE`，以免回退到新默认标识；不必修改 Logto 租户。默认回跳为本次有效 origin 加 `/console/callback/`，配置接口始终返回绝对 URI；显式回跳必须与本次有效 origin 一致。不同 Host 请求不会污染其他请求或改变 JWT audience。
+普通 Node 的客户端 IP 限流采用 socket 地址，忽略客户端可伪造的 X-Forwarded-For；外部代理后的请求可能共享 IP 限流桶。Functions 对登录与管理员 IP 桶使用固定 `vercel-shared` 标识，不信任转发 IP，因此不同访问者会共享这些入口配额。会话级配额仍独立校验；所有配额存入 Redis，不能靠切换实例获得新配额。
 
-客户端 IP 只取 socket 地址，忽略 X-Forwarded-For。若所有请求经过一个外部代理，它们会共享该代理的 IP 限流桶，不能靠注入转发头获得独立配额。
+`GET /healthz` 和 `HEAD /healthz` 检查实例与 Redis 共享状态是否可用；Redis 不可用时返回 503。不调用 Logto，不暴露配置或协调状态。body 上限 100000 字节、响应上限 2 MiB；长轮询有 Redis 等待租约和取消机制，不依赖后台定时清理。Node 停机关闭本实例的接入与连接，保留共享数据。
 
-`GET /healthz` 和 `HEAD /healthz` 只报告进程存活，不调用 Logto、不泄露配置或协调状态。请求从读 body 到 handler / 响应读取共用25秒预算，body 上限100000字节、响应上限2MiB，信令长轮询最多15秒；客户端断连释放等待者。SIGTERM 停止接入、关闭协调等待者与连接并释放租约；SIGKILL 后 helper 通过 stdin EOF 自动释放内核锁。
+Redis epoch、注册密钥派生材料与 fence 属于 namespace 的身份状态。不要手工删除部分键来解除配额；删除整个 namespace 代表明确的协调重置。完整到期、幂等与原子性约束见 [Redis 协调契约](redis-coordination.md)。托管 Redis 的复制、网络分区与故障切换保证由提供商决定，本项目不提供跨故障域的共识协议。
 
-`/admin/` 使用同一服务 `.env` 中的独立管理密钥，只读查看协调状态；密钥只保存在当前页面内存，刷新后重新输入。`/console/` 使用 Logto，提供当前用户自己的只读设备视图。
+Upstash 的当前保证与配额以官方 [EVAL](https://upstash.com/docs/redis/commands/scripting/eval)、[REST API](https://upstash.com/docs/redis/features/restapi)、[Global Database](https://upstash.com/docs/redis/features/globaldatabase)、[一致性](https://upstash.com/docs/redis/features/consistency) 和 [价格](https://upstash.com/pricing/redis) 为准。写路由 EVAL 内的原子校验不能提升为跨分区、跨故障切换的线性一致承诺。
 
-使用独立域名的前端和 JS SDK 时，除在 Logto SPA 登记该前端的精确回跳和 origin 外，还要把前端 origin 加入 `CYBERGRID_BROWSER_ORIGINS`。前端使用 `LOGTO_BROWSER_CLIENT_ID` 对应的受信 SPA 与固定 `LOGTO_RESOURCE`；不能把 Native 或 M2M ID 用作浏览器身份。白名单仅开放 console 读取、会话建立及 console 专用注销，不开放设备写入、信令或管理 API，也不允许 cookie credentials。留空不影响原有同源站点或原生 SDK。端口申报的 Quick Tunnel URL 由业务服务自行配置鉴权和浏览器 CORS，中央的白名单不为业务端口代配这些规则。
+`/admin/` 使用独立管理密钥，只返回白名单投影；管理密钥仅在当前页面内存保存。`/console/` 使用 Logto，显示当前用户自己的只读设备视图。独立前端除 Logto SPA 回跳外，还须加入 `CYBERGRID_BROWSER_ORIGINS`；该白名单不为业务端口代理鉴权或 CORS。
 
 ## SDK 与发布
 
-[GitHub Releases](https://github.com/ywateru/CyberGrid/releases) 提供 Go、Rust、Lab 和校验清单。网站构建不下载这些大文件。原生制品通过独立的 Release workflow 构建；Node 服务 CI 只检查新服务与 Docker，不运行手机或 WAN 验收。正式签名、公证、商店发布与长期监控需另行配置。
+[GitHub Releases](https://github.com/ywateru/CyberGrid/releases) 提供 Rust、Go、JS、Lab 和校验清单。网站构建不下载 SDK 大文件。服务 CI 验证 Node、Functions 适配与 Redis / Docker；原生 Release workflow 独立运行，不把 CI 构建当作手机或公网直连验收。

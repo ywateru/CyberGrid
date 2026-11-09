@@ -5,16 +5,21 @@
     "README.md",
     "LICENSE",
     ".gitignore",
-    ".gitattributes"
+    ".gitattributes",
+    "package.json",
+    "vercel.json",
+    ".vercelignore"
   ],
   "sourceRoots": [
     ".github",
+    "api",
     "scripts/release",
     "server/src",
     "server/api",
     "server/test",
     "server/tests",
     "server/public",
+    "server/notices",
     "server/scripts",
     "sdk",
     "sdk-rust",
@@ -39,7 +44,14 @@
     "docs/sdk.md",
     "docs/releasing.md",
     "docs/getting-started.md",
-    "docs/lab-browser-login.md"
+    "docs/lab-browser-login.md",
+    "docs/INDEX.md",
+    "docs/redis-coordination.md",
+    "docs/plan/README.md",
+    "docs/plan/tasks/redis-001.md",
+    "docs/plan/tasks/redis-002.md",
+    "docs/plan/tasks/redis-003.md",
+    "docs/plan/reviews/redis-003.md"
   ],
   "excludedParts": [
     ".git",
@@ -91,7 +103,7 @@
   "notes": [
     "Provider bin/jniLibs are explicit exceptions to generic build exclusions.",
     "Gradle wrapper JAR is a required checked-in build tool, not an application output.",
-    "Only the explicitly reviewed public docs are eligible; original verification/product/plan docs are archived.",
+    "Only explicitly listed reviewed public docs are eligible; other local verification, product and plan records remain excluded.",
     "Credentials, .env files other than reviewed .env.example, local freezes and build logs are never public."
   ],
   "excludedExactFiles": [

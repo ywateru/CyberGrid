@@ -1,110 +1,41 @@
-name: Node service and Docker
+name: Check Redis coordinator
+
 on:
   push:
     branches: [main]
-    paths: ['server/**', '.github/workflows/server.yml']
+    paths: ['server/**', 'api/**', 'package.json', 'vercel.json', '.vercelignore', 'scripts/release/**', '.github/workflows/server.yml']
   pull_request:
-    paths: ['server/**', '.github/workflows/server.yml']
+    paths: ['server/**', 'api/**', 'package.json', 'vercel.json', '.vercelignore', 'scripts/release/**', '.github/workflows/server.yml']
+  workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
-  server:
+  coordinator:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: '22'
-          cache: npm
-          cache-dependency-path: server/package-lock.json
-      - run: npm ci --include=dev
-        working-directory: server
-      - run: npm run build && npm run test:node
-        working-directory: server
-      - name: Build and run the same nonroot Node entrypoint
-        shell: bash
+          node-version: '22.23.4'
+      - name: Install isolated Redis test prerequisite
         run: |
-          set -euo pipefail
-          docker build -t cybergrid-node-ci server
-          test "$(docker image inspect cybergrid-node-ci --format '{{.Config.User}}')" = node
-          trap 'docker logs cybergrid-node-ci; docker logs cybergrid-node-ci-optional 2>/dev/null || true; docker rm -f cybergrid-node-ci cybergrid-node-ci-optional >/dev/null 2>&1 || true' EXIT
-          docker run -d --name cybergrid-node-ci \
-            -e CYBERGRID_PUBLIC_ORIGIN=https://grid.example \
-            -e LOGTO_ISSUER=https://fixture.invalid/oidc \
-            -e LOGTO_BROWSER_CLIENT_ID=FixtureSPA \
-            -e LOGTO_MANAGEMENT_CLIENT_ID=FixtureDirectory \
-            -e LOGTO_MANAGEMENT_CLIENT_SECRET=fixture-not-used \
-            cybergrid-node-ci
-          for attempt in $(seq 1 30); do
-            status=$(docker inspect cybergrid-node-ci --format '{{.State.Health.Status}}')
-            if [ "$status" = healthy ]; then break; fi
-            sleep 2
-          done
-          test "$(docker inspect cybergrid-node-ci --format '{{.State.Health.Status}}')" = healthy
-          docker stop --time 10 cybergrid-node-ci
-          test "$(docker inspect cybergrid-node-ci --format '{{.State.ExitCode}}')" = 0
-          # Same built image, no PUBLIC_ORIGIN and no LOGTO_RESOURCE: config is
-          # usable directly and through a standard HTTPS proxy, audience stays fixed.
-          docker run -d --name cybergrid-node-ci-optional \
-            -e LOGTO_ISSUER=https://fixture.invalid/oidc \
-            -e LOGTO_BROWSER_CLIENT_ID=FixtureSPA \
-            -e LOGTO_MANAGEMENT_CLIENT_ID=FixtureDirectory \
-            -e LOGTO_MANAGEMENT_CLIENT_SECRET=fixture-not-used \
-            cybergrid-node-ci
-          for attempt in $(seq 1 30); do
-            if docker exec cybergrid-node-ci-optional node -e "require('node:http').get('http://127.0.0.1:7400/healthz',r=>{r.resume();process.exitCode=r.statusCode===200?0:1}).on('error',()=>process.exitCode=1)"; then break; fi
-            sleep 1
-          done
-          docker exec cybergrid-node-ci-optional node --input-type=module -e '
-            import assert from "node:assert/strict";
-            const base="http://127.0.0.1:7400",path="/api/v1/console/auth/config";
-            const local=await(await fetch(base+path)).json();
-            assert.equal(local.resource,"https://cybergrid.local/api");
-            assert.equal(local.redirectUri,base+"/console/callback/");
-            const external=await(await fetch(base+path,{headers:{"x-forwarded-host":"grid.example","x-forwarded-proto":"https"}})).json();
-            assert.equal(external.resource,local.resource);
-            assert.equal(external.redirectUri,"https://grid.example/console/callback/");
-            const again=await(await fetch(base+path)).json();
-            assert.equal(again.redirectUri,local.redirectUri);
-          '
-          docker stop --time 10 cybergrid-node-ci-optional
-          test "$(docker inspect cybergrid-node-ci-optional --format '{{.State.ExitCode}}')" = 0
-      - name: Run the documented Compose service with the existing image
-        shell: bash
+          sudo apt-get update
+          sudo apt-get install -y redis-server
+          command -v redis-server
+      - name: Install and build the Function implementation
         run: |
-          set -euo pipefail
-          smoke_dir=$(mktemp -d "$RUNNER_TEMP/cybergrid-compose.XXXXXX")
-          chmod 700 "$smoke_dir"
-          project="cybergrid-ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          compose=(docker compose --project-name "$project" --project-directory "$smoke_dir" -f "$GITHUB_WORKSPACE/server/compose.yaml" -f "$smoke_dir/image.yaml")
-          cleanup() {
-            "${compose[@]}" logs --no-color || true
-            "${compose[@]}" down --volumes --remove-orphans || true
-            rm -rf "$smoke_dir"
-          }
-          trap cleanup EXIT
-          umask 077
-          cat > "$smoke_dir/.env" <<'ENV'
-          LOGTO_ISSUER=https://fixture.invalid/oidc
-          LOGTO_BROWSER_CLIENT_ID=FixtureSPA
-          LOGTO_MANAGEMENT_CLIENT_ID=FixtureDirectory
-          LOGTO_MANAGEMENT_CLIENT_SECRET=fixture-not-used
-          ENV
-          printf 'services:\n  cybergrid:\n    image: cybergrid-node-ci\n' > "$smoke_dir/image.yaml"
-          "${compose[@]}" up -d --no-build --pull never
-          container=$("${compose[@]}" ps -q cybergrid)
-          test -n "$container"
-          test "$(docker inspect "$container" --format '{{.Config.User}}')" = node
-          test "$(docker exec "$container" id -u)" != 0
-          for attempt in $(seq 1 45); do
-            status=$(docker inspect "$container" --format '{{.State.Health.Status}}')
-            if [ "$status" = healthy ]; then break; fi
-            sleep 1
-          done
-          test "$(docker inspect "$container" --format '{{.State.Health.Status}}')" = healthy
-          curl --fail --silent http://127.0.0.1:7400/healthz >/dev/null
-          "${compose[@]}" stop --timeout 10
-          test "$(docker inspect "$container" --format '{{.State.ExitCode}}')" = 0
-          "${compose[@]}" down --volumes --remove-orphans
+          npm --prefix server ci --include=dev
+          npm run build
+      - name: Run real Redis and HTTP coordinator tests
+        env:
+          REQUIRE_REDIS: '1'
+        run: npm --prefix server test
+      - name: Verify server dependency license texts
+        run: python3 scripts/release/collect-server-licenses.py --check
+      - name: Verify non-root Docker and Compose Redis persistence
+        run: python3 scripts/release/check-docker.py

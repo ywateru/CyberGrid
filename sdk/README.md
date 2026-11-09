@@ -4,7 +4,7 @@ Go SDK 0.4.0 支持 Logto 登录、同账号同应用设备发现、TCP 端口�
 
 ## memory-v1 与恢复
 
-新服务端只在唯一 owner 的有界 RAM 保存协调状态。SDK协商 `memory-v1`，以私密 registrationKey/revision/requestId 保持设备逻辑ID，校验 epoch/incarnation/publishRevision，长轮询信令最多15秒。owner重启、中央会话或65秒lease到期后关闭旧流；显式配置 `Config.AuthProvider` 或 `SetAuthProvider` 才能自动恢复。没有 provider 会发送 `requires-login`，不会偷偷重用旧 access token 或弹出授权页面。
+当前服务端使用 Redis 保存跨实例共享协调状态，支持 Node / Docker 和 Vercel Functions。Node 重启或 Function 冷启动不更换 epoch。SDK协商 `memory-v1`，以私密 registrationKey/revision/requestId 保持设备逻辑ID，校验 epoch/incarnation/publishRevision，长轮询信令最多15秒。Redis namespace 重置、中央会话或65秒lease到期后关闭旧流；显式配置 `Config.AuthProvider` 或 `SetAuthProvider` 才能自动恢复。没有 provider 会发送 `requires-login`，不会偷偷重用旧 access token 或弹出授权页面。
 
 `AuthProvider.AccessToken(context.Context,*Client) (OAuthTokens,error)` 由宿主私有凭据所有者实现，返回前必须保存最新 refresh rotation。注册恢复 single-flight，暂时故障指数退避和 jitter，并尊重有界 Retry-After；身份变化、应用拒绝、会话被接管则停止。完整恢复后重新 Expose、本代证书和 provider URL；同一个 Map 保留 loopback listener，恢复期间新连接被拒绝，Ready 后新 TCP 使用当前 peer 重新握手。已经断开的 TCP 不重放字节，不承诺无损续传；`Mapping.Transport/Peer` 是创建时的诊断快照，后续状态请读事件。
 

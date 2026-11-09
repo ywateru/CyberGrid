@@ -104,7 +104,7 @@ def package_sources():
     meta = {'version': VERSIONS['lab'], 'commit': build_metadata('sources')['commit'], 'sha256': mapping, 'sdkSourceManifestSha256': sha(OUT / 'cybergrid-sdk-rust-source-manifest.json')}
     write_json('lab-source-manifest.json', meta)
     tar('CyberGrid-Lab-0.3.0-source.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in app_files], 'CyberGrid-Lab-0.3.0', {'SOURCE-MANIFEST.json': (json.dumps(meta, indent=2, sort_keys=True) + '\n').encode()})
-    license_files = tracked('LICENSE', 'sdk/LICENSE', 'sdk/third_party', 'sdk/THIRD_PARTY_NOTICES.md', 'sdk-rust/LICENSE', 'sdk-rust/licenses', 'sdk-rust/THIRD_PARTY_NOTICES.md', 'sdk-js/LICENSE', 'sdk-js/notices', 'apps/tauri-test/notices', 'tools/cloudflared/LICENSE', 'tools/cloudflared/BUNDLED_THIRD_PARTY_NOTICES.md')
+    license_files = tracked('LICENSE', 'server/notices', 'sdk/LICENSE', 'sdk/third_party', 'sdk/THIRD_PARTY_NOTICES.md', 'sdk-rust/LICENSE', 'sdk-rust/licenses', 'sdk-rust/THIRD_PARTY_NOTICES.md', 'sdk-js/LICENSE', 'sdk-js/notices', 'apps/tauri-test/notices', 'tools/cloudflared/LICENSE', 'tools/cloudflared/BUNDLED_THIRD_PARTY_NOTICES.md')
     tar('CyberGrid-licenses.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in license_files], 'CyberGrid-licenses')
     write_json('build-sources.json', build_metadata('sources'))
 
