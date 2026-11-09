@@ -215,7 +215,7 @@ func validateAppID(id string) error {
 	return nil
 }
 
-// Apps lists the tenant's read-only Logto Native Device Flow directory using
+// Apps lists the tenant's read-only standard Logto Native directory using
 // this client's device session. It is not a per-user authorization list.
 func (c *Client) Apps(ctx context.Context) ([]Application, error) {
 	var out struct {
@@ -230,8 +230,8 @@ func (c *Client) Apps(ctx context.Context) ([]Application, error) {
 	}
 	seen := make(map[string]bool)
 	for _, app := range out.Apps {
-		if validateAppID(app.ID) != nil || app.Type != "Native" || !app.IsDeviceFlow || seen[app.ID] {
-			return nil, errors.New("application directory contains an invalid or duplicate Native Device Flow entry")
+		if validateAppID(app.ID) != nil || app.Type != "Native" || app.IsDeviceFlow || seen[app.ID] {
+			return nil, errors.New("application directory contains an invalid or duplicate Native browser sign-in entry")
 		}
 		seen[app.ID] = true
 	}

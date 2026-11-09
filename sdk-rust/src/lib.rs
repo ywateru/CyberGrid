@@ -11,7 +11,10 @@ mod secure;
 mod tunnel;
 mod types;
 
-pub use auth::{AuthConfig, Coordination, DeviceAuthorization, OAuthTokens};
+pub use auth::{
+    AuthConfig, BrowserGrantCheckpoint, Coordination, DeviceAuthorization, GrantImportOutcome,
+    OAuthTokens,
+};
 pub use client::{AuthFuture, AuthProvider, Client};
 pub use credentials::CredentialStore;
 pub use error::{Error, Result};

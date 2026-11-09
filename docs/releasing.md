@@ -1,6 +1,8 @@
 # Building and publishing a release
 
-CyberGrid uses a project release tag, such as `v0.5.1`, while the components retain their own versions: Go SDK/CLI 0.4.0, Rust SDK 0.2.0 and CyberGrid Lab 0.2.0. Publishing source does not grant an additional open-source license. See the root and component `LICENSE` files; third-party grants remain separately effective.
+CyberGrid uses a project release tag, such as `v0.6.0`, while the components retain their own versions: Go SDK/CLI 0.4.0, Rust SDK 0.2.0 and CyberGrid Lab 0.3.0. Publishing source does not grant an additional open-source license. See the root and component `LICENSE` files; third-party grants remain separately effective.
+
+The v0.6.0 coordinator and Lab use ordinary Logto Native applications with Device Flow disabled. Deploy the matching coordinator with the client release. Historical device-code CLI login does not work with this coordinator; it remains only for older compatible services. Existing releases are immutable.
 
 ## Workflow
 
@@ -24,7 +26,7 @@ From the reviewed, clean repository:
 
 ```sh
 git push origin main
-gh workflow run release.yml --ref main -f release_tag=v0.5.1
+gh workflow run release.yml --ref main -f release_tag=v0.6.0
 ```
 
 Dispatch from the exact reviewed source revision. The publishing job creates the project tag only after all required builds have passed, and binds the Release to that job's `GITHUB_SHA`. Do not create or move a release tag during build iteration. Existing tags remain unchanged. The Go submodule uses its independent `sdk/v0.4.0` tag; create a new submodule tag only for a new Go SDK version.
@@ -51,7 +53,7 @@ Release packaging reads the committed source list through `git ls-files`. It doe
 python3 scripts/release/package.py sources
 python3 scripts/release/package.py macos --app '/absolute/path/to/CyberGrid Lab.app' --go-binary sdk/bin/cybergrid-macos
 python3 scripts/release/package.py android --apk /absolute/path/to/app-universal-debug.apk --go-binary sdk/bin/cybergrid-android-arm64
-RELEASE_TAG=v0.5.1 python3 scripts/release/package.py finalize
+RELEASE_TAG=v0.6.0 python3 scripts/release/package.py finalize
 ```
 
 Output is under `dist/release/`, which is not committed. `finalize` requires all three platform/source job metadata files. Source archives contain the offline SDK provider resources and licenses. Platform packages include full notices; the macOS CLI embeds its provider, while Android requires the OS-installed native library directory.

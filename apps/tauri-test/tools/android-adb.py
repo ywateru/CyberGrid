@@ -154,11 +154,16 @@ def parser():
     sub = p.add_subparsers(dest="action", required=True)
     for action in ("start", "status", "cancel-login", "refresh", "disconnect", "logout", "close"):
         sub.add_parser(action)
-    for action in ("login", "resume"):
-        q = sub.add_parser(action)
-        q.add_argument("--server", required=True)
-        q.add_argument("--app", required=True)
-        q.add_argument("--name", required=True)
+    for action in ("login", "web-login", "resume"):
+        description = ("Alias for web-login" if action == "login" else
+                       "Start official browser login" if action == "web-login" else
+                       "Resume this device's saved grant")
+        q = sub.add_parser(action, help=description, description=description)
+        # Omitted public configuration is resolved by LabState's shared preset.
+        # Never accept OAuth material or a callback URI through this interface.
+        q.add_argument("--server")
+        q.add_argument("--app")
+        q.add_argument("--name")
         q.add_argument("--force-fallback", action="store_true")
     for action in ("connect", "probe"):
         sub.add_parser(action).add_argument("--device-id", required=True)
@@ -189,14 +194,19 @@ def main(argv=None, adb_factory=Adb):
     if high == SAFE_INT:
         raise Failure("SEQUENCE_EXHAUSTED", "Close and restart the App before another operation")
     payload = {}
-    if args.action in ("login", "resume"):
-        payload = {"server": args.server, "app": args.app, "name": args.name, "forceFallback": args.force_fallback}
+    if args.action in ("login", "web-login", "resume"):
+        payload = {key: value for key, value in
+                   (("server", args.server), ("app", args.app), ("name", args.name))
+                   if value is not None}
+        payload["forceFallback"] = args.force_fallback
     elif args.action in ("connect", "probe"):
         payload = {"deviceId": args.device_id}
     elif args.action == "send":
         payload = {"text": args.text}
     request = {"version": 1, "controlEpoch": epoch, "sequence": high + 1,
-               "requestId": str(uuid.uuid4()), "action": args.action, "payload": payload}
+               "requestId": str(uuid.uuid4()),
+               "action": "web-login" if args.action == "login" else args.action,
+               "payload": payload}
     try:
         adb.publish(request)
     except Failure as error:

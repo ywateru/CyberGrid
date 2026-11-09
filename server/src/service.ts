@@ -15,7 +15,7 @@ function json(data:unknown,status=200){return new Response(JSON.stringify(data),
 export interface ServiceOptions {store:Store;identity:Identity;directory:ApplicationDirectory;browserClientId:string;devMode?:boolean;now?:()=>number;authRateLimit?:number;adminKey?:string}
 export function createService(options:ServiceOptions){
  const {store,identity,directory}=options;const verifyAdmin=adminVerifier(options.adminKey);const now=options.now??Date.now;const coordination=()=>({protocol:'memory-v1',epoch:store.epoch,heartbeatSeconds:20,leaseSeconds:65,signalTtlSeconds:120,maxSignalWaitSeconds:15});
- async function application(id:string,existing=false){const app=(await directory.list()).find(a=>a.id===id);if(existing&&(!app||!eligible(app)))throw new ApiError(401,'APPLICATION_UNAVAILABLE','Logto 应用已删除或不再支持 Device Flow，请重新授权');if(!app)throw new ApiError(404,'APPLICATION_NOT_FOUND','找不到此 Logto Application');if(!eligible(app))throw new ApiError(400,'UNSUPPORTED_APPLICATION_FLOW','应用须为启用 Device Flow 的 Logto Native Application');return app;}
+ async function application(id:string,existing=false){const app=(await directory.list()).find(a=>a.id===id);if(existing&&(!app||!eligible(app)))throw new ApiError(401,'APPLICATION_UNAVAILABLE','Logto 应用已删除或不再支持网页登录，请重新授权');if(!app)throw new ApiError(404,'APPLICATION_NOT_FOUND','找不到此 Logto Application');if(!eligible(app))throw new ApiError(400,'UNSUPPORTED_APPLICATION_FLOW','应用须为关闭 Device Flow 的 Logto Native Application，请使用官方 SDK 网页登录');return app;}
  const inner=async function handle(request:Request,clientIP='unknown'):Promise<Response>{try{
   const u=new URL(request.url),time=now();if(options.devMode&&!['localhost','127.0.0.1','[::1]'].includes(u.hostname))throw new ApiError(403,'DEV_LOOPBACK_ONLY','开发模式仅允许 loopback 地址');
   const origin=request.headers.get('origin');if(origin&&origin!==u.origin)throw new ApiError(403,'ORIGIN_REJECTED','不允许跨站请求');if(request.headers.get('sec-fetch-site')==='cross-site')throw new ApiError(403,'ORIGIN_REJECTED','不允许跨站请求');
@@ -31,7 +31,7 @@ export function createService(options:ServiceOptions){
   }
   if(path==='/api/v1/auth/register'||path==='/api/v1/auth/login')throw new ApiError(410,'AUTH_FLOW_REPLACED','请使用 Logto 浏览器授权与 /auth/exchange；中央服务不接收密码');
   const authConfiguration=(id:string)=>{try{return requestAuthConfiguration(identity.configuration(id),u.origin);}catch{throw new ApiError(400,'INVALID_CONSOLE_REDIRECT_URI','控制台回跳与本次访问 origin 不一致');}};
-  if(path==='/api/v1/auth/config'&&method==='GET'){const id=appID(u.searchParams.get('appId')??undefined);await application(id);return json({...authConfiguration(id),coordination:coordination()});}
+  if(path==='/api/v1/auth/config'&&method==='GET'){const id=appID(u.searchParams.get('appId')??undefined);await application(id);return json({...authConfiguration(id),loginFlow:'authorization_code',coordination:coordination()});}
   if(path==='/api/v1/console/auth/config'&&method==='GET')return json({...authConfiguration(options.browserClientId),coordination:coordination()});
   await store.cleanup(time);
   let body:Record<string,unknown>={};if(['POST','PUT','PATCH'].includes(method)){
@@ -59,7 +59,7 @@ export function createService(options:ServiceOptions){
   store.current(session,time);if(session.protocol&&request.headers.get('x-cybergrid-epoch')!==store.epoch)throw new ApiError(409,'COORDINATOR_RESET','协调服务epoch不匹配');
   if(!await store.rate('api:'+session.hash,time,360))throw new ApiError(429,'RATE_LIMITED','请求过于频繁，请稍后重试');
   if(session.purpose==='device')await application(session.appId,true);store.current(session,now());
-  if(path==='/api/v1/apps'&&method==='GET')return json({source:'logto',apps:(await directory.list()).filter(eligible).map(a=>({id:a.id,name:a.name,type:'Native',isDeviceFlow:true}))});
+  if(path==='/api/v1/apps'&&method==='GET')return json({source:'logto',apps:(await directory.list()).filter(eligible).map(a=>({id:a.id,name:a.name,type:'Native',isDeviceFlow:a.isDeviceFlow}))});
   if(path==='/api/v1/console/devices'){
    if(session.purpose!=='console')throw new ApiError(403,'FORBIDDEN','此接口仅供只读控制台会话使用');if(method!=='GET')throw new ApiError(405,'METHOD_NOT_ALLOWED','请求方法不支持');const id=appID(u.searchParams.get('appId')??undefined);await application(id);return json({devices:await store.devices(session.userId,id,time)});
   }

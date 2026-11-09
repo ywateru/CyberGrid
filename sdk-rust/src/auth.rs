@@ -22,6 +22,8 @@ pub struct Coordination {
 #[serde(rename_all = "camelCase")]
 pub struct AuthConfig {
     #[serde(default)]
+    pub login_flow: Option<String>,
+    #[serde(default)]
     pub coordination: Option<Coordination>,
     pub provider: String,
     pub issuer: String,
@@ -48,6 +50,13 @@ fn https(raw: &str) -> Result<Url> {
 }
 impl AuthConfig {
     pub(crate) fn validate(&self, app_id: &str) -> Result<()> {
+        if self
+            .login_flow
+            .as_deref()
+            .is_some_and(|flow| !["authorization_code", "device_code"].contains(&flow))
+        {
+            return Err(protocol("unsupported loginFlow"));
+        }
         let issuer = https(&self.issuer)?;
         https(&self.resource)?;
         if issuer.query().is_some()
@@ -105,6 +114,23 @@ pub struct OAuthTokens {
     pub token_type: String,
     pub scope: String,
 }
+/// Private browser-journal crash reconciliation. A different existing grant is
+/// ambiguous: callers must retain the journal and must not revoke its token.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BrowserGrantCheckpoint {
+    Matching,
+    Empty,
+    OtherGrant,
+}
+/// Both acknowledgements transfer refresh ownership to Rust. The producing
+/// browser SDK must stop all token operations and clear its temporary memory.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum GrantImportOutcome {
+    OwnedPersisted,
+    /// Retain this Client and its CredentialStore; retry the checkpoint or revoke.
+    /// Do not exchange a CyberGrid session until the checkpoint succeeds.
+    OwnedPending,
+}
 impl fmt::Debug for OAuthTokens {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("OAuthTokens{redacted}")
@@ -130,6 +156,98 @@ fn safe_code(code: &str) -> String {
     }
 }
 impl Client {
+    /// Checks an explicit private store under the normal grant/file gates,
+    /// without token calls or a network dependency. This does not authenticate
+    /// a session or authorize overwriting any stored credential.
+    pub async fn browser_grant_checkpoint(
+        &self,
+        expected: &AuthConfig,
+        refresh: &str,
+    ) -> Result<BrowserGrantCheckpoint> {
+        expected.validate(&self.cfg.app_id)?;
+        if refresh.is_empty() {
+            return Err(protocol("refresh token required"));
+        }
+        let _grant = self.grant_operation.lock().await;
+        let store = self.grant_store.read().await.clone().ok_or_else(|| {
+            Error::Credentials("browser journal requires an explicit credential store".into())
+        })?;
+        let _auth = store.auth_gate.lock().await;
+        let _file = store.lock().await?;
+        store.browser_checkpoint(self, expected, refresh).await
+    }
+    /// One-time browser SDK handoff, without refreshing or authenticating a JWT.
+    /// `expected` is the trusted configuration captured before authorization.
+    /// An error means ownership was not accepted: the source must retain and
+    /// clean up its grant. Both successful outcomes are ownership ACKs, even if
+    /// disk persistence failed. Never race/drop this future after submission;
+    /// retain the Client/store until its outcome and cleanup are resolved.
+    pub async fn import_browser_grant(
+        &self,
+        expected: &AuthConfig,
+        tokens: OAuthTokens,
+    ) -> Result<GrantImportOutcome> {
+        let _grant = self.grant_operation.lock().await;
+        let store = self.grant_store.read().await.clone().ok_or_else(|| {
+            Error::Credentials("browser handoff requires an explicit credential store".into())
+        })?;
+        let _auth = store.auth_gate.lock().await;
+        expected.validate(&self.cfg.app_id)?;
+        let mut expected = expected.clone();
+        expected.coordination = None;
+        // A lost ACK is confirmed from private ownership state, without a
+        // network dependency, refresh, or rewriting the credential file.
+        if let Some(imported) = self.browser_imported.lock().await.as_ref() {
+            let mut cached =
+                self.auth.lock().await.clone().ok_or_else(|| {
+                    Error::Credentials("browser handoff binding unavailable".into())
+                })?;
+            cached.coordination = None;
+            if imported != &tokens.refresh_token || cached != expected {
+                return Err(Error::Credentials(
+                    "browser handoff cannot replace an owned grant".into(),
+                ));
+            }
+            return store.browser_import_ack(self, imported).await;
+        }
+        if self.is_closed() {
+            return Err(Error::Cancelled);
+        }
+        let mut current = self.auth_config().await?;
+        current.coordination = None;
+        if current != expected {
+            return Err(Error::Credentials(
+                "browser handoff OAuth binding differs".into(),
+            ));
+        }
+        let file = store.lock().await?;
+        if self.is_closed() {
+            return Err(Error::Cancelled);
+        }
+        store.require_empty_browser_destination(self).await?;
+        if tokens.access_token.is_empty()
+            || tokens.access_token.len() > 65536
+            || tokens.refresh_token.is_empty()
+            || tokens.refresh_token.len() > 32768
+            || !tokens.token_type.eq_ignore_ascii_case("bearer")
+            || tokens.expires_in == 0
+            || tokens.expires_in > 86400
+            || tokens.expires_at <= Utc::now()
+            || tokens.expires_at > Utc::now() + chrono::Duration::seconds(86460)
+            || !tokens.scope.split_whitespace().any(|s| s == "connect")
+        {
+            return Err(protocol("invalid browser resource grant"));
+        }
+        // checkpoint_owned installs pending ownership before fallible storage.
+        // A storage failure is an ACK with pending ownership, not a rejection.
+        let refresh = tokens.refresh_token.clone();
+        let outcome = match self.checkpoint_owned(tokens, Some(&file)).await {
+            Ok(()) => GrantImportOutcome::OwnedPersisted,
+            Err(_) => GrantImportOutcome::OwnedPending,
+        };
+        *self.browser_imported.lock().await = Some(refresh);
+        Ok(outcome)
+    }
     pub async fn auth_config(&self) -> Result<AuthConfig> {
         let mut url = Url::parse(&format!("{}/api/v1/auth/config", self.cfg.base_url))
             .map_err(|_| protocol("invalid API URL"))?;
@@ -228,6 +346,11 @@ impl Client {
             return Err(Error::Cancelled);
         }
         let a = self.auth_config().await?;
+        if a.login_flow.as_deref() == Some("authorization_code") {
+            return Err(protocol(
+                "Device Flow is not supported; use official browser authorization with PKCE",
+            ));
+        }
         let v = self
             .oauth(
                 &a.device_authorization_endpoint,

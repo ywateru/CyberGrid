@@ -67,7 +67,7 @@ func (s *testControl) serve(w http.ResponseWriter, r *http.Request) {
 	}
 	switch {
 	case path == "/apps" && r.Method == "GET":
-		reply(map[string]any{"source": "logto", "apps": []Application{{ID: "NativeTestA", Name: "Fixture A", Type: "Native", IsDeviceFlow: true}, {ID: "NativeTestB", Name: "Fixture B", Type: "Native", IsDeviceFlow: true}}})
+		reply(map[string]any{"source": "logto", "apps": []Application{{ID: "NativeTestA", Name: "Fixture A", Type: "Native", IsDeviceFlow: false}, {ID: "NativeTestB", Name: "Fixture B", Type: "Native", IsDeviceFlow: false}}})
 	case path == "/session" && r.Method == "DELETE":
 		delete(s.sessions, key)
 		delete(s.devices, sess.DeviceID)

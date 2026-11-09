@@ -70,6 +70,98 @@ pub struct CredentialStore {
     pub(crate) auth_gate: Arc<tokio::sync::Mutex<()>>,
 }
 impl CredentialStore {
+    pub(crate) async fn browser_checkpoint(
+        &self,
+        client: &Client,
+        expected: &AuthConfig,
+        refresh: &str,
+    ) -> Result<crate::BrowserGrantCheckpoint> {
+        if self.pending.lock().await.is_some() {
+            return Ok(crate::BrowserGrantCheckpoint::OtherGrant);
+        }
+        match std::fs::symlink_metadata(&self.path) {
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                Ok(crate::BrowserGrantCheckpoint::Empty)
+            }
+            Err(e) => Err(e.into()),
+            Ok(_) => {
+                use std::os::unix::fs::MetadataExt;
+                let mut f = OpenOptions::new()
+                    .read(true)
+                    .custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK | libc::O_CLOEXEC)
+                    .open(&self.path)?;
+                let m = f.metadata()?;
+                if !m.is_file()
+                    || m.mode() & 0o7777 != 0o600
+                    || m.uid() != unsafe { libc::geteuid() }
+                {
+                    return Err(Error::Credentials(
+                        "browser checkpoint requires owned regular 0600 file".into(),
+                    ));
+                }
+                let mut bytes = Vec::new();
+                Read::by_ref(&mut f).take(65537).read_to_end(&mut bytes)?;
+                if bytes.len() > 65536 {
+                    return Err(Error::Credentials("file too large".into()));
+                }
+                let saved: Credentials = serde_json::from_slice(&bytes)
+                    .map_err(|_| Error::Credentials("invalid private JSON".into()))?;
+                saved.validate(client, expected)?;
+                Ok(if saved.refresh_token == refresh {
+                    crate::BrowserGrantCheckpoint::Matching
+                } else {
+                    crate::BrowserGrantCheckpoint::OtherGrant
+                })
+            }
+        }
+    }
+    /// Called only with the Client grant gate, this store's authorization gate,
+    /// and its cross-process file lease held. Existing independent grants are
+    /// never replaced; only a previously accepted handoff can be acknowledged.
+    pub(crate) async fn browser_import_ack(
+        &self,
+        client: &Client,
+        refresh: &str,
+    ) -> Result<crate::GrantImportOutcome> {
+        let latest = client.latest_grant.lock().await.clone();
+        if latest.as_deref() == Some(refresh) {
+            if self
+                .pending
+                .lock()
+                .await
+                .as_ref()
+                .is_some_and(|p| p.refresh_token == refresh)
+            {
+                return Ok(crate::GrantImportOutcome::OwnedPending);
+            }
+            if self.latest_committed.lock().await.as_deref() == Some(refresh) {
+                return Ok(crate::GrantImportOutcome::OwnedPersisted);
+            }
+        }
+        Err(Error::Credentials(
+            "browser handoff grant was rotated or revoked".into(),
+        ))
+    }
+    pub(crate) async fn require_empty_browser_destination(&self, client: &Client) -> Result<()> {
+        if client.latest_grant.lock().await.is_some() {
+            return Err(Error::Credentials(
+                "browser handoff cannot replace an owned grant".into(),
+            ));
+        }
+        if self.pending.lock().await.is_some()
+            || self.latest_committed.lock().await.is_some()
+            || match std::fs::symlink_metadata(&self.path) {
+                Ok(_) => true,
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => false,
+                Err(e) => return Err(e.into()),
+            }
+        {
+            return Err(Error::Credentials(
+                "browser handoff requires an empty credential store".into(),
+            ));
+        }
+        Ok(())
+    }
     pub fn new(path: impl Into<PathBuf>) -> Self {
         Self {
             path: path.into(),

@@ -20,6 +20,7 @@ android {
     namespace = "tech.tinadev.cybergrid.lab"
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
+        manifestPlaceholders["logtoRedirectScheme"] = "tech.tinadev.cybergrid.lab"
         applicationId = "tech.tinadev.cybergrid.lab"
         minSdk = 28
         targetSdk = 37
@@ -77,6 +78,8 @@ rust {
 }
 
 dependencies {
+    // Protected credential handoff is intentionally compiled against this exact version.
+    implementation("io.logto.sdk:android:3.0.0")
     implementation("androidx.webkit:webkit:1.14.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.activity:activity-ktx:1.10.1")

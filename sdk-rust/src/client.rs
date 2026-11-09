@@ -71,6 +71,7 @@ pub struct Client {
     pub(crate) grant_store: RwLock<Option<CredentialStore>>,
     pending_grant: Mutex<Option<OAuthTokens>>,
     pub(crate) latest_grant: Mutex<Option<String>>,
+    pub(crate) browser_imported: Mutex<Option<String>>,
 }
 impl Client {
     pub fn new(mut cfg: Config) -> Result<Arc<Self>> {
@@ -115,6 +116,7 @@ impl Client {
             grant_store: RwLock::new(None),
             pending_grant: Mutex::new(None),
             latest_grant: Mutex::new(None),
+            browser_imported: Mutex::new(None),
         }))
     }
     pub(crate) fn closed_token(&self) -> &CancellationToken {
@@ -659,7 +661,7 @@ impl Client {
         }
         for a in &out.apps {
             crate::types::validate_app_id(&a.id)?;
-            if a.type_ != "Native" || !a.is_device_flow || !seen.insert(&a.id) {
+            if a.type_ != "Native" || a.is_device_flow || !seen.insert(&a.id) {
                 return Err(protocol("invalid or duplicate Native application"));
             }
         }

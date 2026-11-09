@@ -9,6 +9,6 @@ export class FixtureIdentity implements Identity {
  async verify(token:string){const user=this.tokens.get(token);if(!user)throw new ApiError(401,'INVALID_IDENTITY','Logto 授权无效或已过期，请重新授权');return {...user};}
 }
 export class FixtureDirectory implements ApplicationDirectory {
- apps:Application[]=[{id:A,name:'Demo',type:'Native',isDeviceFlow:true},{id:B,name:'Sync',type:'Native',isDeviceFlow:true},{id:SPA,name:'Console',type:'SPA',isDeviceFlow:false}]; unavailable=false;
+ apps:Application[]=[{id:A,name:'Demo',type:'Native',isDeviceFlow:false},{id:B,name:'Sync',type:'Native',isDeviceFlow:false},{id:SPA,name:'Console',type:'SPA',isDeviceFlow:false}]; unavailable=false;
  async list(){if(this.unavailable)throw new ApiError(503,'IDENTITY_PROVIDER_UNAVAILABLE','目录不可用');return structuredClone(this.apps);}
 }

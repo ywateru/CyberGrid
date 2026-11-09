@@ -32,3 +32,5 @@ npm start
 管理后台使用独立 `CYBERGRID_ADMIN_KEY`，只读展示白名单 DTO；不配置时 API 返回503。前端不内置密钥。Logto 管理用户和应用，中央不管理应用目录，也不向 Logto 写协调数据。
 
 开发检查：`npm run build` 与 `npm run test:node` 覆盖本轮入口、静态/回跳、请求边界和租约；`npm test` 保留服务协议测试。GitHub Actions 的 Node workflow 构建并启动真实 Docker image，原生 Release workflow 独立运行。
+
+设备只接受关闭 Device Flow 的普通 Native 应用，认证配置声明 `loginFlow: "authorization_code"`；SPA 个人控制台保持独立。Lab 使用官方 SDK 网页登录，新旧认证策略需配套升级，不能迁用其他 client 的授权。

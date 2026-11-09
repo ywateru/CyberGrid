@@ -109,7 +109,7 @@ func TestAppsRequiresSessionAndReadsLogtoDirectory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(apps) != 2 || apps[1].ID != "NativeTestB" || apps[1].Type != "Native" || !apps[1].IsDeviceFlow {
+	if len(apps) != 2 || apps[1].ID != "NativeTestB" || apps[1].Type != "Native" || apps[1].IsDeviceFlow {
 		t.Fatal("read-only tenant directory was altered")
 	}
 }
@@ -126,7 +126,8 @@ func TestAppsRejectsOldOrUnsupportedDirectoryResponses(t *testing.T) {
 		{"missing-apps", map[string]any{"source": "logto"}, false},
 		{"old-enabled-dto", map[string]any{"source": "logto", "apps": []any{map[string]any{"id": "NativeA", "name": "A", "enabled": true}}}, false},
 		{"wrong-type", map[string]any{"source": "logto", "apps": []Application{{ID: "SPA", Type: "SPA", IsDeviceFlow: true}}}, false},
-		{"flow-disabled", map[string]any{"source": "logto", "apps": []Application{{ID: "NativeA", Type: "Native"}}}, false},
+		{"browser-native", map[string]any{"source": "logto", "apps": []Application{{ID: "NativeA", Type: "Native", IsDeviceFlow: false}}}, true},
+		{"device-flow-enabled", map[string]any{"source": "logto", "apps": []Application{{ID: "NativeA", Type: "Native", IsDeviceFlow: true}}}, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

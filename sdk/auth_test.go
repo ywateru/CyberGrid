@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -75,6 +76,33 @@ func newOAuthFixture(t *testing.T) (*Client, *oauthFixture) {
 	}
 	t.Cleanup(func() { c.Close() })
 	return c, f
+}
+
+func TestBrowserLoginConfigurationRejectsDeviceFlowWithoutOAuthRequest(t *testing.T) {
+	var config AuthConfig
+	var oauthRequests atomic.Int64
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/v1/auth/config" {
+			oauthRequests.Add(1)
+			http.Error(w, "unexpected OAuth request", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(config)
+	}))
+	t.Cleanup(server.Close)
+	config = AuthConfig{Provider: "logto", LoginFlow: "authorization_code", Issuer: server.URL + "/oidc", ClientID: "browser-native", Resource: "https://cybergrid.aixgg.com/api", Scope: "openid offline_access connect", DeviceAuthorizationEndpoint: server.URL + "/oidc/device/auth", TokenEndpoint: server.URL + "/oidc/token"}
+	c, err := New(Config{BaseURL: server.URL, AppID: config.ClientID, HTTPClient: server.Client(), DisableTunnel: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { c.Close() })
+	if _, err := c.BeginDeviceAuthorization(context.Background()); err == nil || !strings.Contains(err.Error(), "Device Flow is disabled") {
+		t.Fatalf("expected explicit browser-only guidance, got %v", err)
+	}
+	if got := oauthRequests.Load(); got != 0 {
+		t.Fatalf("disabled flow made %d OAuth requests", got)
+	}
 }
 
 func TestDeviceAuthorizationPendingAndResourceRefresh(t *testing.T) {

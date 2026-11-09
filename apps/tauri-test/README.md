@@ -1,9 +1,10 @@
-# CyberGrid Lab 0.2.0
+# CyberGrid Lab 0.3.0
 
 Tauri 2 测试 App，macOS 与 Android 共用原生 Rust SDK。两端独立完成 Logto 托管登录，查看同账号同应用设备、连接端口、发送带对端确认的消息，并执行 65,536 字节 SHA256 校验。中央只协调身份和设备元数据，不接触业务内容。
 
 本目录依赖同仓库 `../../sdk-rust`，不运行 Go CLI 或业务代理。完整源码和测试包见 [GitHub Releases](https://github.com/ywateru/CyberGrid/releases)。保留仓库目录结构以便 Cargo path dependency 正确解析。
 
+0.3.0 统一使用官方 SDK 网页登录，关闭 Device Flow 并移除设备码入口。已预置公开测试服务与普通 Native 应用 ID，不预置用户密码。新客户端和协调服务需配套更新；v0.6.0 发布提供本版源码和测试包，现有 v0.5.1 的 Lab 0.2.0 不适用于新服务认证策略。
 ## 构建
 
 依赖 Node.js22、Rust（`Cargo.lock`／Actions固定工具链）、Tauri CLI2；Android 使用 JDK17、SDK37、NDK27.2.12479018、`aarch64-linux-android` target，最低API28。Gradle与AGP版本以项目wrapper及配置为准。
@@ -30,17 +31,28 @@ sh scripts/build-test.sh android
 
 ## 双端操作
 
-1. 配置同一中央HTTPS地址、真实Logto Native Application ID及不同设备名称。Native应用创建时需启用Device Flow。
-2. macOS通过GUI登录；Android使用下述ADB工具提交登录。在可信系统浏览器核对自己发起的设备码后批准授权。两端分别授权，不复制登录文件。
+1. 默认已预置公开测试服务和同一个真实 Logto Native Application ID，可直接选择登录。设备名称按平台预设；两端分别登录同一用户即可互见。自己的部署可在高级连接配置中修改服务和应用；Native 应用需关闭 Device Flow。
+2. 点击 **网页登录**，在系统浏览器中打开 Logto 托管登录页。Android 使用官方 Android SDK，Mac 的 Tauri 前端使用官方 JavaScript SDK。Android 也可通过下述 ADB 命令发起。两端分别授权，不复制登录文件。
 3. 登录后刷新设备，选择在线对端并连接消息端口。发送必须收到对端ack才算成功；两端分别probe比较字节与SHA256。
 4. 默认优先WebRTC，失败回退Cloudflare与内层mTLS。实际transport显示在App中，不能根据设备在线状态推断业务已连接。
 5. 关闭短会话与撤销持久授权是不同操作。退出登录会关闭本轮服务／映射／provider后撤销本机授权；网络失败保留必要材料并如实显示错误，供后续重试。
 
 两平台均使用SDK随包预置并校验的Cloudflared，不需要额外下载。Mac可显式指定可信provider绝对路径作为外部覆盖；默认不搜索PATH。Android使用APK安装的原生库资源。
 
+自己的 Logto Native 应用还需登记以下精确 Redirect URI，关闭 Device Flow：
+
+| 平台 | Redirect URI |
+| --- | --- |
+| macOS 网页登录 | `http://127.0.0.1:17896/callback` |
+| Android 网页登录 | `tech.tinadev.cybergrid.lab://tech.tinadev.cybergrid.lab/callback` |
+
+Mac 只在登录期间监听本机回环地址；端口占用时显示错误，释放端口后重试。两端必须使用同一个 Native 应用 ID，不能用个人控制台的 SPA 应用代替。预置测试应用已登记这两个回调；公共测试环境不预置用户密码，每台设备仍需自行完成 Logto 登录。
+
+升级安装保留旧公开配置，可用“使用预置测试配置”切换到新普通 Native 应用。旧 client 的授权不能迁移；如需撤销，应在服务升级前通过原客户端退出，或在 Logto 中撤销。不要删除、复制或改写旧凭据来绕过应用绑定。
+
 ## 内存协调恢复与凭据
 
-服务端需要 `memory-v1`。App使用v4私有凭据目录，不自动导入旧v3文件或另一设备的grant。access token、refresh token、中央会话密钥及私钥留在Rust，不进入WebView、日志或localStorage。私有目录0700、文件0600。
+服务端需要 `memory-v1`。App 使用 v4 私有凭据目录，不自动导入旧 v3 文件或另一设备的 grant。Mac 网页登录的 OAuth token 会短暂经过官方 JavaScript SDK 内存，交接后清理；不写入 Web Storage，不进入 View、ADB 输出或日志。后续 refresh、恢复与撤销统一由 Rust 管理；中央会话密钥与端到端私钥只留在 Rust。私有目录 0700、文件 0600。完整交接、取消和回调约束见 [网页登录设计](../../docs/lab-browser-login.md)。
 
 owner重启或lease失效后，SDK恢复注册和完整端口快照，保留本地服务与原映射监听意图。恢复中UI清除旧成功状态并暂停发送；Ready后的新TCP重新握手，不重放旧消息或中断流。RequiresLogin需要显式恢复／登录，不后台打开授权页。
 
@@ -56,12 +68,24 @@ owner重启或lease失效后，SDK恢复注册和完整端口快照，保留本�
 
 ## Android ADB 测试控制
 
-以下命令从仓库根目录执行，`ANDROID_SERIAL` 为 `adb devices` 中的目标序列号，`CYBERGRID_SERVER` 为中央HTTPS地址，`CYBERGRID_APP_ID` 为真实Native ID。
+以下命令从仓库根目录执行，`ANDROID_SERIAL` 为 `adb devices` 中的目标序列号。0.3.0 可省略服务与应用参数，直接使用公开测试配置发起网页登录：
+
+```sh
+python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" start
+python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" web-login
+python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" status
+```
+
+`web-login` 在手机系统浏览器打开 Logto，由用户完成登录后返回 App。`login` 是同一网页登录流程的别名。
+
+Android SDK 等待系统浏览器结果期间，`cancel-login` 先标记取消，仍须用户关闭本轮 Custom Tab 才能结束 SDK 回调。等待超过 45 秒会报告操作失败并保留授权所有者，不自动关闭浏览器或启动新登录。请关闭已取消的授权页，待 App 返回未登录状态后重新发起；不要在已取消的页面继续登录。
+
+若连接自己的部署，`CYBERGRID_SERVER` 为中央 HTTPS 地址，`CYBERGRID_APP_ID` 为该部署可信的真实 Native ID：
 
 ```sh
 python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" start
 python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" status
-python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" login \
+python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" web-login \
   --server "$CYBERGRID_SERVER" --app "$CYBERGRID_APP_ID" --name 'Android'
 python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" refresh
 python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" connect --device-id "$PEER_DEVICE_ID"
@@ -70,7 +94,7 @@ python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" probe --
 python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" close
 ```
 
-另有 `resume`（配置同login）、`cancel-login`、`disconnect`、`logout`。命令返回受理不代表Logto授权完成，须在托管页批准并查看status。它只输出白名单公开信息，不输出token、OAuth内部device code、注册密钥、私钥或底层响应。
+另有 `resume`（配置同login）、`cancel-login`、`disconnect`、`logout`。命令返回受理不代表 Logto 授权完成，须在系统浏览器完成登录并查看 status。它只输出白名单公开信息，不输出token、OAuth内部device code、注册密钥、私钥或底层响应。
 
 ADB通过 `run-as` 访问固定App私有队列，调用与GUI相同LabState；无需输入法、坐标点击、剪贴板或WebView注入，也没有外部HTTP测试桥。debug-test构建显式启用 `adb-test-control`；入口同时要求Android与debug_assertions，普通release即使误传feature也不编译该入口。
 

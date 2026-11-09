@@ -14,7 +14,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'dist' / 'release'
-VERSIONS = {'go': '0.4.0', 'rust': '0.2.0', 'lab': '0.2.0'}
+VERSIONS = {'go': '0.4.0', 'rust': '0.2.0', 'lab': '0.3.0'}
 
 
 def sha(path):
@@ -90,11 +90,11 @@ def package_sources():
         meta = {'version': version, 'commit': build_metadata('sources')['commit'], 'sha256': mapping}
         write_json(name + '-source-manifest.json', meta)
         tar(f'{name}-{version}-source.tar.gz', [(p, p.relative_to(ROOT / prefix).as_posix()) for p in files], f'{name}-{version}', {'SOURCE-MANIFEST.json': (json.dumps(meta, indent=2, sort_keys=True) + '\n').encode()})
-    app_files = tracked('apps/tauri-test', 'sdk-rust', 'tools/cloudflared', 'scripts/release')
+    app_files = tracked('apps/tauri-test', 'sdk-rust', 'tools/cloudflared', 'scripts/release', 'docs/lab-browser-login.md')
     mapping = {p.relative_to(ROOT).as_posix(): sha(p) for p in app_files}
     meta = {'version': VERSIONS['lab'], 'commit': build_metadata('sources')['commit'], 'sha256': mapping, 'sdkSourceManifestSha256': sha(OUT / 'cybergrid-sdk-rust-source-manifest.json')}
     write_json('lab-source-manifest.json', meta)
-    tar('CyberGrid-Lab-0.2.0-source.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in app_files], 'CyberGrid-Lab-0.2.0', {'SOURCE-MANIFEST.json': (json.dumps(meta, indent=2, sort_keys=True) + '\n').encode()})
+    tar('CyberGrid-Lab-0.3.0-source.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in app_files], 'CyberGrid-Lab-0.3.0', {'SOURCE-MANIFEST.json': (json.dumps(meta, indent=2, sort_keys=True) + '\n').encode()})
     license_files = tracked('LICENSE', 'sdk/LICENSE', 'sdk/third_party', 'sdk/THIRD_PARTY_NOTICES.md', 'sdk-rust/LICENSE', 'sdk-rust/licenses', 'sdk-rust/THIRD_PARTY_NOTICES.md', 'apps/tauri-test/notices', 'tools/cloudflared/LICENSE', 'tools/cloudflared/BUNDLED_THIRD_PARTY_NOTICES.md')
     tar('CyberGrid-licenses.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in license_files], 'CyberGrid-licenses')
     write_json('build-sources.json', build_metadata('sources'))
@@ -120,7 +120,7 @@ def package_macos(app, binary):
     native = app / 'Contents/MacOS/cybergrid-tauri-lab'
     subprocess.run(['lipo', str(native), '-verify_arch', 'arm64'], check=True)
     subprocess.run(['codesign', '--verify', '--deep', '--strict', str(app)], check=True)
-    target = OUT / 'CyberGrid-Lab-0.2.0-macos-arm64-test.zip'
+    target = OUT / 'CyberGrid-Lab-0.3.0-macos-arm64-test.zip'
     subprocess.run(['ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', str(app), str(target)], check=True)
     with zipfile.ZipFile(target, 'a', compression=zipfile.ZIP_DEFLATED) as archive:
         for path in tracked('apps/tauri-test/notices', 'apps/tauri-test/README.md'):
@@ -151,9 +151,9 @@ def package_android(apk, binary, manifest):
         data = archive.read(names[0])
         if len(data) != fixed['bytes'] or hashlib.sha256(data).hexdigest() != fixed['sha256']:
             raise RuntimeError('APK provider changed')
-    target = OUT / 'CyberGrid-Lab-0.2.0-android-arm64-test.apk'
+    target = OUT / 'CyberGrid-Lab-0.3.0-android-arm64-test.apk'
     shutil.copyfile(apk, target)
-    with zipfile.ZipFile(OUT / 'CyberGrid-Lab-0.2.0-android-arm64-test.zip', 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(OUT / 'CyberGrid-Lab-0.3.0-android-arm64-test.zip', 'w', compression=zipfile.ZIP_DEFLATED) as archive:
         archive.write(target, target.name)
         for path in tracked('apps/tauri-test/notices', 'apps/tauri-test/README.md', 'apps/tauri-test/tools/android-adb.py'):
             archive.write(path, path.relative_to(ROOT / 'apps/tauri-test').as_posix())
@@ -165,8 +165,8 @@ def package_android(apk, binary, manifest):
 
 
 def finalize():
-    apk = OUT / 'CyberGrid-Lab-0.2.0-android-arm64-test.apk'
-    wrapper = OUT / 'CyberGrid-Lab-0.2.0-android-arm64-test.zip'
+    apk = OUT / 'CyberGrid-Lab-0.3.0-android-arm64-test.apk'
+    wrapper = OUT / 'CyberGrid-Lab-0.3.0-android-arm64-test.zip'
     if apk.is_file() and not wrapper.exists():
         with zipfile.ZipFile(wrapper, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
             archive.write(apk, apk.name)
@@ -182,9 +182,9 @@ def finalize():
     expected = {
         'cybergrid-sdk-0.4.0-source.tar.gz', 'cybergrid-sdk-source-manifest.json',
         'cybergrid-sdk-rust-0.2.0-source.tar.gz', 'cybergrid-sdk-rust-source-manifest.json',
-        'CyberGrid-Lab-0.2.0-source.tar.gz', 'lab-source-manifest.json', 'CyberGrid-licenses.tar.gz',
-        'CyberGrid-Lab-0.2.0-macos-arm64-test.zip', 'cybergrid-sdk-0.4.0-macos-arm64.tar.gz',
-        'CyberGrid-Lab-0.2.0-android-arm64-test.apk', 'CyberGrid-Lab-0.2.0-android-arm64-test.zip',
+        'CyberGrid-Lab-0.3.0-source.tar.gz', 'lab-source-manifest.json', 'CyberGrid-licenses.tar.gz',
+        'CyberGrid-Lab-0.3.0-macos-arm64-test.zip', 'cybergrid-sdk-0.4.0-macos-arm64.tar.gz',
+        'CyberGrid-Lab-0.3.0-android-arm64-test.apk', 'CyberGrid-Lab-0.3.0-android-arm64-test.zip',
         'cybergrid-sdk-0.4.0-android-arm64.tar.gz', 'build-sources.json', 'build-macos.json', 'build-android.json',
     }
     actual = {p.name for p in OUT.iterdir() if p.is_file()} - {'SHA256SUMS', 'release-manifest.json'}

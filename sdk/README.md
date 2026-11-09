@@ -20,11 +20,11 @@ SDK在首次 device grant 后、resource交换前立即调用 `SetGrantCheckpoin
 
 - macOS arm64：进入 `cybergrid-sdk-0.4.0-macos-arm64/` 解压目录，运行 `./cybergrid-macos version`；下文 Mac CLI 命令也从该目录运行。
 - Android arm64：进入 `cybergrid-sdk-0.4.0-android-arm64/` 解压目录，设置目标设备的 `ANDROID_SERIAL`，运行 `adb -s "$ANDROID_SERIAL" push ./cybergrid-android-arm64 /data/local/tmp/cybergrid`，随后按 Android 说明授权并启动。
-- Go 源码：进入 `cybergrid-sdk-0.4.0/` 解压目录后，当前目录已是 module 根目录，无需再 `cd sdk`，可直接 `go build ./...`、`go test ./...` 或 `go run ./examples/embed`。源码构建的 CLI 在 `bin/`，可进入该目录运行下文的 `./cybergrid-macos` 命令。
+- Go 源码：进入 `cybergrid-sdk-0.4.0/` 解压目录后，当前目录已是 module 根目录，无需再 `cd sdk`，可直接 `go build ./...`、`go test ./...` 或 `go build ./examples/embed`。源码构建的 CLI 在 `bin/`，可进入该目录运行下文的 `./cybergrid-macos` 命令。
 
 SDK 已预置固定 cloudflared：macOS arm64 CLI 默认内置提取，无需外装；Android arm64 的离线 jniLibs 资源与打包脚本随 SDK 交付，宿主安装后由 NativeLibraryDir 使用。原生 CLI 包不包含 Go 构建环境。详见 [provider 集成说明](provider-assets/README.md)。
 
-Go SDK 通过 Logto Cloud 托管注册／登录，每台设备独立使用 OAuth Device Authorization Flow。SDK 用 API resource access token 向中央交换 app/device 绑定的 CyberGrid session bearer；后续协调 API 仅使用该会话。中央和 SDK 均不接收账号密码或 Logto 管理令牌。中央不接收业务字节。第一版提供 **TCP** 端口映射，`Port.Type` 为应用自定义字符串，`Transport` 必须是 `tcp`。
+Go SDK 通过 Logto Cloud 托管注册／登录，当前服务使用关闭 Device Flow 的普通 Native 应用，由宿主官方 Logto SDK 完成 Authorization Code + PKCE。历史设备码 API 仅为旧服务保留，新服务会明确拒绝设备码请求。SDK 用 API resource access token 向中央交换 app/device 绑定的 CyberGrid session bearer；后续协调 API 仅使用该会话。中央和 SDK 均不接收账号密码或 Logto 管理令牌。中央不接收业务字节。第一版提供 **TCP** 端口映射，`Port.Type` 为应用自定义字符串，`Transport` 必须是 `tcp`。
 
 CLI 默认中央地址为 `https://cybergrid.aixgg.com`，自建部署请显式配置 `-server` 或 `CYBERGRID_SERVER`。应用只来自 Logto Native Applications；配置说明见仓库的部署文档。
 
@@ -32,11 +32,11 @@ CLI 默认中央地址为 `https://cybergrid.aixgg.com`，自建部署请显式�
 
 ## 使用 SDK
 
-SDK 的 AppID 就是 Logto Console 中 Native Application 的公开 ID／OAuth `client_id`，长度 1..21，保留原大小写。由租户维护者在 Logto 创建 Native 应用并启用 Device Flow，再从该应用复制 ID；不能填应用名称、旧业务 slug 或控制台 SPA 的 ID。API resource 需配置 `connect` 用户权限。CyberGrid 没有独立应用表、预制 ID、别名转换或管理员 CRUD。
+SDK 的 AppID 就是 Logto Console 中 Native Application 的公开 ID／OAuth `client_id`，长度 1..21，保留原大小写。由租户维护者在 Logto 创建普通 Native 应用并关闭 Device Flow，再从该应用复制 ID；不能填应用名称、旧业务 slug 或控制台 SPA 的 ID。API resource 需配置 `connect` 用户权限。CyberGrid 没有独立应用表、预制 ID、别名转换或管理员 CRUD。
 
 将真实 Native client_id 配置为进程环境 `CYBERGRID_APP_ID`，或显式传入 Config.AppID。它是公开标识，不是管理密钥。
 
-`AuthConfig` 请求 `GET /api/v1/auth/config?appId=ID` 并核对返回 `clientId == AppID`；交换响应必须同时满足 `purpose=device`、`appId == AppID`。未知应用、非 Native 或未启用 Device Flow 明确失败，不会换用其他应用。设备发现和业务连接始终限制在同用户、同真实 Logto Application ID 下。
+`AuthConfig` 请求 `GET /api/v1/auth/config?appId=ID` 并核对返回 `clientId == AppID`；交换响应必须同时满足 `purpose=device`、`appId == AppID`。未知应用、非 Native 或启用 Device Flow 明确失败，不会换用其他应用。设备发现和业务连接始终限制在同用户、同真实 Logto Application ID 下。
 
 ```go
 client, err := cybergrid.New(cybergrid.Config{
@@ -47,21 +47,14 @@ client, err := cybergrid.New(cybergrid.Config{
 if err != nil { return err }
 defer client.Close()
 
-// 用户在 Logto 托管页面注册／登录；Android shell 可在 Mac 浏览器批准。
-authorization, err := client.BeginDeviceAuthorization(ctx)
-if err != nil { return err }
-fmt.Println(authorization.VerificationURI, authorization.UserCode)
-// 不输出 DeviceAuthorization 的内部 device code 或任何 OAuth token。
-// 此方法内部完成 device grant → refresh_token + resource，返回 API access token。
-// 授权前必须安装私有 GrantCheckpoint；完整可编译示例中使用
-// RAM 私有所有者并在退出时完成撤销，CLI则使用v4锁文件持久化。
-tokens, err := client.CompleteDeviceAuthorization(ctx, authorization)
-if err != nil { return err }
-session, err := client.LoginWithAccessToken(ctx, tokens.AccessToken, "my-device")
+// resourceAccessToken comes from the host's official Logto browser SDK.
+// Request the pinned API resource and connect scope; never log the token.
+// The host retains the sole refresh owner and provides AuthProvider recovery.
+session, err := client.LoginWithAccessToken(ctx, resourceAccessToken, "my-device")
 if err != nil { return err }
 _ = session.DeviceID // 不记录 session.SessionKey
 
-// 登录后只读列出同租户的 Native Device Flow 应用，不代表用户授权清单。
+// 登录后只读列出同租户的普通 Native 应用，不代表用户授权清单。
 apps, err := client.Apps(ctx)
 if err != nil { return err }
 for _, app := range apps { fmt.Println(app.ID, app.Name) }
@@ -86,23 +79,25 @@ for _, device := range devices {
 }
 ```
 
-下载源码包后可直接在 module 中运行（需已配置可用控制面，业务服务自行监听示例的 `127.0.0.1:8080`）：
+源码包中的 `examples/embed` 初次设备码授权仅适用于旧服务；接入当前服务须替换为上文宿主网页登录入口。可先构建示例：
 
 ```sh
 tar -xzf cybergrid-sdk-0.4.0-source.tar.gz
 cd cybergrid-sdk-0.4.0
-go run ./examples/embed
+go build ./examples/embed
 ```
 
-Go module 直接从此仓库引用：
+当前网页登录策略请使用项目 v0.6.0 的 Go 源码包。在自己的项目中引用解压后的模块（将路径替换为实际位置）：
 
 ```sh
-go get github.com/ywateru/CyberGrid/sdk@v0.4.0
+go mod edit -require=github.com/ywateru/CyberGrid/sdk@v0.0.0
+go mod edit -replace=github.com/ywateru/CyberGrid/sdk=/absolute/path/cybergrid-sdk-0.4.0
+go mod tidy
 ```
 
-源码包用户也可在自己的项目中为该模块设置本地 `replace`。完整示例见 [examples/embed/main.go](examples/embed/main.go)，其中安装 GrantCheckpoint 和 AuthProvider，保存私有 grant 并在退出时完成撤销。上面的片段仅说明已配置客户端的操作顺序，不能跳过凭据 checkpoint。
+历史子模块 tag `sdk/v0.4.0` 对应较早的设备码实现，不包含本次网页登录适配。完整示例见 [examples/embed/main.go](examples/embed/main.go)，其中安装 GrantCheckpoint 和 AuthProvider，保存私有 grant 并在退出时完成撤销；初次授权入口需按上文接入宿主网页登录。上面的片段仅说明已配置客户端的操作顺序，不能跳过凭据 checkpoint。
 
-完整嵌入入口在源码包 `examples/embed/main.go`。远端 Expose 只连接远端的 `127.0.0.1:Port`；本地 Map 只允许监听 loopback，防止意外向局域网开放。`Map` 创建映射前会实际打开一次远端端口验证可用性。映射端口可为 0，由系统分配。`Close()` 会关闭设备 origin、隧道进程、peer、映射、流，并注销会话；客户端关闭后不可重新登录，需 `New`。传入 Map 的 context 取消会关闭映射。本次中央会话撤销、会话过期或心跳 lease 超时同样关闭现有数据路径。Logto 删除应用或关闭 Device Flow 后，服务端最迟在 30 秒目录缓存失效后拒绝后续协调调用，SDK 再按心跳／错误／lease 生命周期关闭连接；不承诺瞬时切断业务字节。
+完整嵌入入口在源码包 `examples/embed/main.go`。远端 Expose 只连接远端的 `127.0.0.1:Port`；本地 Map 只允许监听 loopback，防止意外向局域网开放。`Map` 创建映射前会实际打开一次远端端口验证可用性。映射端口可为 0，由系统分配。`Close()` 会关闭设备 origin、隧道进程、peer、映射、流，并注销会话；客户端关闭后不可重新登录，需 `New`。传入 Map 的 context 取消会关闭映射。本次中央会话撤销、会话过期或心跳 lease 超时同样关闭现有数据路径。Logto 删除应用或将其改为不受支持类型后，服务端最迟在 30 秒目录缓存失效后拒绝后续协调调用，SDK 再按心跳／错误／lease 生命周期关闭连接；不承诺瞬时切断业务字节。
 
 ## 连接、安全和限制
 
@@ -132,7 +127,9 @@ GO=go sh scripts/build.sh
 
 自动网络测试启动独立内存测试控制面，分别真实运行本地 Pion WebRTC 和本地 WebSocket + mTLS，验证 TCP 字节、FIN 半关闭、deadline、peer 断开关闭本地监听、错误 fingerprint、会话撤销、provider 退出 URL 清理。测试中的 WS origin 替换只存在包内私有测试入口，不接受环境变量或公开配置；本地 WS 成功不能代表公网 Cloudflare 成功，本地 WebRTC 成功也不能代表 Wi-Fi/4G NAT 直连成功。
 
-## CLI
+## CLI（历史设备码兼容）
+
+以下设备码登录仅适用于旧服务，不能用于当前声明 `loginFlow: "authorization_code"` 的协调服务。当前 Go CLI 未实现网页登录，测试新服务请使用 [Lab 0.3.0](../apps/tauri-test/README.md)，或由宿主官方 Logto SDK 提供资源 access token。旧客户端授权不能迁作新普通 Native 的凭据。
 
 每台设备执行一次 `login`，在可信浏览器打开显示的 URL、核对设备码，再完成 Logto 注册或登录。macOS 可选 `-open-browser`；Android 不依赖本机浏览器，可以在 Mac 批准。**不要批准非自己发起的设备码**。没有密码参数／账号密码环境变量、PAT、client secret 或中央注册接口。旧 `Register`／`Login` 方法保留编译兼容，但总是明确返回 unsupported 错误；迁移代码必须使用新授权方法。
 
@@ -168,7 +165,7 @@ chmod 700 "$HOME/.config/cybergrid"
 
 `-server`／`CYBERGRID_SERVER` 默认 `https://cybergrid.aixgg.com`。`-app`／进程环境 `CYBERGRID_APP_ID` 必须显式指定真实 Native ID，命令行优先；无全局默认应用，也不自动读取或执行 `.env`。`echo`／`version` 不需应用 ID，其余认证网络命令均需 ID。
 
-`Apps()`／CLI `apps` 必须先登录，使用中央会话读取 `{source:"logto",apps:[{id,name,type:"Native",isDeviceFlow:true}]}`。这份同租户目录不代表用户已经授权每个应用，不包含 secret／enabled／管理员字段；选另一个应用需在该真实 ID 下独立授权并使用另一个凭据文件。SDK 不实现控制台 SPA 登录或跨应用设备查看。
+`Apps()`／CLI `apps` 必须先登录，使用中央会话读取 `{source:"logto",apps:[{id,name,type:"Native",isDeviceFlow:false}]}`。这份同租户目录不代表用户已经授权每个应用，不包含 secret／enabled／管理员字段；选另一个应用需在该真实 ID 下独立授权并使用另一个凭据文件。SDK 不实现控制台 SPA 登录或跨应用设备查看。
 
 **从 0.2 升级：** 新版在刷新前明确拒绝 v2 或跨应用 v3 文件，不自动升级、覆盖或删除。旧 API 尚未切换时，可以先用 0.2 `logout` 撤销旧 grant；旧 API 已切换后，0.2 的无 appId 配置请求也会失败，应由 Logto 维护者撤销遗留 grant。删除本地文件不等于撤销 provider 授权。随后用 0.4 在新的v4文件中重新独立授权。
 
@@ -176,7 +173,7 @@ chmod 700 "$HOME/.config/cybergrid"
 
 SDK 的基础公开认证方法为 `AuthConfig`、`BeginDeviceAuthorization`、`CompleteDeviceAuthorization`、`RefreshAccessToken`、`LoginWithAccessToken` 与 `RevokeRefreshToken`。认证端点必须是与 issuer 同源的 HTTPS URL，HTTP 仅允许开发中央 API loopback，OAuth 仍需 HTTPS。轮询至少间隔 5 秒，处理 `authorization_pending`、`slow_down`、拒绝、过期和 context 取消。`CompleteDeviceAuthorization` 在初次 device grant 成功后，必须使用返回的 refresh token 再请求指定 resource 的 API access token，封装 Logto 初次只返回 opaque OIDC token 的实际行为。缺 refresh token 或资源刷新失败会明确报错，不把初次 opaque token／ID token 交给中央；返回值包含最新旋转 refresh token（若 provider 未轮换则保留当前 token）。`RefreshAccessToken` 会请求同一 resource 的 access token；嵌入应用应在自己的安全存储中序列化刷新、原子保存最新 refreshToken。access token 的签名／issuer／audience／权限由中央验证，SDK 不把 ID token 当成 API 身份。
 
-官方依据：[Logto Device Flow](https://docs.logto.io/quick-starts/device-flow)。需配置真实 Native／device-flow application、API resource 和 `connect` 用户权限。SDK 不使用不受支持的授权回退；配置不完整或授权失败会明确报错。
+历史设备码流程依据：[Logto Device Flow](https://docs.logto.io/quick-starts/device-flow)。当前服务须配置关闭 Device Flow 的普通 Native 应用、API resource 和 `connect` 用户权限，使用官方 SDK 浏览器授权。SDK 不使用不受支持的授权回退；配置不完整或授权失败会明确报错。
 `host -expose api:8080:my-api` 可发布现有服务；`-echo-port 0` 可与其一起使用。`-stun none` 禁用公共 STUN，`-stun stun:IP:PORT,stun:IP:PORT` 可指定通过当批 preflight 验证的端点。不要永久硬编码历史 STUN IP。`-interface en0` / `rmnet_data0` 限制候选接口。`probe -probe-timeout 180s` 可显式调整传输截止时间（默认 45 秒，与 SDK 连接预算分开）；`-diagnostics` 输出连接阶段和 probe 已写入／收到的字节数，不输出业务内容或凭据。`probe` 输出 `mapped.transport`、直连时实际选中 ICE pair，以及 `verified.bytes/sha256/seconds`；仅 hash 一致才退出成功。
 
 ### Android 集成

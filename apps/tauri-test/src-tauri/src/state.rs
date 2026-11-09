@@ -1,5 +1,5 @@
 use crate::{
-    platform, protocol,
+    browser, platform, protocol,
     services::{Incoming, LocalServices},
 };
 use cybergrid_sdk::{Client, Config, CredentialStore, Device, Mapping, Port};
@@ -87,7 +87,7 @@ impl Default for LabConfig {
     fn default() -> Self {
         Self {
             base_url: "https://cybergrid.aixgg.com".into(),
-            app_id: String::new(),
+            app_id: "24wdctfohmxkk2nb6n0mp".into(),
             device_name: if cfg!(target_os = "android") {
                 "Android".into()
             } else {
@@ -97,13 +97,6 @@ impl Default for LabConfig {
             cloudflared_path: String::new(),
         }
     }
-}
-#[derive(Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PublicAuth {
-    verification_uri: String,
-    user_code: String,
-    expires_at: String,
 }
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -159,15 +152,31 @@ pub struct Record {
 #[serde(rename_all = "camelCase")]
 pub struct View {
     phase: String,
+    preset_config: LabConfig,
+    browser_diagnostic: Option<BrowserDiagnostic>,
+    platform: String,
+    auth_mode: String,
     config: LabConfig,
     can_resume: bool,
     error: Option<String>,
-    authorization: Option<PublicAuth>,
     local: Option<LocalDevice>,
     devices: Vec<PublicDevice>,
     records: Vec<Record>,
     connection: Option<Connection>,
     status: String,
+}
+#[derive(Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BrowserFeatures {
+    pub abort_timeout: bool,
+    pub abort_any: bool,
+    pub web_crypto: bool,
+}
+#[derive(Clone, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BrowserDiagnostic {
+    phases: Vec<String>,
+    features: Option<BrowserFeatures>,
 }
 struct Pending {
     cancel: CancellationToken,
@@ -184,9 +193,9 @@ struct Running {
 }
 struct Inner {
     phase: String,
+    auth_mode: String,
     config: LabConfig,
     error: Option<String>,
-    authorization: Option<PublicAuth>,
     local: Option<LocalDevice>,
     devices: Vec<Device>,
     records: Vec<Record>,
@@ -205,13 +214,16 @@ pub struct LabState {
     retired: Mutex<Vec<tokio::task::JoinHandle<()>>>,
     grant_owners: Mutex<Vec<Arc<Client>>>,
     pub exiting: AtomicBool,
+    auth_setup: Mutex<()>,
+    browser_diagnostic: Mutex<BrowserDiagnostic>,
+    browser: Mutex<Option<Arc<browser::Transaction>>>,
 }
 fn timestamp() -> String {
     time::OffsetDateTime::now_utc()
         .format(&time::format_description::well_known::Rfc3339)
         .unwrap_or_else(|_| "时间不可用".into())
 }
-fn credential_path(data: &Path, config: &LabConfig) -> PathBuf {
+pub(crate) fn credential_path(data: &Path, config: &LabConfig) -> PathBuf {
     let hash = protocol::text_hash(&format!(
         "{}\0{}",
         config.base_url.trim_end_matches('/'),
@@ -243,14 +255,18 @@ impl LabState {
         Ok(Arc::new(Self {
             inner: Mutex::new(Inner {
                 phase: "signed_out".into(),
+                auth_mode: "browser".into(),
                 config,
                 error: None,
-                authorization: None,
                 local: None,
                 devices: vec![],
                 records: vec![],
                 connection: None,
-                status: "使用同一个账号与应用，在两端分别登录".into(),
+                status: if browser::journal_path(&data_dir).exists() {
+                    "检测到待清理浏览器授权；下次登录会先安全处理，未完成前禁止新授权".into()
+                } else {
+                    "使用同一个账号与应用，在两端分别登录".into()
+                },
                 generation: 0,
                 pending: None,
                 running: None,
@@ -262,16 +278,103 @@ impl LabState {
             retired: Mutex::new(Vec::new()),
             grant_owners: Mutex::new(Vec::new()),
             exiting: AtomicBool::new(false),
+            auth_setup: Mutex::new(()),
+            browser_diagnostic: Mutex::new(BrowserDiagnostic::default()),
+            browser: Mutex::new(None),
         }))
+    }
+    pub async fn browser_trace(
+        &self,
+        phase: &str,
+        features: Option<BrowserFeatures>,
+    ) -> Result<(), String> {
+        if !cfg!(debug_assertions) {
+            return Ok(());
+        }
+        if ![
+            "begin-await",
+            "native-reserved",
+            "native-config-await",
+            "native-config-ready",
+            "begin-ready",
+            "client-created",
+            "sdk-signin",
+            "native-fetch-await",
+            "native-fetch-ready",
+            "native-fetch-error",
+            "pkce-state",
+            "pkce-verifier",
+            "pkce-challenge",
+            "open-await",
+            "open-ready",
+            "native-open-validated",
+            "native-open-ready",
+            "callback-await",
+            "callback-ready",
+            "callback-has-code",
+            "callback-no-code",
+            "callback-has-state",
+            "callback-no-state",
+            "callback-error-invalid_request",
+            "callback-error-invalid_scope",
+            "callback-error-invalid_target",
+            "callback-error-unauthorized_client",
+            "callback-error-access_denied",
+            "callback-error-unsupported_response_type",
+            "callback-error-server_error",
+            "callback-error-temporarily_unavailable",
+            "callback-error-interaction_required",
+            "callback-error-login_required",
+            "callback-error-consent_required",
+            "callback-error-other",
+            "sdk-session-missing",
+            "sdk-session-invalid",
+            "sdk-redirect-mismatch",
+            "sdk-error-callback",
+            "sdk-state-missing",
+            "sdk-state-mismatch",
+            "sdk-code-missing",
+            "sdk-callback-other",
+            "sdk-callback",
+            "resource-await",
+            "commit-await",
+            "commit-ready",
+            "failed",
+        ]
+        .contains(&phase)
+        {
+            return Err("无效的诊断阶段".into());
+        }
+        let mut d = self.browser_diagnostic.lock().await;
+        if phase == "begin-await" {
+            d.phases.clear();
+            d.features = None;
+        }
+        d.phases.push(phase.into());
+        if d.phases.len() > 32 {
+            d.phases.remove(0);
+        }
+        if features.is_some() {
+            d.features = features;
+        }
+        let _ = browser::write_diagnostic(&self.data_dir, &*d);
+        Ok(())
     }
     pub async fn view(&self) -> View {
         let s = self.inner.lock().await;
         View {
             phase: s.phase.clone(),
+            preset_config: LabConfig::default(),
+            browser_diagnostic: if cfg!(debug_assertions) {
+                Some(self.browser_diagnostic.lock().await.clone())
+            } else {
+                None
+            },
+            platform: browser::platform().into(),
+            auth_mode: s.auth_mode.clone(),
             config: s.config.clone(),
             can_resume: credential_path(&self.data_dir, &s.config).exists(),
             error: s.error.clone(),
-            authorization: s.authorization.clone(),
             local: s.local.clone(),
             devices: s.devices.iter().map(PublicDevice::from).collect(),
             records: s.records.clone(),
@@ -333,6 +436,11 @@ impl LabState {
         mut config: LabConfig,
         resume: bool,
     ) -> Result<(), String> {
+        if !resume {
+            return self.begin_web_login(config).await.map(|_| ());
+        }
+        let _setup = self.auth_setup.lock().await;
+        self.prepare_browser_cleanup().await?;
         {
             let mut retired = self.retired.lock().await;
             retired.retain(|task| !task.is_finished());
@@ -375,26 +483,18 @@ impl LabState {
                 task: None,
             });
             s.config = config.clone();
-            s.phase = if resume {
-                "connecting".into()
-            } else {
-                "authorizing".into()
-            };
+            s.auth_mode = "browser".into();
+            s.phase = "connecting".into();
             s.error = None;
             s.records.clear();
             s.sdk_generation = 0;
-            s.authorization = None;
-            s.status = if resume {
-                "正在恢复本机授权".into()
-            } else {
-                "正在取得设备授权码".into()
-            };
+            s.status = "正在恢复本机授权".into();
             generation
         };
         let state = self.clone();
         let task = tokio::spawn(async move {
             state
-                .login_worker(config, client, credentials, cancel, generation, resume)
+                .login_worker(config, client, credentials, cancel, generation)
                 .await;
         });
         let mut s = self.inner.lock().await;
@@ -415,7 +515,6 @@ impl LabState {
         credentials: CredentialStore,
         cancel: CancellationToken,
         generation: u64,
-        resume: bool,
     ) {
         let binding = client
             .use_credential_store(credentials.clone())
@@ -426,110 +525,14 @@ impl LabState {
             .await;
         let flow = async {
             binding?;
-            let tokens = if resume {
-                credentials
-                    .refresh(&client)
-                    .await
-                    .map_err(|e| e.to_string())?
-            } else {
-                let auth = client
-                    .begin_device_authorization()
-                    .await
-                    .map_err(|e| e.to_string())?;
-                {
-                    let mut s = self.inner.lock().await;
-                    if s.generation != generation {
-                        return Err("登录已取消".into());
-                    }
-                    s.authorization = Some(PublicAuth {
-                        verification_uri: auth
-                            .verification_uri_complete
-                            .clone()
-                            .unwrap_or_else(|| auth.verification_uri.clone()),
-                        user_code: auth.user_code.clone(),
-                        expires_at: (time::OffsetDateTime::now_utc()
-                            + time::Duration::seconds(auth.expires_in.min(i64::MAX as u64) as i64))
-                        .format(&time::format_description::well_known::Rfc3339)
-                        .map_err(|_| "授权过期时间无效".to_string())?,
-                    });
-                    s.status = "请在 Logto 托管页面确认设备码并登录".into();
-                }
-                let tokens = client
-                    .complete_device_authorization(&auth, &cancel)
-                    .await
-                    .map_err(|e| e.to_string())?;
-                tokens
-            };
-            {
-                let mut s = self.inner.lock().await;
-                if s.generation != generation || cancel.is_cancelled() {
-                    return Err("登录已取消，本机授权可在下次恢复或撤销".into());
-                }
-                s.phase = "connecting".into();
-                s.authorization = None;
-                s.status = "授权成功，正在建立本机设备会话".into();
-            }
-            let session = client
-                .login_with_access_token(&tokens.access_token, &config.device_name)
+            let tokens = credentials
+                .refresh(&client)
                 .await
                 .map_err(|e| e.to_string())?;
-            let (tx, rx) = mpsc::channel(64);
-            let services = LocalServices::start(session.device_id.clone(), tx).await?;
-            let ports = vec![
-                Port::tcp(
-                    protocol::MESSAGE_PORT,
-                    services.message_port,
-                    "cybergrid-lab-message-v1",
-                ),
-                Port::tcp(
-                    protocol::ECHO_PORT,
-                    services.echo_port,
-                    "cybergrid-lab-echo-v1",
-                ),
-            ];
-            for port in &ports {
-                if let Err(e) = client.expose(port.clone()).await {
-                    services.close().await;
-                    return Err(e.to_string());
-                }
-            }
-            let devices = match client.devices().await {
-                Ok(d) => d,
-                Err(e) => {
-                    services.close().await;
-                    return Err(e.to_string());
-                }
-            };
-            let runtime = Arc::new(Running {
-                client: client.clone(),
-                services,
-                cancel: CancellationToken::new(),
-                mapping: Mutex::new(None),
-                operation: Mutex::new(()),
-                device_id: session.device_id.clone(),
-            });
-            {
-                let mut s = self.inner.lock().await;
-                if s.generation != generation || cancel.is_cancelled() {
-                    return Err("登录已取消".into());
-                }
-                s.local = Some(LocalDevice {
-                    device_id: session.device_id,
-                    device_name: config.device_name.clone(),
-                    user_id: session.user.id,
-                    ports,
-                });
-                s.devices = devices;
-                s.running = Some(runtime.clone());
-                s.pending = None;
-                s.phase = "ready".into();
-                s.status = "已登录，正在准备端到端连接入口".into();
-                s.error = None;
-            }
-            self.spawn_runtime(runtime, rx);
-            Ok::<(), String>(())
+            self.install_session(&config, &client, &cancel, generation, &tokens.access_token)
+                .await
         };
-        // Device Flow observes cancellation itself. Never drop an in-flight
+        // Never drop an in-flight
         // rotating refresh/exchange: finish persistence, then close by generation.
         let result = flow.await;
         if let Err(error) = result {
@@ -541,7 +544,6 @@ impl LabState {
             if s.generation == generation {
                 s.pending = None;
                 s.phase = "signed_out".into();
-                s.authorization = None;
                 s.status = "登录未完成；已有授权文件会保留，避免丢失撤销材料".into();
                 s.error = if cancel.is_cancelled() {
                     None
@@ -549,6 +551,324 @@ impl LabState {
                     Some(error)
                 };
             }
+        }
+    }
+    async fn install_session(
+        self: &Arc<Self>,
+        config: &LabConfig,
+        client: &Arc<Client>,
+        cancel: &CancellationToken,
+        generation: u64,
+        access_token: &str,
+    ) -> Result<(), String> {
+        {
+            let mut s = self.inner.lock().await;
+            if s.generation != generation || cancel.is_cancelled() {
+                return Err("登录已取消，本机授权可在下次恢复或撤销".into());
+            }
+            s.phase = "connecting".into();
+            s.status = "授权成功，正在建立本机设备会话".into();
+        }
+        let session = client
+            .login_with_access_token(access_token, &config.device_name)
+            .await
+            .map_err(|e| e.to_string())?;
+        let (tx, rx) = mpsc::channel(64);
+        let services = LocalServices::start(session.device_id.clone(), tx).await?;
+        let ports = vec![
+            Port::tcp(
+                protocol::MESSAGE_PORT,
+                services.message_port,
+                "cybergrid-lab-message-v1",
+            ),
+            Port::tcp(
+                protocol::ECHO_PORT,
+                services.echo_port,
+                "cybergrid-lab-echo-v1",
+            ),
+        ];
+        for port in &ports {
+            if let Err(e) = client.expose(port.clone()).await {
+                services.close().await;
+                return Err(e.to_string());
+            }
+        }
+        let devices = match client.devices().await {
+            Ok(d) => d,
+            Err(e) => {
+                services.close().await;
+                return Err(e.to_string());
+            }
+        };
+        let runtime = Arc::new(Running {
+            client: client.clone(),
+            services,
+            cancel: CancellationToken::new(),
+            mapping: Mutex::new(None),
+            operation: Mutex::new(()),
+            device_id: session.device_id.clone(),
+        });
+        {
+            let mut s = self.inner.lock().await;
+            if s.generation != generation || cancel.is_cancelled() {
+                drop(s);
+                runtime.cancel.cancel();
+                runtime.services.close().await;
+                return Err("登录已取消".into());
+            }
+            s.local = Some(LocalDevice {
+                device_id: session.device_id,
+                device_name: config.device_name.clone(),
+                user_id: session.user.id,
+                ports,
+            });
+            s.devices = devices;
+            s.running = Some(runtime.clone());
+            s.pending = None;
+            s.phase = "ready".into();
+            s.status = "已登录，正在准备端到端连接入口".into();
+            s.error = None;
+        }
+        self.spawn_runtime(runtime, rx);
+        Ok(())
+    }
+    async fn prepare_browser_cleanup(&self) -> Result<(), String> {
+        if let Some(tx) = self.browser.lock().await.clone() {
+            if !tx.cancel.is_cancelled() && tx.owned.lock().await.is_none() {
+                return Err("已有网页登录正在执行，请先取消".into());
+            }
+            tx.cleanup().await?;
+        }
+        browser::recover(&self.data_dir).await?;
+        Ok(())
+    }
+    pub async fn begin_web_login(
+        self: &Arc<Self>,
+        mut config: LabConfig,
+    ) -> Result<browser::Begin, String> {
+        // Reserve before the first await: native/ADB cancellation does not rely
+        // on a JS caller remaining alive to cancel a late setup result.
+        let cancel = CancellationToken::new();
+        let generation = {
+            let mut s = self.inner.lock().await;
+            if self.exiting.load(std::sync::atomic::Ordering::SeqCst)
+                || s.running.is_some()
+                || s.pending.is_some()
+                || s.phase == "closing"
+            {
+                return Err("已有登录或会话正在运行".into());
+            }
+            s.generation += 1;
+            let g = s.generation;
+            s.pending = Some(Pending {
+                cancel: cancel.clone(),
+                generation: g,
+                task: None,
+            });
+            s.auth_mode = "browser".into();
+            s.phase = "authorizing".into();
+            s.error = None;
+            s.status = "正在核对网页登录配置".into();
+            g
+        };
+        self.browser_trace("native-reserved", None).await?;
+        let setup = async {
+            let _setup = self.auth_setup.lock().await;
+            self.prepare_browser_cleanup().await?;
+            {
+                let mut retired = self.retired.lock().await;
+                retired.retain(|t| !t.is_finished());
+                if !retired.is_empty() {
+                    return Err("上一次授权正在安全结束".into());
+                }
+            }
+            if !self.grant_owners.lock().await.is_empty() {
+                return Err("待处理授权必须先保存或撤销".into());
+            }
+            config.base_url = config.base_url.trim().trim_end_matches('/').into();
+            config.app_id = config.app_id.trim().into();
+            config.device_name = config.device_name.trim().into();
+            let client = self.create_client(&config)?;
+            let store = CredentialStore::new(credential_path(&self.data_dir, &config));
+            if store.exists() {
+                return Err("已有本机授权，请恢复或先撤销".into());
+            }
+            self.browser_trace("native-config-await", None).await?;
+            let expected = client
+                .auth_config()
+                .await
+                .map_err(|_| "无法核对服务公开认证配置".to_string())?;
+            self.browser_trace("native-config-ready", None).await?;
+            if expected
+                .login_flow
+                .as_deref()
+                .is_some_and(|flow| flow != "authorization_code")
+            {
+                return Err("此应用未配置网页登录，请选择普通 Logto Native 应用".into());
+            }
+            client
+                .use_credential_store(store.clone())
+                .await
+                .map_err(|_| "无法绑定私有凭据存储".to_string())?;
+            client.set_auth_provider(Arc::new(store)).await;
+            if cancel.is_cancelled() {
+                return Err("网页登录已取消".into());
+            }
+            let (send, recv) = tokio::sync::oneshot::channel();
+            let (tx, begin) = browser::Transaction::new(
+                config.clone(),
+                expected,
+                client.clone(),
+                &self.data_dir,
+                generation,
+                cancel.clone(),
+                send,
+            )
+            .await?;
+            {
+                let mut s = self.inner.lock().await;
+                if s.generation != generation
+                    || cancel.is_cancelled()
+                    || self.exiting.load(std::sync::atomic::Ordering::SeqCst)
+                {
+                    return Err("网页登录已取消".into());
+                }
+                self.save_settings(&config)?;
+                s.config = config.clone();
+                s.status = "请在系统浏览器完成 Logto 登录".into();
+            }
+            *self.browser.lock().await = Some(tx.clone());
+            let state = self.clone();
+            let worker_config = config.clone();
+            let worker_cancel = cancel.clone();
+            let task = tokio::spawn(async move {
+                let result = match recv.await {
+                    Ok(Some(access)) => {
+                        state
+                            .install_session(
+                                &worker_config,
+                                &client,
+                                &worker_cancel,
+                                generation,
+                                &access,
+                            )
+                            .await
+                    }
+                    _ => Err("网页登录已结束；待处理授权可恢复或撤销".into()),
+                };
+                if let Err(error) = result {
+                    let _ = client.close().await;
+                    if client.has_pending_grant().await {
+                        state.grant_owners.lock().await.push(client.clone());
+                    }
+                    let mut s = state.inner.lock().await;
+                    if s.generation == generation {
+                        s.pending = None;
+                        s.phase = "signed_out".into();
+                        s.error = if worker_cancel.is_cancelled() {
+                            None
+                        } else {
+                            Some(error)
+                        };
+                        s.status = "网页登录未就绪；本机授权材料保留供安全处理".into();
+                    }
+                }
+            });
+            {
+                let mut s = self.inner.lock().await;
+                if let Some(p) = s
+                    .pending
+                    .as_mut()
+                    .filter(|p| p.generation == generation && !cancel.is_cancelled())
+                {
+                    p.task = Some(task);
+                    #[cfg(target_os = "android")]
+                    if {
+                        tx.source_active
+                            .store(true, std::sync::atomic::Ordering::SeqCst);
+                        crate::android_browser::start(&begin, cancel.clone()).await
+                    }
+                    .is_err()
+                    {
+                        tx.source_active
+                            .store(false, std::sync::atomic::Ordering::SeqCst);
+                        tx.source_settled.notify_waiters();
+                        cancel.cancel();
+                        return Err("无法启动 Android 系统浏览器登录".into());
+                    }
+                } else {
+                    drop(s);
+                    tx.source_active
+                        .store(false, std::sync::atomic::Ordering::SeqCst);
+                    tx.source_settled.notify_waiters();
+                    tx.cleanup().await?;
+                    self.retired.lock().await.push(task);
+                    return Err("网页登录已取消".into());
+                }
+            }
+            Ok(begin)
+        }
+        .await;
+        if setup.is_err() {
+            cancel.cancel();
+            let mut s = self.inner.lock().await;
+            if s.generation == generation {
+                s.pending = None;
+                s.phase = "signed_out".into();
+                s.error = Some("无法启动网页登录，请核对配置或处理已有授权".into());
+            }
+        }
+        setup
+    }
+    pub async fn browser_transaction(&self, id: &str) -> Result<Arc<browser::Transaction>, String> {
+        self.browser
+            .lock()
+            .await
+            .as_ref()
+            .filter(|t| t.id == id)
+            .cloned()
+            .ok_or_else(|| "网页登录事务不存在或已失效".into())
+    }
+    pub async fn browser_cancel(&self, id: &str) -> Result<(), String> {
+        let tx = self.browser_transaction(id).await?;
+        // Lost final ACK is safe: Rust already owns it. Never revoke it through
+        // the producing SDK or invalidate a newly installed session.
+        if tx.owned.lock().await.is_some() {
+            return Ok(());
+        }
+        self.cancel_login().await
+    }
+    #[cfg(target_os = "android")]
+    pub async fn android_browser_stage(
+        &self,
+        id: &str,
+        tokens: browser::Tokens,
+        final_grant: bool,
+    ) -> Result<String, String> {
+        let tx = self.browser_transaction(id).await?;
+        {
+            let _guard = tx.operation.lock().await;
+            if let Some(outcome) = *tx.owned.lock().await {
+                return Ok(format!("{outcome:?}"));
+            }
+            tx.stage(tokens.clone()).await?;
+        }
+        // Every SDK completion stages before releasing the source-call fence.
+        // Initial success stays fenced through resource getAccessToken.
+        if final_grant || tx.cancel.is_cancelled() {
+            tx.source_active
+                .store(false, std::sync::atomic::Ordering::SeqCst);
+            tx.source_settled.notify_waiters();
+        }
+        if tx.cancel.is_cancelled() {
+            tx.cleanup().await?;
+            return Ok("Cancelled".into());
+        }
+        if final_grant {
+            let result = tx.commit(tokens).await?;
+            Ok(format!("{result:?}"))
+        } else {
+            Ok("Staged".into())
         }
     }
     fn spawn_runtime(
@@ -658,6 +978,11 @@ impl LabState {
         }
     }
     pub async fn cancel_login(&self) -> Result<(), String> {
+        if let Some(tx) = self.browser.lock().await.clone() {
+            #[cfg(target_os = "android")]
+            crate::android_browser::cancel(&tx.id).await?;
+            tx.cleanup().await?;
+        }
         let pending = {
             let mut s = self.inner.lock().await;
             let pending = s.pending.take();
@@ -665,8 +990,7 @@ impl LabState {
                 p.cancel.cancel();
                 s.generation = p.generation + 1;
                 s.phase = "signed_out".into();
-                s.authorization = None;
-                s.status = "已取消设备授权；已有本机授权仍可恢复或撤销".into();
+                s.status = "已取消网页登录；已有本机授权仍可恢复或撤销".into();
             }
             pending
         };
@@ -835,6 +1159,12 @@ impl LabState {
             .await
     }
     async fn shutdown_with_wait(&self, revoke: bool, wait: Duration) -> Result<(), String> {
+        if let Some(tx) = self.browser.lock().await.clone() {
+            #[cfg(target_os = "android")]
+            crate::android_browser::cancel(&tx.id).await?;
+            tx.cleanup_with_revoke(revoke).await?;
+        }
+        browser::recover(&self.data_dir).await?;
         let (runtime, config, pending) = {
             let mut s = self.inner.lock().await;
             if s.phase == "closing" {
@@ -846,7 +1176,6 @@ impl LabState {
             }
             s.generation += 1;
             s.phase = "closing".into();
-            s.authorization = None;
             s.status = "正在关闭本机连接".into();
             (s.running.take(), s.config.clone(), pending)
         };
@@ -954,5 +1283,56 @@ impl LabState {
         } else {
             Err(errors.join("；"))
         }
+    }
+}
+
+#[cfg(test)]
+mod browser_setup_tests {
+    use super::*;
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    #[tokio::test]
+    async fn browser_boundary_setup_cancel_fences_native_before_any_browser_start() {
+        let root = std::env::temp_dir().join(format!(
+            "cybergrid-browser-setup-{}",
+            hex::encode(rand::random::<[u8; 12]>())
+        ));
+        let state = LabState::new(root.join("data"), root.join("cache")).unwrap();
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let base = format!("http://{}", listener.local_addr().unwrap());
+        let (observed, seen) = tokio::sync::oneshot::channel();
+        let (release, released) = tokio::sync::oneshot::channel();
+        let serve = tokio::spawn(async move {
+            let (mut s, _) = listener.accept().await.unwrap();
+            let mut buf = [0; 8192];
+            assert!(s.read(&mut buf).await.unwrap() > 0);
+            observed.send(()).unwrap();
+            released.await.unwrap();
+            let body=serde_json::json!({"provider":"logto","clientId":"fixture-native","issuer":"https://login.example.test/oidc","resource":"https://example.test/api","scope":"openid offline_access connect","deviceAuthorizationEndpoint":"https://login.example.test/oidc/device/auth","tokenEndpoint":"https://login.example.test/oidc/token","revocationEndpoint":"https://login.example.test/oidc/token/revocation"}).to_string();
+            let h=format!("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",body.len(),body);
+            s.write_all(h.as_bytes()).await.unwrap();
+        });
+        let task = {
+            let state = state.clone();
+            tokio::spawn(async move {
+                state
+                    .begin_web_login(LabConfig {
+                        base_url: base,
+                        app_id: "fixture-native".into(),
+                        cloudflared_path: "/usr/bin/true".into(),
+                        ..Default::default()
+                    })
+                    .await
+            })
+        };
+        seen.await.unwrap();
+        assert_eq!(state.view().await.phase, "authorizing");
+        state.cancel_login().await.unwrap();
+        release.send(()).unwrap();
+        assert!(task.await.unwrap().is_err());
+        serve.await.unwrap();
+        assert!(state.browser.lock().await.is_none());
+        assert!(state.inner.lock().await.pending.is_none());
+        assert_eq!(state.view().await.phase, "signed_out");
+        std::fs::remove_dir_all(root).unwrap();
     }
 }

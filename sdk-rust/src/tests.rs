@@ -90,6 +90,325 @@ fn public_config(base: &str, app: &str) -> Value {
     json!({"coordination":{"protocol":"memory-v1","epoch":"fixture-epoch","heartbeatSeconds":20,"leaseSeconds":65,"signalTtlSeconds":120,"maxSignalWaitSeconds":15},"provider":"logto","issuer":format!("{base}/oidc"),"clientId":app,"resource":"https://cybergrid.aixgg.com/api","scope":"openid offline_access profile email connect","deviceAuthorizationEndpoint":format!("{base}/oidc/device/auth"),"tokenEndpoint":format!("{base}/oidc/token"),"revocationEndpoint":format!("{base}/oidc/token/revocation")})
 }
 
+fn browser_tokens(refresh: &str) -> OAuthTokens {
+    OAuthTokens {
+        access_token: "unverified-resource-access".into(),
+        refresh_token: refresh.into(),
+        expires_in: 3600,
+        expires_at: chrono::Utc::now() + chrono::Duration::hours(1),
+        token_type: "Bearer".into(),
+        scope: "connect".into(),
+    }
+}
+
+#[tokio::test]
+async fn browser_import_checkpoints_without_refresh_and_ack_is_idempotent() {
+    let base = Arc::new(Mutex::new(String::new()));
+    let b = base.clone();
+    let calls = Arc::new(AtomicUsize::new(0));
+    let counter = calls.clone();
+    let config_calls = Arc::new(AtomicUsize::new(0));
+    let configs = config_calls.clone();
+    let f = Fixture::new(Arc::new(move |_, path, _, _| {
+        if path.starts_with("/api/v1/auth/config?") {
+            configs.fetch_add(1, Ordering::SeqCst);
+            return (200, public_config(&b.lock().unwrap(), "RealA"));
+        }
+        counter.fetch_add(1, Ordering::SeqCst);
+        (401, json!({"error":"invalid_token"}))
+    }))
+    .await;
+    *base.lock().unwrap() = f.base.clone();
+    let client = f.client("RealA");
+    let root = tempfile::tempdir().unwrap();
+    let path = root.path().join("browser.json");
+    let store = CredentialStore::new(&path);
+    client.use_credential_store(store.clone()).await.unwrap();
+    let mut config = client.auth_config().await.unwrap();
+    config.coordination.as_mut().unwrap().epoch = "old-non-OAuth-epoch".into();
+    let tokens = browser_tokens("latest-browser-refresh");
+    assert_eq!(
+        client
+            .import_browser_grant(&config, tokens.clone())
+            .await
+            .unwrap(),
+        GrantImportOutcome::OwnedPersisted
+    );
+    let bytes = std::fs::read(&path).unwrap();
+    let saved: Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(saved["version"], 4);
+    assert_eq!(saved["clientId"], "RealA");
+    assert_eq!(saved["refreshToken"], "latest-browser-refresh");
+    assert!(!String::from_utf8_lossy(&bytes).contains(&tokens.access_token));
+    let before_ack = config_calls.load(Ordering::SeqCst);
+    let mut retry = tokens.clone();
+    retry.expires_at = chrono::Utc::now() - chrono::Duration::seconds(1);
+    assert_eq!(
+        client.import_browser_grant(&config, retry).await.unwrap(),
+        GrantImportOutcome::OwnedPersisted
+    );
+    assert_eq!(
+        config_calls.load(Ordering::SeqCst),
+        before_ack,
+        "lost ACK confirmation must not depend on network"
+    );
+    assert_eq!(std::fs::read(&path).unwrap(), bytes);
+    assert!(!client.has_pending_grant().await);
+    assert!(client
+        .import_browser_grant(&config, browser_tokens("different-grant"))
+        .await
+        .is_err());
+    let other = f.client("RealA");
+    other
+        .use_credential_store(CredentialStore::new(&path))
+        .await
+        .unwrap();
+    assert_eq!(
+        other
+            .browser_grant_checkpoint(&config, &tokens.refresh_token)
+            .await
+            .unwrap(),
+        crate::BrowserGrantCheckpoint::Matching
+    );
+    assert_eq!(
+        other
+            .browser_grant_checkpoint(&config, "older-journal-token")
+            .await
+            .unwrap(),
+        crate::BrowserGrantCheckpoint::OtherGrant
+    );
+    let empty = f.client("RealA");
+    empty
+        .use_credential_store(CredentialStore::new(root.path().join("empty.json")))
+        .await
+        .unwrap();
+    assert_eq!(
+        empty
+            .browser_grant_checkpoint(&config, "unowned-journal-token")
+            .await
+            .unwrap(),
+        crate::BrowserGrantCheckpoint::Empty
+    );
+    assert!(other.import_browser_grant(&config, tokens).await.is_err());
+    assert_eq!(std::fs::read(&path).unwrap(), bytes);
+    assert_eq!(
+        calls.load(Ordering::SeqCst),
+        0,
+        "handoff must not refresh, exchange, or revoke"
+    );
+    assert!(
+        client.session.read().await.is_none(),
+        "server exchange remains a separate authenticated step"
+    );
+}
+
+#[tokio::test]
+async fn browser_import_and_native_refresh_share_the_grant_gate() {
+    let base = Arc::new(Mutex::new(String::new()));
+    let b = base.clone();
+    let calls = Arc::new(AtomicUsize::new(0));
+    let counter = calls.clone();
+    let f = Fixture::new(Arc::new(move |_, request, body, _| {
+        if request.starts_with("/api/v1/auth/config?") {
+            return (200, public_config(&b.lock().unwrap(), "RealA"));
+        }
+        assert_eq!(request, "/oidc/token");
+        let form = url::form_urlencoded::parse(&body).collect::<HashMap<_, _>>();
+        assert_eq!(form.get("refresh_token").unwrap(), "latest-browser-refresh");
+        assert_eq!(form.get("resource").unwrap(), "https://cybergrid.aixgg.com/api");
+        counter.fetch_add(1, Ordering::SeqCst);
+        (200, json!({"access_token":"native-resource-access", "refresh_token":"new-native-refresh", "expires_in":3600, "token_type":"Bearer", "scope":"connect"}))
+    })).await;
+    *base.lock().unwrap() = f.base.clone();
+    let client = f.client("RealA");
+    let root = tempfile::tempdir().unwrap();
+    let path = root.path().join("browser.json");
+    let store = CredentialStore::new(&path);
+    client.use_credential_store(store.clone()).await.unwrap();
+    let config = client.auth_config().await.unwrap();
+    let gate = store.auth_gate.lock().await;
+    let c = client.clone();
+    let a = config.clone();
+    let importing = tokio::spawn(async move {
+        c.import_browser_grant(&a, browser_tokens("latest-browser-refresh"))
+            .await
+    });
+    // Wait for import to own the shared grant gate before submitting refresh.
+    tokio::time::timeout(Duration::from_secs(3), async {
+        loop {
+            if client.grant_operation.try_lock().is_err() {
+                break;
+            }
+            tokio::task::yield_now().await;
+        }
+    })
+    .await
+    .unwrap();
+    let c = client.clone();
+    let refreshing =
+        tokio::spawn(async move { c.refresh_access_token("stale-must-not-be-used").await });
+    assert_eq!(calls.load(Ordering::SeqCst), 0);
+    drop(gate);
+    assert_eq!(
+        importing.await.unwrap().unwrap(),
+        GrantImportOutcome::OwnedPersisted
+    );
+    let newest = refreshing.await.unwrap().unwrap();
+    assert_eq!(newest.refresh_token, "new-native-refresh");
+    assert_eq!(calls.load(Ordering::SeqCst), 1);
+    let saved: Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+    assert_eq!(saved["refreshToken"], "new-native-refresh");
+    assert!(
+        client
+            .import_browser_grant(&config, browser_tokens("latest-browser-refresh"))
+            .await
+            .is_err(),
+        "stale handoff must not overwrite native rotation"
+    );
+}
+
+#[tokio::test]
+async fn browser_import_rejects_binding_and_token_errors_without_ownership() {
+    let base = Arc::new(Mutex::new(String::new()));
+    let b = base.clone();
+    let f = Fixture::new(Arc::new(move |_, path, _, _| {
+        assert!(path.starts_with("/api/v1/auth/config?"));
+        (200, public_config(&b.lock().unwrap(), "RealA"))
+    }))
+    .await;
+    *base.lock().unwrap() = f.base.clone();
+    let client = f.client("RealA");
+    let config = client.auth_config().await.unwrap();
+    assert!(client
+        .import_browser_grant(&config, browser_tokens("source-still-owned"))
+        .await
+        .is_err());
+    let root = tempfile::tempdir().unwrap();
+    let path = root.path().join("browser.json");
+    client
+        .use_credential_store(CredentialStore::new(&path))
+        .await
+        .unwrap();
+    for field in [
+        "client", "issuer", "resource", "scope", "endpoint", "revoke",
+    ] {
+        let mut wrong = config.clone();
+        match field {
+            "client" => wrong.client_id = "Other".into(),
+            "issuer" => wrong.issuer = format!("{}/different-issuer", f.base),
+            "resource" => wrong.resource = "https://other.example/api".into(),
+            "scope" => wrong.scope.push_str(" other"),
+            "endpoint" => wrong.token_endpoint = format!("{}/different-token", f.base),
+            "revoke" => wrong.revocation_endpoint = None,
+            _ => unreachable!(),
+        }
+        assert!(
+            client
+                .import_browser_grant(&wrong, browser_tokens("source-still-owned"))
+                .await
+                .is_err(),
+            "{field}"
+        );
+    }
+    for field in ["access", "refresh", "kind", "duration", "expiry", "scope"] {
+        let mut bad = browser_tokens("source-still-owned");
+        match field {
+            "access" => bad.access_token.clear(),
+            "refresh" => bad.refresh_token.clear(),
+            "kind" => bad.token_type = "Basic".into(),
+            "duration" => bad.expires_in = 0,
+            "expiry" => bad.expires_at = chrono::Utc::now() - chrono::Duration::seconds(1),
+            "scope" => bad.scope = "openid".into(),
+            _ => unreachable!(),
+        }
+        let error = client.import_browser_grant(&config, bad).await.unwrap_err();
+        assert!(!format!("{error:?}").contains("source-still-owned"));
+    }
+    assert!(!path.exists());
+    assert!(!client.has_pending_grant().await);
+    assert!(client.latest_grant.lock().await.is_none());
+}
+
+#[tokio::test]
+async fn browser_import_disk_failure_ack_retains_latest_for_retry_and_revoke() {
+    use std::os::unix::fs::PermissionsExt;
+    for retry_checkpoint in [false, true] {
+        let root = tempfile::tempdir().unwrap();
+        let storage = root.path().join("private");
+        std::fs::create_dir(&storage).unwrap();
+        let path = storage.join("browser.json");
+        let blocked = storage.clone();
+        let base = Arc::new(Mutex::new(String::new()));
+        let b = base.clone();
+        let revoke = Arc::new(AtomicUsize::new(0));
+        let revoked = revoke.clone();
+        let f = Fixture::new(Arc::new(move |_, request, body, _| {
+            if request.starts_with("/api/v1/auth/config?") {
+                std::fs::set_permissions(&blocked, std::fs::Permissions::from_mode(0o500)).unwrap();
+                return (200, public_config(&b.lock().unwrap(), "RealA"));
+            }
+            assert_eq!(request, "/oidc/token/revocation");
+            let form = url::form_urlencoded::parse(&body).collect::<HashMap<_, _>>();
+            assert_eq!(form.get("token").unwrap(), "latest-browser-refresh");
+            revoked.fetch_add(1, Ordering::SeqCst);
+            (200, json!({}))
+        }))
+        .await;
+        *base.lock().unwrap() = f.base.clone();
+        let client = f.client("RealA");
+        let store = CredentialStore::new(&path);
+        // The existing private lock remains writable while the directory denies
+        // atomic checkpoint creation. No timing or privileged filesystem needed.
+        drop(store.lock().await.unwrap());
+        client.use_credential_store(store.clone()).await.unwrap();
+        let config = client.auth_config().await.unwrap();
+        let tokens = browser_tokens("latest-browser-refresh");
+        assert_eq!(
+            client
+                .import_browser_grant(&config, tokens.clone())
+                .await
+                .unwrap(),
+            GrantImportOutcome::OwnedPending
+        );
+        assert!(client.has_pending_grant().await);
+        assert!(!path.exists());
+        assert_eq!(
+            client
+                .import_browser_grant(&config, tokens.clone())
+                .await
+                .unwrap(),
+            GrantImportOutcome::OwnedPending
+        );
+        assert!(client
+            .import_browser_grant(&config, browser_tokens("replacement"))
+            .await
+            .is_err());
+        if !retry_checkpoint {
+            client.revoke_pending_grant().await.unwrap();
+            assert_eq!(revoke.load(Ordering::SeqCst), 1);
+            assert!(!client.has_pending_grant().await);
+            assert!(client.latest_grant.lock().await.is_none());
+            assert!(!path.exists());
+            std::fs::set_permissions(&storage, std::fs::Permissions::from_mode(0o700)).unwrap();
+            continue;
+        }
+        std::fs::set_permissions(&storage, std::fs::Permissions::from_mode(0o700)).unwrap();
+        client.retry_pending_grant().await.unwrap();
+        assert!(!client.has_pending_grant().await);
+        let saved: Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+        assert_eq!(saved["refreshToken"], "latest-browser-refresh");
+        assert_eq!(
+            client.import_browser_grant(&config, tokens).await.unwrap(),
+            GrantImportOutcome::OwnedPersisted
+        );
+        // Discovery in logout deliberately re-applies the write failure, proving
+        // revocation is possible using the transferred grant even on storage error.
+        store.logout(&client).await.unwrap_err();
+        assert_eq!(revoke.load(Ordering::SeqCst), 1);
+        std::fs::set_permissions(&storage, std::fs::Permissions::from_mode(0o700)).unwrap();
+    }
+}
+
 #[test]
 fn config_and_tunnel_security() {
     assert!(Client::new(Config::default()).is_err());
@@ -1241,4 +1560,33 @@ async fn close_during_environment_callback_prevents_provider_spawn() {
         !record.exists(),
         "Close must fence spawn after environment callback completes"
     );
+}
+
+#[tokio::test]
+async fn browser_login_flow_prevents_device_oauth_requests() {
+    let base = Arc::new(Mutex::new(String::new()));
+    let source = base.clone();
+    let oauth = Arc::new(AtomicUsize::new(0));
+    let attempts = oauth.clone();
+    let fixture = Fixture::new(Arc::new(move |_, path, _, _| {
+        if path.starts_with("/api/v1/auth/config?") {
+            let mut config = public_config(&source.lock().unwrap(), "RealA");
+            config["loginFlow"] = json!("authorization_code");
+            return (200, config);
+        }
+        attempts.fetch_add(1, Ordering::SeqCst);
+        (400, json!({"error":"unexpected_oauth"}))
+    }))
+    .await;
+    *base.lock().unwrap() = fixture.base.clone();
+    let client = fixture.client("RealA");
+    let error = client.begin_device_authorization().await.unwrap_err();
+    assert!(error.to_string().contains("Device Flow is not supported"));
+    assert_eq!(oauth.load(Ordering::SeqCst), 0);
+    let legacy: AuthConfig = serde_json::from_value(public_config(&fixture.base, "RealA")).unwrap();
+    assert!(legacy.login_flow.is_none());
+    legacy.validate("RealA").unwrap();
+    let mut invalid = legacy;
+    invalid.login_flow = Some("unknown".into());
+    assert!(invalid.validate("RealA").is_err());
 }

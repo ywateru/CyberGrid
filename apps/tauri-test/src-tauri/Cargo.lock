@@ -948,13 +948,17 @@ dependencies = [
 
 [[package]]
 name = "cybergrid-tauri-lab"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
+ "chrono",
  "cybergrid-sdk",
+ "fs2",
  "hex",
  "jni",
+ "libc",
  "ndk-context",
  "rand 0.9.5",
+ "reqwest 0.12.28",
  "serde",
  "serde_json",
  "sha2",
@@ -964,6 +968,7 @@ dependencies = [
  "time",
  "tokio",
  "tokio-util",
+ "url",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 {
   "name": "cybergrid-tauri-lab",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,8 +10,11 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
+    "@logto/browser": "3.1.2",
+    "@logto/client": "3.2.2",
     "@tauri-apps/api": "2.12.4",
-    "@tauri-apps/plugin-opener": "^2.7.2"
+    "@tauri-apps/plugin-opener": "^2.7.2",
+    "jose": "5.10.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.12.4",

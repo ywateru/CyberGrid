@@ -1203,5 +1203,208 @@
     "source": "https://maven.google.com/web/index.html#androidx.browser:browser:1.8.0",
     "texts": {},
     "version": "1.8.0"
+  },
+  {
+    "archiveSha256": "4241c14a7727c34feea6507ec801318a3d4a90f070e4525681079fb94ee4c593",
+    "declaredLicenses": [
+      {
+        "name": "Apache-2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ],
+    "group": "com.google.code.gson",
+    "name": "gson",
+    "officialLicenseText": {
+      "file": "common/Apache-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "source": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+    },
+    "pomSha256": "d2b115634f5c085db4b9c9ffc2658e89e231fdbfbe2242121a1cd95d4d948dd7",
+    "pomSource": "https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.pom",
+    "source": "https://central.sonatype.com/artifact/com.google.code.gson/gson/2.10.1",
+    "texts": {},
+    "version": "2.10.1"
+  },
+  {
+    "archiveSha256": "ee8f6bd6cd1257013d748330f4ca147638a9fbcb52fb388d5ac93cf53408745d",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ],
+    "group": "com.squareup.okhttp3",
+    "name": "okhttp",
+    "officialLicenseText": {
+      "file": "common/Apache-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "source": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+    },
+    "pomSha256": "7a2d427b38b17e076da64ee8d2102e64888dcb238aee5e2dba4a7752c94a3fde",
+    "pomSource": "https://repo.maven.apache.org/maven2/com/squareup/okhttp3/okhttp/4.11.0/okhttp-4.11.0.pom",
+    "source": "https://central.sonatype.com/artifact/com.squareup.okhttp3/okhttp/4.11.0",
+    "texts": {
+      "okhttp3/internal/publicsuffix/NOTICE": "8a9c58fbded5ea3474315e4a9824ca8b1486098a1a03e897e0b19419d5e1876a"
+    },
+    "version": "4.11.0"
+  },
+  {
+    "archiveSha256": "b642baef4c570055de4cb3d1667b2b16dced901ff8066345a063691aa06025a4",
+    "declaredLicenses": [
+      {
+        "distribution": "repo",
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ],
+    "group": "com.squareup.okio",
+    "name": "okio-jvm",
+    "officialLicenseText": {
+      "file": "common/Apache-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "source": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+    },
+    "pomSha256": "5c451f94a76bea861b6ef2bf84e8f57200545968c86555abdfed13c7ca2d489d",
+    "pomSource": "https://repo.maven.apache.org/maven2/com/squareup/okio/okio-jvm/3.2.0/okio-jvm-3.2.0.pom",
+    "source": "https://central.sonatype.com/artifact/com.squareup.okio/okio-jvm/3.2.0",
+    "texts": {},
+    "version": "3.2.0"
+  },
+  {
+    "archiveSha256": "ad49c5a5d83541c684bdf4a826ee1a067e40c2e4c31a692827eb256a7dc0e645",
+    "declaredLicenses": [
+      {
+        "name": "Mozilla Public License 2.0",
+        "url": "https://opensource.org/licenses/MPL-2.0"
+      }
+    ],
+    "group": "io.logto.sdk",
+    "licenseDeclarationNote": "Published 3.0.0 POM declares MPL-2.0; the matching upstream v3.0.0 LICENSE is MIT. Both original texts and the published declaration are preserved without choosing between them.",
+    "licenseTextSource": "https://raw.githubusercontent.com/logto-io/kotlin/v3.0.0/LICENSE",
+    "name": "android",
+    "officialLicenseText": {
+      "file": "common/MPL-2.0.txt",
+      "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04",
+      "source": "https://www.mozilla.org/media/MPL/2.0/index.txt"
+    },
+    "pomSha256": "2f34851df8a1786640596575a1cd368bad75dc4363e3bfaed890ddb16be8de02",
+    "pomSource": "https://repo.maven.apache.org/maven2/io/logto/sdk/android/3.0.0/android-3.0.0.pom",
+    "source": "https://central.sonatype.com/artifact/io.logto.sdk/android/3.0.0",
+    "sourceAvailability": "https://github.com/logto-io/kotlin/tree/v3.0.0",
+    "texts": {
+      "upstream-LICENSE": "b6d6c086ac4744bb39633e6dcc62f664347668dfce8e40cc7acca4856aac8281"
+    },
+    "version": "3.0.0"
+  },
+  {
+    "archiveSha256": "b2b4c6ab1a8f1c89b9f97deb6a66b70affaf49fd064e99aed2633dcda3bcc8fb",
+    "declaredLicenses": [
+      {
+        "name": "Mozilla Public License 2.0",
+        "url": "https://opensource.org/licenses/MPL-2.0"
+      }
+    ],
+    "group": "io.logto.sdk",
+    "licenseDeclarationNote": "Published 3.0.0 POM declares MPL-2.0; the matching upstream v3.0.0 LICENSE is MIT. Both original texts and the published declaration are preserved without choosing between them.",
+    "licenseTextSource": "https://raw.githubusercontent.com/logto-io/kotlin/v3.0.0/LICENSE",
+    "name": "kotlin",
+    "officialLicenseText": {
+      "file": "common/MPL-2.0.txt",
+      "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04",
+      "source": "https://www.mozilla.org/media/MPL/2.0/index.txt"
+    },
+    "pomSha256": "0055fb10e549dcec6a6fd09072e7ef8380e387fb3ac2544db1efeeb042236cd8",
+    "pomSource": "https://repo.maven.apache.org/maven2/io/logto/sdk/kotlin/3.0.0/kotlin-3.0.0.pom",
+    "source": "https://central.sonatype.com/artifact/io.logto.sdk/kotlin/3.0.0",
+    "sourceAvailability": "https://github.com/logto-io/kotlin/tree/v3.0.0",
+    "texts": {
+      "upstream-LICENSE": "b6d6c086ac4744bb39633e6dcc62f664347668dfce8e40cc7acca4856aac8281"
+    },
+    "version": "3.0.0"
+  },
+  {
+    "archiveSha256": "7314af50cde9c99e8eaf43eee617a23edcc6bb43036221064355094999d837ef",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ],
+    "group": "org.bitbucket.b_c",
+    "name": "jose4j",
+    "officialLicenseText": {
+      "file": "common/Apache-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "source": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+    },
+    "pomSha256": "3fb7fa713e89d42784bdf4d192ece217400040bda7e933886a9f45ce8b9b557e",
+    "pomSource": "https://repo.maven.apache.org/maven2/org/bitbucket/b_c/jose4j/0.9.6/jose4j-0.9.6.pom",
+    "source": "https://central.sonatype.com/artifact/org.bitbucket.b_c/jose4j/0.9.6",
+    "texts": {},
+    "version": "0.9.6"
+  },
+  {
+    "archiveSha256": "055f5cb24287fa106100995a7b47ab92126b81e832e875f5fa2cf0bd55693d0b",
+    "declaredLicenses": [
+      {
+        "name": "The Apache License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ],
+    "group": "org.jetbrains.kotlin",
+    "name": "kotlin-stdlib-jdk7",
+    "officialLicenseText": {
+      "file": "common/Apache-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "source": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+    },
+    "pomSha256": "4f958aa993d5984f8f5ebed4146562a5f3a9f695b6049c9f287381379cadab33",
+    "pomSource": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib-jdk7/1.8.22/kotlin-stdlib-jdk7-1.8.22.pom",
+    "source": "https://central.sonatype.com/artifact/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.8.22",
+    "texts": {},
+    "version": "1.8.22"
+  },
+  {
+    "archiveSha256": "4198b0eaf090a4f25b6f7e5a59581f4314ba8c9f6cd1d13ee9d348e65ed8f707",
+    "declaredLicenses": [
+      {
+        "name": "The Apache License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ],
+    "group": "org.jetbrains.kotlin",
+    "name": "kotlin-stdlib-jdk8",
+    "officialLicenseText": {
+      "file": "common/Apache-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "source": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+    },
+    "pomSha256": "928f2187217476313cb816d48070bc7654aa3b9a5ae81d3fc5f8c279cc8f8d9e",
+    "pomSource": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib-jdk8/1.8.22/kotlin-stdlib-jdk8-1.8.22.pom",
+    "source": "https://central.sonatype.com/artifact/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.8.22",
+    "texts": {},
+    "version": "1.8.22"
+  },
+  {
+    "archiveSha256": "d3ef575e3e4979678dc01bf1dcce51021493b4d11fb7f1be8ad982877c16a1c0",
+    "declaredLicenses": [
+      {
+        "distribution": "repo",
+        "name": "MIT License",
+        "url": "http://www.opensource.org/licenses/mit-license.php"
+      }
+    ],
+    "group": "org.slf4j",
+    "licenseTextSource": "https://raw.githubusercontent.com/qos-ch/slf4j/v_1.7.36/LICENSE.txt",
+    "name": "slf4j-api",
+    "parentPomSha256": "bb388d37fbcdd3cde64c3cede21838693218dc451f04040c5df360a78ed7e812",
+    "parentPomSource": "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom",
+    "pomSha256": "fb046a9c229437928bb11c2d27c8b5d773eb8a25e60cbd253d985210dedc2684",
+    "pomSource": "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom",
+    "source": "https://central.sonatype.com/artifact/org.slf4j/slf4j-api/1.7.36",
+    "texts": {
+      "LICENSE.txt": "6fbe2eaf44b193b8a40eed9208f52848572224ad8d7672dd09418aa174847e73"
+    },
+    "version": "1.7.36"
   }
 ]

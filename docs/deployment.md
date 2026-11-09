@@ -7,7 +7,7 @@ CyberGrid 由一个长期运行的 Node.js 22 进程提供完整官网、管理�
 在自己的 Logto 租户中准备：
 
 - 一个 SPA Application，用于网站 `/console/`。登记完整的回跳 URI，默认 `https://你的域名/console/callback/`，以及该 HTTPS origin。
-- 启用 Device Flow 的 Native Applications。每个 SDK 使用自己的真实 Application ID，两端分别授权。
+- 关闭 Device Flow 的普通 Native Applications。两端使用相同的真实 Application ID，分别通过官方 SDK 网页授权。登记 Mac 回调 `http://127.0.0.1:17896/callback` 与 Android 回调 `tech.tinadev.cybergrid.lab://tech.tinadev.cybergrid.lab/callback`。Logto 不允许切换既有应用的 Device Flow 标志，旧 Device Flow 应用需替换为普通 Native，不能迁用旧 client 的 refresh token。
 - 一个固定 API resource，提供 `connect` scope；签发面向该 resource 的 ES384 用户 access token。优先使用显式 `LOGTO_RESOURCE`；未设置时，有公开 origin 则默认该 origin 加 `/api`，否则默认固定标识 `https://cybergrid.local/api`。该标识是 OAuth audience，不需要 DNS 或实际 HTTP 服务，但必须在 Logto 创建完全相同的 resource。
 - 读取应用目录的 M2M Management API 凭据。当前使用的 `all` 权限较宽，须只保存在服务端；运行代码只读取固定租户目录，不写入用户或应用。
 

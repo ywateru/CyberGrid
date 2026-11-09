@@ -28,7 +28,9 @@ JWT 验签的 Logto issuer、JWKS 和 API resource 始终由启动配置固定�
 
 HTTP 适配器依据实际请求字节判断 GET / HEAD 是否携带请求体。反向代理使用合法的空分块传输时，应在同一请求总预算、容量上限与断连取消机制下读完并确认零字节，不能仅因 `Transfer-Encoding: chunked` 就拒绝无请求体的访问。实际非空 GET / HEAD 请求体仍在调用业务 handler 前拒绝；传输声明超出容量或实际读取超限仍按原容量边界拒绝，不放宽 HTTP 解析器对冲突或非法 framing 的校验。
 
-Logto 管理用户与应用。SDK 的 AppID 是启用 Device Flow 的 Native 应用 `client_id`；通过 JWT 验签后的 subject 与 client_id 划分命名空间。设备只能发现和连接同账号、同应用的终端。CyberGrid 不提供应用 CRUD。浏览器个人控制台使用独立 SPA PKCE 身份，只读设备信息，不注册设备。
+Logto 管理用户与应用。SDK 的 AppID 是关闭 Device Flow 的普通 Native 应用 `client_id`；通过 JWT 验签后的 subject 与 client_id 划分命名空间。设备只能发现和连接同账号、同应用的终端。CyberGrid 不提供应用 CRUD。浏览器个人控制台使用独立 SPA PKCE 身份，只读设备信息，不注册设备。
+
+Lab 测试客户端统一使用官方 Logto SDK 网页登录，移除设备码入口。Mac 和 Android 使用同一个普通 Native 应用，不改变服务端应用隔离规则；启用 Device Flow 的 Native 应用明确拒绝。平台接入、预置公开配置及凭据交接契约见 [Lab 网页登录](lab-browser-login.md)。
 
 服务内存保存有界的会话 hash、设备心跳、端口、证书指纹和短期信令。它不保存用户密码、refresh token、端到端私钥或业务 payload。设备内存元数据会过期，服务重启清空所有协调状态并生成新 epoch。
 

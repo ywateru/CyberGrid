@@ -1,6 +1,6 @@
 [package]
 name = "cybergrid-tauri-lab"
-version = "0.2.0"
+version = "0.3.0"
 description = "CyberGrid native Rust SDK two-device test app"
 authors = ["CyberGrid"]
 edition = "2021"
@@ -27,6 +27,11 @@ tokio-util = "0.7"
 sha2 = "0.10"
 rand = "0.9"
 hex = "0.4"
+url = "2"
+chrono = { version = "0.4", features = ["serde"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+libc = "0.2"
+fs2 = "0.4"
 time = { version = "0.3", features = ["formatting"] }
 
 [target.'cfg(target_os = "android")'.dependencies]

@@ -16,6 +16,7 @@ import (
 type AuthConfig struct {
 	Coordination                Coordination `json:"coordination,omitempty"`
 	Provider                    string       `json:"provider"`
+	LoginFlow                   string       `json:"loginFlow,omitempty"`
 	Issuer                      string       `json:"issuer"`
 	ClientID                    string       `json:"clientId"`
 	Resource                    string       `json:"resource"`
@@ -80,6 +81,9 @@ func validateAuthConfig(a AuthConfig) error {
 	}
 	if issuer.RawQuery != "" || a.Provider != "logto" || a.ClientID == "" || a.Resource == "" {
 		return errors.New("invalid Logto configuration")
+	}
+	if a.LoginFlow != "" && a.LoginFlow != "authorization_code" && a.LoginFlow != "device_code" {
+		return errors.New("unsupported OAuth login flow")
 	}
 	if _, err := httpsURL(a.Resource); err != nil {
 		return errors.New("OAuth resource must be an HTTPS identifier")
@@ -179,6 +183,9 @@ func (c *Client) BeginDeviceAuthorization(ctx context.Context) (DeviceAuthorizat
 	a, err := c.AuthConfig(ctx)
 	if err != nil {
 		return DeviceAuthorization{}, err
+	}
+	if a.LoginFlow == "authorization_code" {
+		return DeviceAuthorization{}, errors.New("Device Flow is disabled; use official SDK browser sign-in")
 	}
 	var raw struct {
 		DeviceCode              string `json:"device_code"`

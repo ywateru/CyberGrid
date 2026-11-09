@@ -3,6 +3,9 @@
     all(target_os = "android", debug_assertions, feature = "adb-test-control")
 ))]
 mod adb_control;
+#[cfg(target_os = "android")]
+mod android_browser;
+mod browser;
 mod platform;
 mod protocol;
 mod services;
@@ -17,11 +20,97 @@ async fn lab_view(state: tauri::State<'_, Arc<LabState>>) -> Result<View, String
     Ok(state.view().await)
 }
 #[tauri::command]
-async fn begin_login(
+async fn begin_web_login(
     state: tauri::State<'_, Arc<LabState>>,
     config: LabConfig,
+) -> Result<browser::Begin, String> {
+    state.inner().begin_web_login(config).await
+}
+#[tauri::command]
+async fn browser_trace(
+    state: tauri::State<'_, Arc<LabState>>,
+    phase: String,
+    features: Option<state::BrowserFeatures>,
 ) -> Result<(), String> {
-    state.inner().start_login(config, false).await
+    state.browser_trace(&phase, features).await
+}
+#[tauri::command]
+async fn browser_fetch(
+    state: tauri::State<'_, Arc<LabState>>,
+    transaction_id: String,
+    request: browser::FetchRequest,
+) -> Result<browser::FetchResponse, String> {
+    state.browser_trace("native-fetch-await", None).await?;
+    let result = state
+        .browser_transaction(&transaction_id)
+        .await?
+        .fetch(request)
+        .await;
+    let _ = state
+        .browser_trace(
+            if result.is_ok() {
+                "native-fetch-ready"
+            } else {
+                "native-fetch-error"
+            },
+            None,
+        )
+        .await;
+    result
+}
+#[tauri::command]
+async fn browser_open(
+    state: tauri::State<'_, Arc<LabState>>,
+    app: tauri::AppHandle,
+    transaction_id: String,
+    url: String,
+) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
+    state
+        .browser_transaction(&transaction_id)
+        .await?
+        .authorize_url(&url)
+        .await?;
+    state.browser_trace("native-open-validated", None).await?;
+    let result = app
+        .opener()
+        .open_url(url, None::<&str>)
+        .map_err(|_| "无法打开系统浏览器".into());
+    if result.is_ok() {
+        let _ = state.browser_trace("native-open-ready", None).await;
+    }
+    result
+}
+#[tauri::command]
+async fn browser_wait_callback(
+    state: tauri::State<'_, Arc<LabState>>,
+    transaction_id: String,
+) -> Result<String, String> {
+    state
+        .browser_transaction(&transaction_id)
+        .await?
+        .callback()
+        .await
+}
+#[tauri::command]
+async fn browser_commit(
+    state: tauri::State<'_, Arc<LabState>>,
+    transaction_id: String,
+    tokens: browser::Tokens,
+) -> Result<String, String> {
+    let result = state
+        .browser_transaction(&transaction_id)
+        .await?
+        .commit(tokens)
+        .await?;
+    Ok(format!("{result:?}"))
+}
+#[tauri::command]
+async fn browser_cancel(
+    state: tauri::State<'_, Arc<LabState>>,
+    transaction_id: String,
+) -> Result<(), String> {
+    state.browser_cancel(&transaction_id).await
 }
 #[tauri::command]
 async fn resume_login(
@@ -78,12 +167,20 @@ pub fn run() {
                 state.clone(),
                 app.handle().clone(),
             )?;
+            #[cfg(target_os = "android")]
+            android_browser::register(&state);
             app.manage(state);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             lab_view,
-            begin_login,
+            begin_web_login,
+            browser_fetch,
+            browser_trace,
+            browser_open,
+            browser_wait_callback,
+            browser_commit,
+            browser_cancel,
             resume_login,
             cancel_login,
             logout,

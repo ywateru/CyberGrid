@@ -19,7 +19,7 @@ Cargo resolves `path` relative to the application's Cargo.toml. When using the r
 An application ID is mandatory. Supply the exact, case-sensitive **Logto Native application client ID**. No test ID or default application is silently selected. Applications are managed in Logto.
 
 ```rust,no_run
-use cybergrid_sdk::{CancellationToken, Client, Config, CredentialStore, Port};
+use cybergrid_sdk::{Client, Config, CredentialStore, Port};
 
 # async fn example() -> Result<(), Box<dyn std::error::Error>> {
 let client = Client::new(Config {
@@ -30,17 +30,11 @@ let client = Client::new(Config {
 let store = CredentialStore::new("./private-device/credentials.json");
 client.use_credential_store(store.clone()).await?;
 client.set_auth_provider(std::sync::Arc::new(store.clone())).await;
-let tokens = if store.exists() {
-    store.refresh(&client).await?
-} else {
-    let authorization = client.begin_device_authorization().await?;
-    // Present user_code and open verification_uri[_complete] in the system browser.
-    let cancel = CancellationToken::new();
-    let tokens = client.complete_device_authorization(&authorization, &cancel).await?;
-    // The bound store checkpoints the first grant and every rotation BEFORE
-    // another fallible resource exchange. Do not drop this future on cancel.
-    tokens
-};
+// The host first completes official SDK browser sign-in and grant handoff.
+if !store.exists() {
+    return Err("Complete browser sign-in and credential handoff in the host first".into());
+}
+let tokens = store.refresh(&client).await?;
 let session = client.login_with_access_token(&tokens.access_token, "My device").await?;
 client.expose(Port::tcp("sync", 6789, "my-sync-protocol")).await?;
 let devices = client.devices().await?;
@@ -61,7 +55,9 @@ client.close().await?;
 
 ## Login, persistence and cancellation
 
-The SDK verifies the server-advertised issuer, client ID, resource and same-origin HTTPS OAuth endpoints. Device Flow handles pending/slow_down and exchanges the initial opaque grant for a resource-scoped access token. Refresh rotation is saved atomically before device exchange. Tokens are private Rust values, have redacted Debug output, and are not serializable. `Session` serialization excludes its device session key.
+The current coordinator uses ordinary Native applications with Device Flow disabled. The host completes Authorization Code + PKCE with an official Logto SDK; CyberGrid Lab uses the JavaScript SDK on macOS and Android SDK on Android. Import the latest resource grant with `Client::import_browser_grant(&AuthConfig, OAuthTokens)`, using verified configuration from `auth_config()`. Only `OwnedPersisted` is ready for device login. `OwnedPending` transfers ownership to Rust but requires the retained Client/store to complete checkpoint or revocation; never continue registration or drop the pending owner. The producing SDK must stop token operations after either ownership acknowledgement. See the [host handoff contract](../docs/lab-browser-login.md).
+
+The SDK verifies the server-advertised issuer, client ID, resource and same-origin HTTPS OAuth endpoints. Historical Device Flow methods remain for source compatibility, but refuse before requesting device authorization when the server declares `loginFlow: "authorization_code"`. Refresh rotation is saved atomically before device exchange. Tokens are private Rust values, have redacted Debug output, and are not serializable. `Session` serialization excludes its device session key.
 
 `CredentialStore` is an optional Unix private-file implementation: explicit path, version 4 namespace and full OAuth endpoint/scope binding, 0600 regular files, no symlinks, cross-process flock and atomic replacement. Versions 2/3 (no automatic migration), another server/application/client ID, or changed issuer/resource/scope/trusted endpoints fails while preserving the file. The SDK never discovers or imports Go credential files. For Keychain/Keystore-backed persistence, use the public OAuth token methods and persist the latest refresh grant in the host's secure store instead.
 

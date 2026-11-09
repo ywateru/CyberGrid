@@ -8,7 +8,6 @@ on:
       release_tag:
         description: 'Project release tag (SDK series keep their own versions)'
         required: true
-        default: 'v0.5.1'
         type: string
 
 permissions:

@@ -46,6 +46,6 @@ export interface Store {
  signals(to:string,after:number,now:number):Promise<Signal[]>;
  rate(key:string,now:number,limit:number):Promise<boolean>;
 }
-export interface AuthConfiguration {provider:'logto';issuer:string;clientId:string;resource:string;scope:string;deviceAuthorizationEndpoint:string;tokenEndpoint:string;authorizationEndpoint:string;revocationEndpoint:string;redirectUri:string;jwksUri:string}
+export interface AuthConfiguration {provider:'logto';loginFlow?:'authorization_code';issuer:string;clientId:string;resource:string;scope:string;deviceAuthorizationEndpoint:string;tokenEndpoint:string;authorizationEndpoint:string;revocationEndpoint:string;redirectUri:string;jwksUri:string}
 export interface Identity {configuration(clientId:string):AuthConfiguration;verify(accessToken:string):Promise<VerifiedIdentity>}
 export class ApiError extends Error {constructor(public status:number,public code:string,message:string,public retryAfter?:number){super(message);}}

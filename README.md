@@ -26,22 +26,24 @@ docker compose up --build -d
 | --- | --- | --- |
 | [Go SDK／CLI](sdk/README.md) | 0.4.0 | 端口声明、设备发现、TCP 映射、自动协调恢复 |
 | [Rust SDK](sdk-rust/README.md) | 0.2.0 | 原生 Rust API，与 Go 互通 |
-| [CyberGrid Lab](apps/tauri-test/README.md) | 0.2.0 | Tauri 2 macOS／Android 测试程序 |
+| [CyberGrid Lab](apps/tauri-test/README.md) | 0.3.0 源码 | Tauri 2 macOS／Android 测试程序，官方 SDK 网页登录 |
 | [内存协调服务](server/README.md) | memory-v1 | Logto 身份、设备与端口信令、只读管理后台 |
 
 从 [GitHub Releases](https://github.com/ywateru/CyberGrid/releases) 下载平台测试包、SDK 源码和许可证。每次发布附 SHA256SUMS 与产物清单；Actions 从锁定依赖构建。Rust 当前使用本地 Cargo path dependency，尚未发布到 crates.io。macOS 测试包未公证，Android 为包含 ADB 控制入口的 debug-test 包。
 
-客户端传入中央 HTTPS 地址与 Logto Native Application ID。该 ID 就是 OAuth `client_id`，需在 Logto 创建应用时启用 Device Flow。各设备独立完成 Logto 托管登录，不能复制另一台设备的授权文件。登录后声明本机 loopback 端口，列出同账号、同应用的设备，再将远端端口映射到本机。
+客户端传入中央 HTTPS 地址与 Logto Native Application ID。该 ID 就是 OAuth `client_id`，需在 Logto 创建普通 Native 应用并关闭 Device Flow。各设备独立完成 Logto 托管登录，不能复制另一台设备的授权文件。登录后声明本机 loopback 端口，列出同账号、同应用的设备，再将远端端口映射到本机。
+
+Lab 0.3.0 统一使用官方 Logto SDK 网页登录，已预置公开测试配置；Android 使用官方 Android SDK，Mac 的 Tauri 前端使用官方 JavaScript SDK。Device Flow 已关闭，不提供设备码入口。新协调服务和客户端需配套更新；项目发布 v0.6.0 提供 Lab 0.3.0，需与同版协调服务配套使用；GitHub v0.5.1 的 Lab 0.2.0 不适用于新认证策略。详见 [Lab 使用说明](apps/tauri-test/README.md)。
 
 ```sh
 # 已安装测试 APK、已启用 USB 调试，使用实际连接的 ADB 序列号
 python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" start
 python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" status
-python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" login \
+python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" web-login \
   --server "$CYBERGRID_SERVER" --app "$CYBERGRID_APP_ID" --name 'Android'
 ```
 
-登录命令受理后仍须在 Logto 托管页面批准授权，再查询 `status`。设备刷新、连接、发送、校验、关闭与退出命令见 [ADB 使用说明](apps/tauri-test/README.md#android-adb-测试控制)。不需要输入法、坐标点击或 WebView 注入。
+登录命令受理后仍须在系统浏览器的 Logto 托管页面完成登录，再查询 `status`。设备刷新、连接、发送、校验、关闭与退出命令见 [ADB 使用说明](apps/tauri-test/README.md#android-adb-测试控制)。不需要输入法、坐标点击或 WebView 注入。
 
 ## 管理后台
 

@@ -36,10 +36,30 @@ class FakeAdb:
             self.status = {**self.status, "pid": self.pid, "controlEpoch": "b" * 32}
 
 class ProtocolTests(unittest.TestCase):
+    def test_login_alias_uses_browser_wire_and_resume_keeps_optional_public_preset(self):
+        self.assertIn("Alias for web-login", control.parser().format_help())
+        for action in ("login", "web-login", "resume"):
+            adb = FakeAdb("fixture")
+            result = control.main(["--serial", "fixture", action], lambda _: adb)
+            self.assertTrue(result["ok"])
+            self.assertEqual(adb.sent[0]["action"], "web-login" if action == "login" else action)
+            self.assertEqual(adb.sent[0]["payload"], {"forceFallback": False})
+            self.assertEqual(len(adb.sent), 1)
+
+    def test_web_login_only_accepts_public_configuration(self):
+        adb = FakeAdb("fixture")
+        control.main(["--serial", "fixture", "web-login", "--server", "https://example.test", "--app", "native-app", "--name", "Android", "--force-fallback"], lambda _: adb)
+        self.assertEqual(adb.sent[0]["payload"], {"server": "https://example.test", "app": "native-app", "name": "Android", "forceFallback": True})
+        for option in ("--token", "--refresh-token", "--code", "--redirect-uri", "--account"):
+            with patch("sys.stderr"), self.assertRaises(SystemExit):
+                control.main(["--serial", "fixture", "web-login", option, "forbidden"], lambda _: adb)
+        self.assertEqual(len(adb.sent), 1)
+
     def test_real_command_envelope_and_config_whitelist(self):
         adb = FakeAdb("fixture")
         response = control.main(["--serial", "fixture", "login", "--server", "https://example.test", "--app", "id", "--name", "Android 4G"], lambda _: adb)
         request = adb.sent[0]
+        self.assertEqual(request["action"], "web-login")
         self.assertEqual(response["sequence"], 1)
         self.assertEqual(set(request["payload"]), {"server", "app", "name", "forceFallback"})
         self.assertRegex(request["requestId"], r"^[a-f0-9-]{36}$")

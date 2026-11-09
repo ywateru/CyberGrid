@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { openUrl } from '@tauri-apps/plugin-opener';
+import {invalidateBrowserLogin, startBrowserLogin} from './browser-login';
 import './style.css';
 
 type Port = { id: string; port: number; type: string; transport: string };
@@ -7,8 +7,8 @@ type Device = { id: string; name: string; online: boolean; lastSeen: string; por
 type Config = { baseUrl: string; appId: string; deviceName: string; forceFallback: boolean; cloudflaredPath: string };
 type RecordItem = { id: number; time: string; direction: string; peer: string; kind: string; message?: string; bytes?: number; sha256?: string; transport?: string };
 type View = {
-  phase: string; config: Config; canResume: boolean; error?: string | null;
-  authorization?: { verificationUri: string; userCode: string; expiresAt: string } | null;
+  phase: string; config: Config; presetConfig: Config; canResume: boolean; error?: string | null;
+  platform: 'desktop' | 'android'; authMode: 'browser';
   local?: { deviceId: string; deviceName: string; userId: string; ports: Port[] } | null;
   devices: Device[]; records: RecordItem[];
   connection?: { peerId: string; peerName: string; localAddress: string; transport: string; connected: boolean } | null;
@@ -16,7 +16,7 @@ type View = {
 };
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let view: View | null = null;
-let draft: Config = { baseUrl: 'https://cybergrid.aixgg.com', appId: '', deviceName: '', forceFallback: false, cloudflaredPath: '' };
+let draft: Config = { baseUrl: '', appId: '', deviceName: '', forceFallback: false, cloudflaredPath: '' };
 let messageDraft = '';
 let selectedId = '';
 let pending = false;
@@ -51,13 +51,14 @@ function render() {
       ${!hasSession ? `<section class="login-pane">
         <div class="intro"><h1>注册／登录后，连接另一端。</h1><p>在 Logto 托管页完成注册／登录，在 Mac 和 Android 使用同一个账号与应用。业务消息通过设备间的加密通道传输。</p></div>
         <form id="login-form" class="config-form">
-          <label for="app-id">Logto Native 应用 ID</label><input id="app-id" name="appId" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="url" maxlength="21" value="${escape(draft.appId)}" placeholder="从 Logto 应用复制真实 ID" ${authorizing || busy ? 'disabled' : ''} required>
+          <p class="preset-note">已预置公开测试服务与应用。Mac 和 Android 使用同一应用；每台设备分别授权。</p>
+          ${!authorizing && !busy && !initial ? '<button id="use-preset" type="button" class="text-button">使用预置测试配置</button>' : ''}
           <label for="device-name">本机名称</label><input id="device-name" name="deviceName" maxlength="80" value="${escape(draft.deviceName)}" placeholder="例如：我的 Mac" ${authorizing || busy ? 'disabled' : ''} required>
           <button id="advanced-toggle" type="button" class="text-button" aria-expanded="${showAdvanced}">${showAdvanced ? '收起连接配置' : '连接配置'}</button>
-          ${showAdvanced ? `<div class="advanced"><label for="server-url">中央服务</label><input id="server-url" name="baseUrl" type="url" value="${escape(draft.baseUrl)}" ${authorizing || busy ? 'disabled' : ''}><label for="transport-mode">连接策略</label><select id="transport-mode" ${authorizing || busy ? 'disabled' : ''}><option value="auto" ${!draft.forceFallback ? 'selected' : ''}>优先 WebRTC 直连，失败后回退</option><option value="fallback" ${draft.forceFallback ? 'selected' : ''}>强制 Cloudflare 回退（测试）</option></select><label for="provider-path">macOS cloudflared 路径（留空使用 SDK 内置）</label><input id="provider-path" value="${escape(draft.cloudflaredPath)}" placeholder="默认使用内置 provider；Android 忽略此项" ${authorizing || busy ? 'disabled' : ''}></div>` : ''}
-          ${authorizing ? `<div class="authorization" role="status"><h2>在 Logto 托管页完成注册／登录</h2><p>打开授权页面，确认这是你刚发起的设备码。</p><div class="device-code" aria-label="设备授权码">${escape(view?.authorization?.userCode)}</div><p class="auth-url">${escape(view?.authorization?.verificationUri)}</p><p class="subtle">有效期至 ${escape(datetime(view?.authorization?.expiresAt ?? ''))}。手机切换到浏览器时请保持测试 App 打开。</p><div class="actions"><button type="button" id="open-browser" class="primary">打开浏览器授权</button><button type="button" id="cancel-login" class="secondary">取消</button></div></div>` : `<div class="actions"><button type="submit" class="primary" ${busy ? 'disabled' : ''}>${busy ? '正在连接…' : '注册／登录（Logto）'}</button>${view?.canResume ? `<button type="button" id="resume-login" class="secondary" ${busy ? 'disabled' : ''}>恢复本机登录</button><button type="button" id="revoke-saved" class="text-button" ${busy ? 'disabled' : ''}>撤销本机授权</button>` : ''}${view?.phase === 'connecting' ? '<button type="button" id="cancel-login" class="secondary">取消</button>' : ''}</div>`}
+          ${showAdvanced ? `<div class="advanced"><label for="server-url">中央服务</label><input id="server-url" name="baseUrl" type="url" value="${escape(draft.baseUrl)}" ${authorizing || busy ? 'disabled' : ''}><label for="app-id">Logto Native 应用 ID</label><input id="app-id" name="appId" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="21" value="${escape(draft.appId)}" ${authorizing || busy ? 'disabled' : ''}><p class="subtle">自定义服务与应用须通过可信认证配置核对，不能替换为个人控制台的 SPA 应用。</p><label for="transport-mode">连接策略</label><select id="transport-mode" ${authorizing || busy ? 'disabled' : ''}><option value="auto" ${!draft.forceFallback ? 'selected' : ''}>优先 WebRTC 直连，失败后回退</option><option value="fallback" ${draft.forceFallback ? 'selected' : ''}>强制 Cloudflare 回退（测试）</option></select><label for="provider-path">macOS cloudflared 路径（留空使用 SDK 内置）</label><input id="provider-path" value="${escape(draft.cloudflaredPath)}" placeholder="默认使用内置 provider；Android 忽略此项" ${authorizing || busy ? 'disabled' : ''}></div>` : ''}
+          ${authorizing ? `<div class="authorization" role="status"><h2>在系统浏览器完成网页登录</h2><p>浏览器完成登录后会返回本机。不要在测试 App 中输入账号密码；手机请保持 App 打开。</p><p class="subtle">等待期间可取消，本机将安全处理已取得的授权。</p><div class="actions"><button type="button" id="cancel-login" class="secondary">取消网页登录</button></div></div>` : `<div class="actions login-actions"><button type="submit" class="primary" ${busy || initial ? 'disabled' : ''}>${busy ? '正在处理…' : '网页登录'}</button>${view?.canResume ? `<button type="button" id="resume-login" class="secondary" ${busy ? 'disabled' : ''}>恢复本机授权</button><button type="button" id="revoke-saved" class="text-button" ${busy ? 'disabled' : ''}>退出并撤销本机授权</button>` : ''}${view?.phase === 'connecting' || busy ? '<button type="button" id="cancel-login" class="text-button">取消</button>' : ''}</div>`}
         </form>
-        <p class="privacy">账号密码只输入 Logto 托管页面。每台设备分别授权，凭据保存在本机私有目录。</p>
+        <p class="privacy">账号密码只输入 Logto 托管页面。网页登录使用官方 Logto SDK，授权交接后由原生 SDK 管理本机私有凭据。</p>
       </section>` : `<section class="session-strip"><div><span class="eyebrow">本机</span><h1>${escape(view?.local?.deviceName)}</h1><p class="mono device-id">${escape(view?.local?.deviceId)}</p></div><div class="session-meta"><span>应用 <code>${escape(view?.config.appId)}</code></span><span>账号 <code>${escape(view?.local?.userId)}</code></span><button id="logout" class="secondary">退出登录</button></div></section>
       <section class="workspace"><div class="device-pane"><div class="section-head"><h2>同应用设备</h2><button id="refresh" class="text-button" ${disabled()}>刷新</button></div><p class="subtle">只显示同账号、同应用的真实终端。</p><div class="device-list">${devices.length ? devices.map((d) => `<button class="device-row ${d.id === selectedId ? 'selected' : ''}" data-device="${escape(d.id)}"><div class="device-avatar" aria-hidden="true">${d.name.toLowerCase().includes('android') ? 'A' : 'M'}</div><div class="device-info"><strong>${escape(d.name)}</strong><span><i class="dot ${d.online ? 'online' : ''}"></i>${d.online ? '在线' : '离线'} · ${d.ports.length} 个端口</span><code>${escape(d.id)}</code></div></button>`).join('') : `<div class="empty"><p>还没有另一台设备</p><span>在另一端打开 App，使用同一个账号和应用 ID 登录，再刷新。</span></div>`}</div><div class="local-ports"><h3>本机已发布端口</h3>${view?.local?.ports.map((p) => `<p><span>${escape(p.id)}</span><code>${p.port} / ${escape(p.type)}</code></p>`).join('')}</div></div>
       <div class="communication"><div class="section-head"><h2>${selected ? escape(selected.name) : '选择一个设备'}</h2>${selected ? `<span class="status-label"><i class="dot ${selected.online ? 'online' : ''}"></i>${selected.online ? '在线' : '离线'}</span>` : ''}</div>
@@ -80,14 +81,14 @@ function bind() {
   on('provider-path', 'input', (e) => draft.cloudflaredPath = (e.target as HTMLInputElement).value);
   on('transport-mode', 'change', (e) => draft.forceFallback = (e.target as HTMLSelectElement).value === 'fallback');
   on('message', 'input', (e) => messageDraft = (e.target as HTMLTextAreaElement).value);
+  on('use-preset', 'click', () => { if (view && !pending && view.phase === 'signed_out') { draft = {...view.presetConfig}; localError = ''; showAdvanced = true; render(); } });
   on('advanced-toggle', 'click', () => { showAdvanced = !showAdvanced; render(); });
-  on('login-form', 'submit', (e) => { e.preventDefault(); void action('begin_login', { config: draft }); });
+  on('login-form', 'submit', (e) => { e.preventDefault(); void browserLogin(); });
   on('resume-login', 'click', () => void action('resume_login', { config: draft }));
-  on('cancel-login', 'click', () => void action('cancel_login'));
-  on('logout', 'click', () => void action('logout'));
-  on('revoke-saved', 'click', () => void action('logout'));
+  on('cancel-login', 'click', () => { invalidateBrowserLogin(); void action('cancel_login'); });
+  on('logout', 'click', () => { invalidateBrowserLogin(); void action('logout'); });
+  on('revoke-saved', 'click', () => { invalidateBrowserLogin(); void action('logout'); });
   on('refresh', 'click', () => void action('refresh_devices'));
-  on('open-browser', 'click', () => { const url = view?.authorization?.verificationUri; if (url) void openUrl(url).catch((e) => { localError = `无法打开浏览器：${String(e)}`; render(); }); });
   document.querySelectorAll<HTMLButtonElement>('[data-device]').forEach((button) => button.addEventListener('click', () => { selectedId = button.dataset.device!; localError = ''; render(); }));
   on('connect', 'click', () => void action('connect_device', { deviceId: selectedId }));
   on('disconnect', 'click', () => void action('disconnect_device'));
@@ -100,6 +101,13 @@ async function action(command: string, args: Record<string, unknown> = {}): Prom
   try { await invoke(command, args); await refresh(true); return true; }
   catch (error) { localError = String(error); return false; }
   finally { activeCommands -= 1; pending = activeCommands > 0; render(); }
+}
+async function browserLogin(): Promise<void> {
+  if (pending || initial) return;
+  activeCommands += 1; pending = true; localError = ''; render();
+  try { await startBrowserLogin({...draft}); }
+  catch (error) { localError = error instanceof Error ? error.message : '网页登录未完成，请检查本机授权状态。'; }
+  finally { activeCommands -= 1; pending = activeCommands > 0; await refresh(true); render(); }
 }
 async function refresh(force = false) {
   try {

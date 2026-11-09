@@ -28,9 +28,12 @@ struct Request {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Login {
-    server: String,
-    app: String,
-    name: String,
+    #[serde(default)]
+    server: Option<String>,
+    #[serde(default)]
+    app: Option<String>,
+    #[serde(default)]
+    name: Option<String>,
     #[serde(default)]
     force_fallback: bool,
 }
@@ -49,6 +52,7 @@ struct Text {
 struct Empty {}
 enum Action {
     Login(LabConfig, bool),
+    WebLogin(LabConfig),
     Cancel,
     Refresh,
     Connect(String),
@@ -90,27 +94,33 @@ fn parse(bytes: &[u8]) -> Result<(Request, Action), &'static str> {
     }
     let decode = || -> Result<Action, ()> {
         Ok(match r.action.as_str() {
-            "login" | "resume" => {
+            "login" | "web-login" | "resume" => {
                 let p: Login = serde_json::from_value(r.payload.clone()).map_err(|_| ())?;
-                if p.server.len() > 2048
-                    || !(p.server.starts_with("https://") || p.server.starts_with("http://"))
-                    || p.app.is_empty()
-                    || p.app.len() > 256
-                    || p.name.is_empty()
-                    || p.name.len() > 256
+                let default = LabConfig::default();
+                let server = p.server.unwrap_or(default.base_url);
+                let app = p.app.unwrap_or(default.app_id);
+                let name = p.name.unwrap_or(default.device_name);
+                if server.len() > 2048
+                    || !(server.starts_with("https://") || server.starts_with("http://"))
+                    || app.is_empty()
+                    || app.len() > 256
+                    || name.is_empty()
+                    || name.len() > 256
                 {
                     return Err(());
                 }
-                Action::Login(
-                    LabConfig {
-                        base_url: p.server,
-                        app_id: p.app,
-                        device_name: p.name,
-                        force_fallback: p.force_fallback,
-                        cloudflared_path: String::new(),
-                    },
-                    r.action == "resume",
-                )
+                let config = LabConfig {
+                    base_url: server,
+                    app_id: app,
+                    device_name: name,
+                    force_fallback: p.force_fallback,
+                    cloudflared_path: String::new(),
+                };
+                if r.action != "resume" {
+                    Action::WebLogin(config)
+                } else {
+                    Action::Login(config, r.action == "resume")
+                }
             }
             "connect" | "probe" => {
                 let p: Device = serde_json::from_value(r.payload.clone()).map_err(|_| ())?;
@@ -276,14 +286,10 @@ fn select(value: &Value, fields: &[&str]) -> Value {
     Value::Object(result)
 }
 fn public_projection(source: &Value) -> Value {
-    let mut value = select(source, &["phase", "canResume"]);
+    let mut value = select(source, &["phase", "canResume", "platform", "authMode"]);
     value["config"] = select(
         &source["config"],
         &["baseUrl", "appId", "deviceName", "forceFallback"],
-    );
-    value["authorization"] = select(
-        &source["authorization"],
-        &["verificationUri", "userCode", "expiresAt"],
     );
     value["local"] = select(
         &source["local"],
@@ -374,6 +380,7 @@ async fn safe_view(state: &LabState) -> Value {
 async fn dispatch(state: &Arc<LabState>, action: Action) -> Result<(), String> {
     match action {
         Action::Login(config, resume) => state.start_login(config, resume).await,
+        Action::WebLogin(config) => state.begin_web_login(config).await.map(|_| ()),
         Action::Cancel => state.cancel_login().await,
         Action::Refresh => state.refresh_devices().await,
         Action::Connect(id) => state.connect_device(id).await,
@@ -526,8 +533,7 @@ mod tests {
             .as_object_mut()
             .unwrap()
             .remove("cloudflaredPath");
-        let (_, Action::Login(config, false)) =
-            parse(&serde_json::to_vec(&login).unwrap()).unwrap()
+        let (_, Action::WebLogin(config)) = parse(&serde_json::to_vec(&login).unwrap()).unwrap()
         else {
             panic!()
         };
@@ -597,14 +603,10 @@ mod tests {
         fs::remove_dir_all(directory).unwrap();
     }
     #[test]
-    fn public_projection_preserves_auth_display_but_excludes_secrets() {
+    fn public_projection_excludes_legacy_auth_display_and_secrets() {
         let source = json!({"phase":"authorizing","error":"private-response-secret","status":"private-error-chain","accessToken":"secret","config":{"baseUrl":"https://example.test","appId":"id","cloudflaredPath":"private-path"},"authorization":{"verificationUri":"https://login.example.test/activate","userCode":"PUBLIC-CODE","expiresAt":"later","deviceCode":"secret","refreshToken":"secret"},"local":{"deviceId":"device","ports":[{"id":"message","port":1234,"type":"message","transport":"tcp","registrationKey":"secret"}],"privateKey":"secret"},"devices":[],"records":[],"connection":null});
         let value = public_projection(&source);
-        assert_eq!(value["authorization"]["userCode"], "PUBLIC-CODE");
-        assert_eq!(
-            value["authorization"]["verificationUri"],
-            "https://login.example.test/activate"
-        );
+        assert!(value.get("authorization").is_none());
         assert_eq!(value["local"]["ports"][0]["port"], 1234);
         assert!(value["connection"].is_null());
         let encoded = serde_json::to_string(&value).unwrap();
