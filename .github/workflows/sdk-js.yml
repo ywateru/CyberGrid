@@ -2,9 +2,9 @@ name: Verify browser SDK
 
 on:
   push:
-    paths: ['sdk-js/**', 'server/src/**', 'server/test/fixtures.ts', 'server/package*.json', '.github/workflows/sdk-js.yml']
+    paths: ['sdk-js/**', 'server/src/**', 'server/test/**', 'server/package*.json', '.github/workflows/sdk-js.yml']
   pull_request:
-    paths: ['sdk-js/**', 'server/src/**', 'server/test/fixtures.ts', 'server/package*.json', '.github/workflows/sdk-js.yml']
+    paths: ['sdk-js/**', 'server/src/**', 'server/test/**', 'server/package*.json', '.github/workflows/sdk-js.yml']
   workflow_dispatch:
 
 permissions:
@@ -13,7 +13,9 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
+    env:
+      REQUIRE_REDIS: '1'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -21,6 +23,11 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '22.23.4'
+      - name: Install actual Redis fixture prerequisite
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y redis-server
+          command -v redis-server
       - name: Install fixture coordinator dependencies
         working-directory: server
         run: npm ci --include=dev --ignore-scripts
@@ -30,3 +37,4 @@ jobs:
           npm ci --include=dev --ignore-scripts
           npm test
           npm run test:integration
+          npm run test:bridge-integration

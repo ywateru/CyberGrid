@@ -231,11 +231,11 @@ pub async fn recover(data: &Path) -> Result<(), String> {
         }
         cybergrid_sdk::BrowserGrantCheckpoint::Empty => (),
     }
-    let mut current = c.auth_config().await.map_err(|_| failure())?;
-    let mut expected = j.expected;
-    current.coordination = None;
-    expected.coordination = None;
-    if current != expected {
+    let current = c.auth_config().await.map_err(|_| failure())?;
+    if !current
+        .same_client_binding(&j.expected, &j.config.app_id)
+        .map_err(|_| failure())?
+    {
         return Err("待清理授权的可信配置已改变；保留私有文件并禁止新授权".into());
     }
     c.revoke_refresh_token(&j.tokens.refresh_token)
@@ -671,11 +671,11 @@ impl Transaction {
         }
         if self.owned.lock().await.is_none() {
             if let Some(t) = self.latest.lock().await.as_ref() {
-                let mut current = self.client.auth_config().await.map_err(|_| failure())?;
-                let mut expected = self.expected.clone();
-                current.coordination = None;
-                expected.coordination = None;
-                if current != expected {
+                let current = self.client.auth_config().await.map_err(|_| failure())?;
+                if !current
+                    .same_client_binding(&self.expected, &self.config.app_id)
+                    .map_err(|_| failure())?
+                {
                     return Err(failure());
                 }
                 self.client
@@ -763,6 +763,11 @@ mod tests {
     }
     fn expected() -> AuthConfig {
         AuthConfig {
+            registration_admission: None,
+            endpoint_policy: None,
+            product_id: None,
+            policy_version: None,
+            products: None,
             login_flow: None,
             coordination: None,
             provider: "logto".into(),

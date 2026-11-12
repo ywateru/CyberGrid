@@ -1,0 +1,21 @@
+{
+  "name": "cybergrid-ram-workspace-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 1431 --strictPort",
+    "build": "tsc --noEmit && vite build",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "test:integration": "node --import ../../../server/node_modules/tsx/dist/loader.mjs --test test/*.integration.ts"
+  },
+  "dependencies": {
+    "@logto/browser": "3.1.2",
+    "@logto/client": "3.2.2",
+    "jose": "5.10.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vite": "^7.2.2"
+  }
+}

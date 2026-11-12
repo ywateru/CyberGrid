@@ -3,6 +3,7 @@ const methods=new Map([
  ['/api/v1/console/auth/exchange','POST'],
  ['/api/v1/console/apps','GET'],
  ['/api/v1/console/devices','GET'],
+ ['/api/v1/console/directory','GET'],
  ['/api/v1/console/session','DELETE'],
 ]);
 const requestHeaders=new Set(['authorization','content-type','x-cybergrid-epoch']);

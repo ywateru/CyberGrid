@@ -14,25 +14,30 @@ local function count(t,f) local n=0;for id,v in pairs(rows(t)) do if f(v,id) the
 local function err(code,status) return cjson.encode({error=code,status=status or 409}) end
 local function ok(v) return cjson.encode({value=v}) end
 -- Detect wrong-type corruption before any business writes (Lua has no rollback).
-for _,t in ipairs({'meta','sessions','devices','registrations','fences','signals','dedup','rates','waiters'}) do
+for _,t in ipairs({'meta','sessions','devices','registrations','admissions','fences','signals','dedup','rates','waiters'}) do
  local ty=redis.call('TYPE',key(t)).ok;if ty~='none' and ty~='hash' then return err('COORDINATOR_UNAVAILABLE',503) end
  local ex=redis.call('TYPE',key(t..':expiry')).ok;if ex~='none' and ex~='zset' then return err('COORDINATOR_UNAVAILABLE',503) end
 end
-for _,t in ipairs({'initialized','revision','sequence'}) do local ty=redis.call('TYPE',key(t)).ok;if ty~='none' and ty~='string' then return err('COORDINATOR_UNAVAILABLE',503) end end
+for _,t in ipairs({'initialized','revision','sequence','admission-sequence'}) do local ty=redis.call('TYPE',key(t)).ok;if ty~='none' and ty~='string' then return err('COORDINATOR_UNAVAILABLE',503) end end
 local meta=get('meta','state')
 if op=='init' then
  if not meta then
   if redis.call('EXISTS',key('initialized'))==1 then return err('COORDINATOR_UNAVAILABLE',503) end
-  for _,t in ipairs({'meta','sessions','devices','registrations','fences','signals','dedup','rates','waiters'}) do
+  for _,t in ipairs({'meta','sessions','devices','registrations','admissions','fences','signals','dedup','rates','waiters'}) do
    if size(t)>0 or redis.call('ZCARD',key(t..':expiry'))>0 then return err('COORDINATOR_UNAVAILABLE',503) end
   end
-  if redis.call('EXISTS',key('revision'),key('sequence'))>0 then return err('COORDINATOR_UNAVAILABLE',503) end
-  meta={epoch=a.epoch,seed=a.seed,startedAt=now,limits=a.limits};put('meta','state',meta);redis.call('SET',key('initialized'),'1')
+  if redis.call('EXISTS',key('revision'),key('sequence'),key('admission-sequence'))>0 then return err('COORDINATOR_UNAVAILABLE',503) end
+  meta={epoch=a.epoch,seed=a.seed,startedAt=now,limits=a.limits,registrationMode=a.registrationMode};put('meta','state',meta);redis.call('SET',key('initialized'),'1');if a.registrationMode=='finite-v2' then redis.call('SET',key('admission-sequence'),'0') end
  end
  if redis.call('GET',key('initialized'))~='1' or not meta.epoch or not meta.seed or not meta.startedAt or not meta.limits then return err('COORDINATOR_UNAVAILABLE',503) end
+ if (meta.registrationMode or 'legacy-v1')~=a.registrationMode then return err('REGISTRATION_MODE_MISMATCH',503) end
+ if a.registrationMode=='finite-v2' and not redis.call('GET',key('admission-sequence')) then return err('COORDINATOR_UNAVAILABLE',503) end
+ if not meta.registrationMode then meta.registrationMode='legacy-v1';put('meta','state',meta) end
  meta.revision=tonumber(redis.call('GET',key('revision')) or '0');return ok(meta)
 end
 if not meta or meta.epoch~=a.epoch then return err('COORDINATOR_RESET') end
+if meta.registrationMode~=a.registrationMode then return err('REGISTRATION_MODE_MISMATCH',503) end
+local finite=meta.registrationMode=='finite-v2'
 local L=meta.limits
 local function rev() return tonumber(redis.call('GET',key('revision')) or '0') end
 local function changed() redis.call('INCR',key('revision')) end
@@ -41,7 +46,7 @@ local function sweep(t)
  for _,id in ipairs(ids) do del(t,id) end
  return #ids
 end
-local removed=sweep('sessions')+sweep('devices');sweep('signals');sweep('registrations');sweep('dedup');sweep('rates');sweep('waiters');if removed>0 then changed() end
+local removed=sweep('sessions')+sweep('devices');sweep('signals');sweep('registrations');sweep('admissions');sweep('dedup');sweep('rates');sweep('waiters');if removed>0 then changed() end
 local function live(s)
  if not s or s.expiresAt<=now then return false,'INVALID_SESSION' end
  if s.superseded then return false,'SESSION_SUPERSEDED' end
@@ -61,6 +66,38 @@ end
 local function removeSignals(device)
  for id,v in pairs(rows('signals')) do if v.fromDeviceId==device or v.toDeviceId==device then del('signals',id) end end
 end
+-- Only finite fences have a proof that every issued ticket has expired.
+if finite then
+ local held={};for _,s in pairs(rows('sessions')) do if s.purpose=='device' and s.expiresAt>now and not s.superseded then held[s.deviceId]=true end end
+ for id,f in pairs(rows('fences')) do
+  if f.admissionVersion==2 and now>=f.maxIssuedNotAfter and not held[id] then del('fences',id) end
+ end
+end
+if op=='admissionChallenge' then
+ if not finite then return err('REGISTRATION_ADMISSION_INVALID') end
+ local f=get('fences',a.logical);return ok({now=now,epoch=meta.epoch,domain=f and f.latestDomain or '0'})
+end
+if op=='admissionMint' then
+ if not finite or a.claim.epoch~=meta.epoch then return err('REGISTRATION_ADMISSION_INVALID') end
+ local old=get('admissions',a.id)
+ if old then
+  if old.content~=a.content then return err('REGISTRATION_ADMISSION_CONFLICT') end
+  if now>=old.notAfter then return err('REGISTRATION_ADMISSION_EXPIRED') end
+  return ok({epoch=meta.epoch,domain=old.domain,issuedAt=old.issuedAt,notAfter=old.notAfter})
+ end
+ if now>=a.claim.notAfter then return err('REGISTRATION_ADMISSION_EXPIRED') end
+ local f=get('fences',a.logical)
+ if (f and f.latestDomain or '0')~=a.claim.domain then return err('REGISTRATION_ADMISSION_CONFLICT') end
+ if not f then local e,st=cap('fences',L.registrationKeys,a.userId,L.registrationKeysPerUser);if e then return err(e,st) end end
+ if size('registrations')+size('admissions')+size('dedup')>=L.idempotency then return err('CAPACITY_EXCEEDED',503) end
+ local order=tonumber(redis.call('GET',key('admission-sequence')))
+ if not order or order<0 or order~=math.floor(order) or order>=9007199254740991 then return err('CAPACITY_EXCEEDED',503) end
+ -- All rejecting checks precede the first mint write.
+ order=redis.call('INCR',key('admission-sequence'));local domain=string.format('%.0f',order);local notAfter=now+86400000
+ f=f or {userId=a.userId};f.admissionVersion=2;f.latestDomain=domain;f.maxIssuedNotAfter=math.max(f.maxIssuedNotAfter or 0,notAfter);f.revision=0;f.requestId='';f.content=''
+ put('fences',a.logical,f);put('admissions',a.id,{content=a.content,domain=domain,issuedAt=now,notAfter=notAfter},notAfter)
+ return ok({epoch=meta.epoch,domain=domain,issuedAt=now,notAfter=notAfter})
+end
 if op=='cleanup' then return ok(true) end
 if op=='meta' then return ok({epoch=meta.epoch,revision=rev(),now=now,startedAt=meta.startedAt}) end
 if op=='current' then local s,e=current(a.hash);if not s then return err(e,401) end;return ok(s) end
@@ -68,11 +105,24 @@ if op=='session' then return ok(get('sessions',a.hash) or cjson.null) end
 if op=='register' then
  if a.expectedEpoch~=meta.epoch then return err('COORDINATOR_RESET') end
  local f=a.logical and get('fences',a.logical)
- if f then
-  if a.registrationRevision<f.revision then return err('SESSION_SUPERSEDED') end
-  if a.registrationRevision==f.revision and (a.content~=f.content or a.requestId~=f.requestId) then return err('REGISTRATION_ID_CONFLICT') end
+ if finite and a.logical then
+  if not a.admission then return err('REGISTRATION_ADMISSION_REQUIRED') end
+  if a.admission.epoch~=meta.epoch then return err('REGISTRATION_ADMISSION_INVALID') end
+  if now>=a.admission.notAfter then return err('REGISTRATION_ADMISSION_EXPIRED') end
+  if not f or f.admissionVersion~=2 or f.latestDomain~=a.admission.domain then return err('REGISTRATION_ADMISSION_CONFLICT') end
  end
+ if f and a.registrationRevision<f.revision then return err('SESSION_SUPERSEDED') end
  local old=get('registrations',a.id)
+ -- Recover only an exact pre-binding dynamic receipt; never create/migrate one.
+ local legacy=a.legacy and a.binding and a.binding.policyMode=='dynamic' and (not a.logical or a.binding.authClientId==a.appId)
+ local legacyFence=legacy and (not a.logical or (f and f.userId==a.userId and f.revision==a.registrationRevision and f.requestId==a.requestId and f.content==a.legacy.content))
+ if legacy and legacyFence then
+  if old and old.content==a.legacy.content and old.hash==a.legacy.hash then
+   local s=current(old.hash);if not s then return err('REGISTRATION_ATTEMPT_EXPIRED') end
+   if s.authClientId==nil and s.policyMode==nil and s.protocol=='memory-v1' and s.hash==a.legacy.hash and s.userId==a.userId and s.appId==a.appId and ((a.logical and s.purpose=='device' and s.deviceId==a.logical) or (not a.logical and s.purpose=='console' and s.deviceId==cjson.null)) then return ok(s) end
+  elseif not old and a.logical then return err('REGISTRATION_ATTEMPT_EXPIRED') end
+ end
+ if f and a.registrationRevision==f.revision and (a.content~=f.content or a.requestId~=f.requestId) then return err('REGISTRATION_ID_CONFLICT') end
  if old then
   if old.content~=a.content then return err('REGISTRATION_ID_CONFLICT') end
   local s=current(old.hash);if not s then return err('REGISTRATION_ATTEMPT_EXPIRED') end
@@ -84,17 +134,19 @@ if op=='register' then
  local replacing=previous and previous.sessionHash
  local e,st=cap('sessions',L.sessions,a.userId,L.sessionsPerUser,replacing);if e then return err(e,st) end
  if a.logical and not previous then e,st=cap('devices',L.devices,a.userId,L.devicesPerUser);if e then return err(e,st) end end
- local reclaim=0;for id,r in pairs(rows('registrations')) do if a.logical and r.deviceId==a.logical then reclaim=reclaim+1 end end
+ local reclaim=0;for id,r in pairs(rows('registrations')) do if not finite and a.logical and r.deviceId==a.logical then reclaim=reclaim+1 end end
  local dedupReclaim=0;for _,r in pairs(rows('dedup')) do if replacing and r.sessionHash==replacing then dedupReclaim=dedupReclaim+1 end end
- if size('registrations')+size('dedup')-reclaim-dedupReclaim>=L.idempotency then return err('CAPACITY_EXCEEDED',503) end
+ if size('registrations')+size('admissions')+size('dedup')-reclaim-dedupReclaim>=L.idempotency then return err('CAPACITY_EXCEEDED',503) end
  local s={purpose=a.logical and 'device' or 'console',hash=a.hash,userId=a.userId,appId=a.appId,deviceId=a.logical or cjson.null,expiresAt=now+86400000,protocol='memory-v1'}
+ if finite and a.logical then s.expiresAt=math.min(s.expiresAt,a.admission.notAfter);s.admissionDomain=a.admission.domain;s.admissionNotAfter=a.admission.notAfter end
+ if a.binding then s.authClientId=a.binding.authClientId;s.policyMode=a.binding.policyMode end
  if a.logical then
   s.incarnation=a.incarnation
   if replacing then del('sessions',replacing) end
-  for id,r in pairs(rows('registrations')) do if r.deviceId==a.logical then del('registrations',id) end end
+  for id,r in pairs(rows('registrations')) do if not finite and r.deviceId==a.logical then del('registrations',id) end end
   for id,r in pairs(rows('dedup')) do if r.sessionHash==replacing then del('dedup',id) end end
-  put('devices',a.logical,{id=a.logical,userId=a.userId,appId=a.appId,name=a.name,lastSeen=now,ports=cjson.decode('[]'),tunnelUrl=cjson.null,certificateFingerprint=cjson.null,iroh=cjson.null,incarnation=s.incarnation,publishRevision=0,sessionHash=a.hash,snapshotDigest=''},now+86400000)
-  put('fences',a.logical,{userId=a.userId,revision=a.registrationRevision,requestId=a.requestId,content=a.content})
+  put('devices',a.logical,{id=a.logical,userId=a.userId,appId=a.appId,name=a.name,lastSeen=now,ports=cjson.decode('[]'),tunnelUrl=cjson.null,certificateFingerprint=cjson.null,iroh=cjson.null,incarnation=s.incarnation,publishRevision=0,sessionHash=a.hash,snapshotDigest=''},s.expiresAt)
+  if finite then f.revision=a.registrationRevision;f.requestId=a.requestId;f.content=a.content;put('fences',a.logical,f) else put('fences',a.logical,{userId=a.userId,revision=a.registrationRevision,requestId=a.requestId,content=a.content}) end
   removeSignals(a.logical)
  end
  put('sessions',a.hash,s,s.expiresAt);put('registrations',a.id,{content=a.content,hash=a.hash,deviceId=a.logical or cjson.null},s.expiresAt);changed();return ok(s)
@@ -113,12 +165,30 @@ if a.sessionHash then local s,e=current(a.sessionHash);if not s then return err(
 if op=='publish' then
  local s,e=current(a.hash);if not s then return err(e,401) end
  local d=get('devices',s.deviceId)
+ local currentRevision=tonumber(d.publishRevisionExact or d.publishRevision)
+ a.revision=tonumber(a.revisionText)
  if a.incarnation~=s.incarnation then return err('INCARNATION_MISMATCH') end
- if a.revision<d.publishRevision then return err('STALE_PUBLISH_REVISION') end
- if a.revision==d.publishRevision and a.digest~=d.snapshotDigest then return err('PUBLISH_REVISION_CONFLICT') end
+ if a.revision<currentRevision then return err('STALE_PUBLISH_REVISION') end
+ if a.revision==currentRevision and a.digest~=d.snapshotDigest then return err('PUBLISH_REVISION_CONFLICT') end
+ local history=d.bridgeHistory or {};local nextHistory={};local count=0
+ for _,b in ipairs(history) do nextHistory[b.id]=b;count=count+1 end
+ if a.revision~=currentRevision then
+  for _,b in ipairs(a.bridgeRecords) do
+   local old=nextHistory[b.id]
+   if b.expires<=now or b.expires>now+300000 or (old and (tonumber(b.revision)<tonumber(old.revision) or (tonumber(b.revision)==tonumber(old.revision) and (b.identity~=old.identity or b.expires<old.expires)))) then return err('INVALID_INPUT',400) end
+   if not old then count=count+1 end;if count>4 then return err('INVALID_INPUT',400) end;nextHistory[b.id]=b
+  end
+ end
+ local storedHistory={};for _,b in pairs(nextHistory) do table.insert(storedHistory,b) end
  local change=not online(d) or a.digest~=d.snapshotDigest
- d.ports=a.update.ports;d.tunnelUrl=a.update.tunnelUrl;d.certificateFingerprint=a.update.certificateFingerprint;d.iroh=a.update.iroh;d.publishRevision=a.revision;d.snapshotDigest=a.digest;d.lastSeen=now
- put('devices',d.id,d,now+86400000);if change then changed() end;return ok(true)
+ d.bridgeHistory=storedHistory;d.bridges=nil;d.bridgesJson=a.bridgesJson;d.ports=a.update.ports;d.tunnelUrl=a.update.tunnelUrl;d.certificateFingerprint=a.update.certificateFingerprint;d.iroh=a.update.iroh;d.publishRevision=a.revision;d.publishRevisionExact=a.revisionText;d.snapshotDigest=a.digest;d.lastSeen=now
+ put('devices',d.id,d,math.min(now+86400000,s.admissionNotAfter or now+86400000));if change then changed() end;return ok(true)
+end
+if op=='directorySample' then
+ local s,e=current(a.hash);if not s then return err(e,401) end
+ if s.purpose=='device' and s.appId~=a.productId then return err('FORBIDDEN',403) end
+ local out={};for _,d in pairs(rows('devices')) do if d.userId==s.userId and d.appId==a.productId then d.online=not not online(d);table.insert(out,d) end end
+ return ok({epoch=meta.epoch,now=now,userId=s.userId,purpose=s.purpose,devices=out})
 end
 if op=='device' then local d=get('devices',a.id);if not d then return ok(cjson.null) end;d.online=not not online(d);return ok(d) end
 if op=='devices' then
@@ -136,7 +206,7 @@ if op=='postSignal' then
  if a.value.toIncarnation~=to.incarnation then return err('INCARNATION_MISMATCH') end
  local old=get('dedup',a.id)
  if old then if old.content~=a.content then return err('SIGNAL_ID_CONFLICT') end;return ok(old.id) end
- if size('registrations')+size('dedup')>=L.idempotency then return err('CAPACITY_EXCEEDED',503) end
+ if size('registrations')+size('admissions')+size('dedup')>=L.idempotency then return err('CAPACITY_EXCEEDED',503) end
  local n=0;local bytes=0;local inbox=0;local inboxBytes=0;local un=0;local ub=0
  for _,m in pairs(rows('signals')) do
   local b=string.len(m.payload);n=n+1;bytes=bytes+b

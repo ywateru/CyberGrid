@@ -180,6 +180,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             client
                 .expose(Port::tcp("echo", addr.port(), "echo"))
                 .await?;
+            client.enable_remote().await?;
             println!(
                 "{}",
                 serde_json::json!({"event":"host-ready","deviceId":session.device_id,"port":addr.port()})

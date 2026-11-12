@@ -36,6 +36,54 @@ class FakeAdb:
             self.status = {**self.status, "pid": self.pid, "controlEpoch": "b" * 32}
 
 class ProtocolTests(unittest.TestCase):
+    def test_late_outcome_matches_bounded_summary_and_uses_current_state(self):
+        adb = FakeAdb("fixture")
+        request = {"controlEpoch": "a" * 32, "sequence": 1, "requestId": "first"}
+        adb.result = {**request, "sequence": 2, "requestId": "second", "ok": True}
+        adb.status["state"] = {"localClosed": True, "coordinatorRevocation": "pending"}
+        adb.status["completed"] = [{**request, "ok": True, "code": "OK", "state": {"localClosed": False}}]
+        outcome = control.wait_for_result(adb, request, 123, 1)
+        self.assertEqual(outcome["requestId"], "first")
+        self.assertEqual(outcome["state"], adb.status["state"])
+        adb.result = {**request, "ok": True, "state": {"localClosed": False}}
+        self.assertTrue(control.wait_for_result(adb, request, 123, 1)["state"]["localClosed"])
+        self.assertEqual(adb.sent, [])
+
+    def test_matching_current_rejection_is_not_shadowed_by_cached_result(self):
+        adb = FakeAdb("fixture")
+        request = {"controlEpoch": "a" * 32, "sequence": 1, "requestId": "first"}
+        adb.result = {**request, "ok": True}
+        adb.status["completed"] = [{**request, "ok": False, "code": "SEQUENCE_CONFLICT"}]
+        with self.assertRaises(control.Failure) as rejected:
+            control.wait_for_result(adb, request, 123, 1)
+        self.assertEqual(rejected.exception.code, "SEQUENCE_CONFLICT")
+
+    def test_completed_cache_is_bounded_and_epoch_bound(self):
+        adb = FakeAdb("fixture")
+        request = {"controlEpoch": "a" * 32, "sequence": 1, "requestId": "first"}
+        adb.status["completed"] = [{}] * 17
+        with self.assertRaises(control.Failure) as invalid:
+            control.wait_for_result(adb, request, 123, 1)
+        self.assertEqual(invalid.exception.code, "INVALID_RESPONSE")
+        adb.status["controlEpoch"] = "b" * 32
+        adb.status["completed"] = [{**request, "ok": True}]
+        with self.assertRaises(control.Failure) as unknown:
+            control.wait_for_result(adb, request, 123, 1)
+        self.assertEqual(unknown.exception.code, "OUTCOME_UNKNOWN")
+
+    def test_remote_controls_empty_payload_no_credentials_or_replay(self):
+        for action in ("enable-remote", "disable-remote"):
+            adb = FakeAdb("fixture")
+            result = control.main(["--serial", "fixture", action], lambda _: adb)
+            self.assertTrue(result["ok"])
+            self.assertEqual(adb.sent[0]["action"], action)
+            self.assertEqual(adb.sent[0]["payload"], {})
+            self.assertEqual(len(adb.sent), 1)
+            for option in ("--token", "--app", "--name", "--server"):
+                with patch("sys.stderr"), self.assertRaises(SystemExit):
+                    control.main(["--serial", "fixture", action, option, "forbidden"], lambda _: adb)
+            self.assertEqual(len(adb.sent), 1)
+
     def test_login_alias_uses_browser_wire_and_resume_keeps_optional_public_preset(self):
         self.assertIn("Alias for web-login", control.parser().format_help())
         for action in ("login", "web-login", "resume"):
@@ -62,6 +110,16 @@ class ProtocolTests(unittest.TestCase):
             self.assertEqual(adb.sent[0]["payload"], {"forceFallback": False, "directStrategy": strategy})
         with patch("sys.stderr"), self.assertRaises(SystemExit):
             control.main(["--serial", "fixture", "web-login", "--direct-strategy", "relay"], FakeAdb)
+
+    def test_direct_transport_is_optional_bounded_and_never_accepts_credentials(self):
+        for action in ("web-login", "resume"):
+            for mode in ("auto", "webrtc-only", "iroh-candidate"):
+                adb = FakeAdb("fixture")
+                control.main(["--serial", "fixture", action, "--direct-transport", mode], lambda _: adb)
+                self.assertEqual(adb.sent[0]["payload"], {"forceFallback": False, "directTransport": mode})
+                self.assertEqual(len(adb.sent), 1)
+            with patch("sys.stderr"), self.assertRaises(SystemExit):
+                control.main(["--serial", "fixture", action, "--direct-transport", "iroh-only"], FakeAdb)
 
     def test_real_command_envelope_and_config_whitelist(self):
         adb = FakeAdb("fixture")

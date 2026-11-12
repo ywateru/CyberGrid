@@ -33,11 +33,23 @@ def eligible(relative):
     return True
 
 
+def binary_allowed(relative, data):
+    """Binary exceptions apply to exact files or the existing reviewed roots."""
+    try:
+        data.decode('utf-8')
+        binary = b'\0' in data
+    except UnicodeDecodeError:
+        binary = True
+    name = relative.as_posix()
+    return not binary or name in POLICY.get('allowedBinaryFiles', []) or any(
+        name.startswith(prefix + '/') for prefix in POLICY['allowedBinaryRoots'])
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', type=Path, required=True)
     args = parser.parse_args()
-    keep, excluded = [], []
+    keep, excluded, violations = [], [], []
     for directory, dirs, files in os.walk(ROOT):
         dirs.sort()
         files.sort()
@@ -51,16 +63,21 @@ def main():
             if path.is_symlink():
                 item['reason'] = 'symlink requires explicit review'
                 excluded.append(item)
+            elif eligible(relative) and not binary_allowed(relative, path.read_bytes()):
+                item['reason'] = 'binary is not an explicit reviewed exception'
+                violations.append(item)
             elif eligible(relative):
                 item['sha256'] = hashlib.sha256(path.read_bytes()).hexdigest()
                 keep.append(item)
             else:
                 excluded.append(item)
-    report = {'status': 'PLAN_ONLY_NOT_PRIVACY_APPROVAL', 'keptCount': len(keep), 'keptBytes': sum(x['bytes'] for x in keep), 'archiveCount': len(excluded), 'archiveBytes': sum(x['bytes'] for x in excluded), 'keep': keep, 'archive': excluded}
+    report = {'status': 'PLAN_BLOCKED_BINARY_POLICY' if violations else 'PLAN_ONLY_NOT_PRIVACY_APPROVAL', 'binaryPolicyViolations': violations, 'keptCount': len(keep), 'keptBytes': sum(x['bytes'] for x in keep), 'archiveCount': len(excluded), 'archiveBytes': sum(x['bytes'] for x in excluded), 'keep': keep, 'archive': excluded}
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2) + '\n')
     args.out.chmod(0o600)
-    print(json.dumps({k: report[k] for k in ['status', 'keptCount', 'keptBytes', 'archiveCount', 'archiveBytes']}))
+    print(json.dumps({k: report[k] for k in ['status', 'keptCount', 'keptBytes', 'archiveCount', 'archiveBytes', 'binaryPolicyViolations']}))
+    if violations:
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':

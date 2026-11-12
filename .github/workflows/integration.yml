@@ -1,0 +1,63 @@
+name: Verify native SDK and RAM-only modules
+
+on:
+  push:
+    paths: ['sdk-rust/**', 'sdk-js/**', 'server/**', 'examples/ram-only-workspace/**', 'scripts/release/**', '.github/workflows/integration.yml']
+  pull_request:
+    paths: ['sdk-rust/**', 'sdk-js/**', 'server/**', 'examples/ram-only-workspace/**', 'scripts/release/**', '.github/workflows/integration.yml']
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-integration:
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/target/ci-integration
+      CARGO_INCREMENTAL: '0'
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      REQUIRE_REDIS: '1'
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22.23.4'
+      - name: Install real Redis and fixed Rust toolchain
+        run: |
+          brew list redis >/dev/null 2>&1 || brew install redis
+          command -v redis-server
+          rustup toolchain install 1.97.1 --profile minimal --component clippy
+      - name: Install locked Node dependencies and build actual coordinator and ESM
+        run: |
+          npm --prefix server ci --include=dev --ignore-scripts
+          npm --prefix server run build
+          npm --prefix sdk-js ci --include=dev --ignore-scripts
+          npm --prefix sdk-js run build
+          npm --prefix examples/ram-only-workspace/desktop ci --include=dev --ignore-scripts
+      - name: Run native repository integration including external-prerequisite tests
+        run: cargo +1.97.1 test --locked --manifest-path sdk-rust/Cargo.toml -- --include-ignored
+      - name: Verify official RAM owner and real loopback modules
+        run: |
+          npm --prefix examples/ram-only-workspace/desktop test
+          npm --prefix examples/ram-only-workspace/desktop run build
+          cargo +1.97.1 test --locked --manifest-path examples/ram-only-workspace/Cargo.toml --workspace -- --include-ignored
+          cargo +1.97.1 clippy --locked --manifest-path examples/ram-only-workspace/Cargo.toml --workspace --all-targets -- -D warnings
+          cargo +1.97.1 build --locked --manifest-path examples/ram-only-workspace/Cargo.toml --workspace
+      - name: Verify the complete remote Web module against real Redis
+        run: |
+          test -f examples/ram-only-workspace/web/package.json
+          npm --prefix examples/ram-only-workspace/web ci --include=dev --ignore-scripts
+          npm --prefix examples/ram-only-workspace/web test
+          npm --prefix examples/ram-only-workspace/web run test:integration
+          npm --prefix examples/ram-only-workspace/web run build
+          python3 scripts/release/collect-sample-licenses.py --check
+      - name: Verify dependency locks did not drift
+        run: git diff --exit-code -- sdk-rust/Cargo.lock server/package-lock.json sdk-js/package-lock.json examples/ram-only-workspace/Cargo.lock examples/ram-only-workspace/desktop/package-lock.json examples/ram-only-workspace/web/package-lock.json
+      # These controlled OAuth/loopback tests do not fetch private AnyWork, run
+      # real Logto Cloud login, prove Noise, or complete phone/WAN/long-run gates.

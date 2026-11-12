@@ -128,6 +128,16 @@ async fn logout(state: tauri::State<'_, Arc<LabState>>) -> Result<(), String> {
     state.shutdown(true).await
 }
 #[tauri::command]
+async fn enable_remote(state: tauri::State<'_, Arc<LabState>>) -> Result<(), String> {
+    state.inner().start_enable_remote().await
+}
+#[tauri::command]
+async fn disable_remote(
+    state: tauri::State<'_, Arc<LabState>>,
+) -> Result<cybergrid_sdk::RemoteDisableOutcome, String> {
+    state.disable_remote().await
+}
+#[tauri::command]
 async fn refresh_devices(state: tauri::State<'_, Arc<LabState>>) -> Result<(), String> {
     state.refresh_devices().await
 }
@@ -185,6 +195,8 @@ pub fn run() {
             cancel_login,
             logout,
             refresh_devices,
+            enable_remote,
+            disable_remote,
             connect_device,
             disconnect_device,
             send_message,

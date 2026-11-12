@@ -37,5 +37,7 @@ jobs:
         run: npm --prefix server test
       - name: Verify server dependency license texts
         run: python3 scripts/release/collect-server-licenses.py --check
+      - name: Verify explicit public-source binary policy
+        run: python3 scripts/release/test-source-policy.py
       - name: Verify non-root Docker and Compose Redis persistence
         run: python3 scripts/release/check-docker.py

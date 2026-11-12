@@ -235,15 +235,13 @@ impl Client {
         }))
         .with_client_auth_cert(vec![rt.identity.cert.clone()], rt.identity.key())
         .map_err(|_| transport("client certificate invalid"))?;
-        let tls = tokio::time::timeout(
-            Duration::from_secs(10),
-            TlsConnector::from(Arc::new(config)).connect(
-                ServerName::try_from("cybergrid.invalid")
-                    .map_err(|_| protocol("invalid TLS name"))?,
-                raw,
-            ),
-        )
-        .await
+        let tls = tokio::select! {
+            _ = rt.cancel.cancelled() => return Err(Error::Cancelled),
+            tls = tokio::time::timeout(Duration::from_secs(10),
+                TlsConnector::from(Arc::new(config)).connect(
+                    ServerName::try_from("cybergrid.invalid")
+                        .map_err(|_| protocol("invalid TLS name"))?, raw)) => tls,
+        }
         .map_err(|_| Error::Timeout("peer TLS handshake"))?
         .map_err(|_| transport("peer TLS authentication rejected"))?;
         let cert = tls
@@ -294,6 +292,7 @@ impl Client {
         expected: Option<&Device>,
         generation: Option<u64>,
     ) -> Result<Arc<Peer>> {
+        self.require_remote_access()?;
         let rt = self.active().await?;
         if generation.is_some_and(|generation| generation != rt.generation) {
             return Err(Error::Cancelled);
@@ -320,11 +319,11 @@ impl Client {
         .with_client_cert_verifier(Arc::new(Pins { pins }))
         .with_single_cert(vec![rt.identity.cert.clone()], rt.identity.key())
         .map_err(|_| transport("server certificate invalid"))?;
-        let tls = tokio::time::timeout(
-            Duration::from_secs(10),
-            TlsAcceptor::from(Arc::new(config)).accept(raw),
-        )
-        .await
+        let tls = tokio::select! {
+            _ = rt.cancel.cancelled() => return Err(Error::Cancelled),
+            tls = tokio::time::timeout(Duration::from_secs(10),
+                TlsAcceptor::from(Arc::new(config)).accept(raw)) => tls,
+        }
         .map_err(|_| Error::Timeout("peer TLS handshake"))?
         .map_err(|_| transport("peer TLS authentication rejected"))?;
         let cert = tls
@@ -354,6 +353,7 @@ impl Client {
         if rt.cancel.is_cancelled() || self.generation() != rt.generation {
             return Err(Error::Cancelled);
         }
+        self.require_remote_access()?;
         self.event("mutual-tls-ready", Some(path), Some(&id), None);
         let mux = Mux::start(Box::new(tls), false, rt.cancel.child_token());
         self.remember_peer(id, path.into(), mux, rt.generation, None)

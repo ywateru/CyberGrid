@@ -704,6 +704,13 @@ struct Control {
     devices: HashMap<String, Value>,
     signals: Vec<Value>,
     n: u64,
+    exchange_replies: Vec<u16>,
+    revoke_fails: bool,
+    pause_publishes: usize,
+    publish_barrier: Option<Arc<std::sync::Barrier>>,
+    user_override: Option<String>,
+    config_failure: bool,
+    config_override: Option<(String, String)>,
 }
 async fn control() -> (Fixture, Arc<Mutex<Control>>) {
     let state = Arc::new(Mutex::new(Control {
@@ -715,12 +722,13 @@ async fn control() -> (Fixture, Arc<Mutex<Control>>) {
     let b = base.clone();
     let f=Fixture::new(Arc::new(move|method,path,body,auth|{
         let mut s=st.lock().unwrap();
-        if path.starts_with("/api/v1/auth/config?"){let mut config=public_config(&b.lock().unwrap(),"RealA");config["coordination"]["epoch"]=json!(s.epoch);return(200,config);}
+        if path.starts_with("/api/v1/auth/config?"){if s.config_failure{return(503,json!({"error":{"code":"UNAVAILABLE"}}));}let mut config=public_config(&b.lock().unwrap(),"RealA");config["coordination"]["epoch"]=json!(s.epoch);if let Some((field,value))=&s.config_override {config[field]=json!(value);}return(200,config);}
         let who=format!("id-{}",auth.strip_prefix("Bearer key-").unwrap_or("missing"));
-        if method=="POST"&&path=="/api/v1/auth/exchange"{let v:Value=serde_json::from_slice(&body).unwrap();s.registrations.push(v.clone());let request=v["requestId"].as_str().unwrap().to_owned();if let Some(old)=s.attempts.get(&request){return(200,old.clone());}let name=v["deviceName"].as_str().unwrap();let id=format!("id-{name}");let incarnation=uuid::Uuid::new_v4().to_string();s.devices.insert(id.clone(),json!({"incarnation":incarnation,"publishRevision":0,"id":id,"name":name,"online":true,"lastSeen":chrono::Utc::now(),"ports":[],"tunnelUrl":null,"certificateFingerprint":null}));let out=json!({"coordinatorEpoch":s.epoch,"incarnation":incarnation,"purpose":"device","appId":v["appId"],"sessionKey":format!("key-{name}"),"expiresAt":chrono::Utc::now()+chrono::Duration::hours(1),"deviceId":id,"user":{"id":"fixture-user"}});s.attempts.insert(request,out.clone());return(200,out);}
+        if method=="POST"&&path=="/api/v1/auth/exchange"{let v:Value=serde_json::from_slice(&body).unwrap();s.registrations.push(v.clone());if v["coordinatorEpoch"]!=s.epoch{return(409,json!({"error":{"code":"COORDINATOR_RESET"}}));}let reply=if s.exchange_replies.is_empty(){200}else{s.exchange_replies.remove(0)};if reply==401||reply==403||reply==409{return(reply,json!({"error":{"code":if reply==401{"INVALID_IDENTITY"}else if reply==409{"COORDINATOR_RESET"}else{"APPLICATION_DENIED"}}}));}let request=v["requestId"].as_str().unwrap().to_owned();if let Some(old)=s.attempts.get(&request){return(200,old.clone());}let name=v["deviceName"].as_str().unwrap();let id=format!("id-{name}");let incarnation=uuid::Uuid::new_v4().to_string();s.devices.insert(id.clone(),json!({"incarnation":incarnation,"publishRevision":0,"id":id,"name":name,"online":true,"lastSeen":chrono::Utc::now(),"ports":[],"tunnelUrl":null,"certificateFingerprint":null}));let out=json!({"coordinatorEpoch":s.epoch,"incarnation":incarnation,"purpose":"device","appId":v["appId"],"sessionKey":format!("key-{name}"),"expiresAt":chrono::Utc::now()+chrono::Duration::hours(1),"deviceId":id,"user":{"id":s.user_override.as_deref().unwrap_or("fixture-user")}});s.attempts.insert(request,out.clone());if reply==599{return(599,json!({"error":{"code":"RESPONSE_LOST"}}));}return(200,out);}
         // Each fixture client routes its own heartbeat through a separate name query.
         if method=="PUT"&&path.starts_with("/api/v1/devices/self"){
             // Certificate CN maps to the fixture's generated device identity; first missing fingerprint receives each initial heartbeat.
+            if s.pause_publishes>0 {s.pause_publishes-=1;let barrier=s.publish_barrier.as_ref().unwrap();barrier.wait();barrier.wait();}
             let body:Value=serde_json::from_slice(&body).unwrap();let fp=body["certificateFingerprint"].clone();
             let id=who.clone();
             let epoch=s.epoch.clone();let fail=s.fail_next_publish;s.fail_next_publish=false;let d=s.devices.get_mut(&id).unwrap();d["publishRevision"]=body["publishRevision"].clone();d["certificateFingerprint"]=fp;d["ports"]=body["ports"].clone();d["tunnelUrl"]=body.get("tunnelUrl").cloned().unwrap_or(Value::Null);d["iroh"]=body.get("iroh").cloned().unwrap_or(Value::Null);if fail{return(599,json!({"coordinatorEpoch":epoch,"error":{"code":"RESPONSE_LOST"}}));}return(200,json!({"device":d,"coordinatorEpoch":epoch}));
@@ -728,7 +736,7 @@ async fn control() -> (Fixture, Arc<Mutex<Control>>) {
         if method=="GET"&&path=="/api/v1/devices"{return(200,json!({"coordinatorEpoch":s.epoch,"devices":s.devices.values().collect::<Vec<_>>()}));}
         if method=="POST"&&path=="/api/v1/signals"{let mut v:Value=serde_json::from_slice(&body).unwrap();s.n+=1;v["id"]=json!(s.n);let kind=v["kind"].as_str().unwrap().to_owned();v["fromDeviceId"]=json!(who);v["coordinatorEpoch"]=json!(s.epoch);v["fromIncarnation"]=s.devices[&who]["incarnation"].clone();assert!(matches!(kind.as_str(),"offer"|"answer"|"candidate"|"close"));s.signals.push(v);return(200,json!({"id":s.n,"coordinatorEpoch":s.epoch}));}
         if method=="GET"&&path.starts_with("/api/v1/signals?"){if s.drop_signals{return(200,json!({"coordinatorEpoch":s.epoch,"signals":[],"cursor":s.n}));}let after=path.split("after=").nth(1).unwrap().split('&').next().unwrap().parse::<u64>().unwrap();return(200,json!({"coordinatorEpoch":s.epoch,"signals":s.signals.iter().filter(|s|s["id"].as_u64().unwrap()>after&&s["toDeviceId"]==who).collect::<Vec<_>>(),"cursor":s.n}));}
-        if method=="DELETE"&&path=="/api/v1/session"{return(200,json!({"ok":true}));}
+        if method=="DELETE"&&path=="/api/v1/session"{if s.revoke_fails{return(503,json!({"error":{"code":"UNAVAILABLE"}}));}return(200,json!({"ok":true}));}
         (404,json!({"error":{"code":"NOT_FOUND"}}))
     })).await;
     *base.lock().unwrap() = f.base.clone();
@@ -759,9 +767,11 @@ async fn actual_local_websocket_mtls_smux_port_halfclose_wrong_pin_and_close() {
     a.login_with_access_token("fixture-token-a", "a")
         .await
         .unwrap();
+    a.enable_remote().await.unwrap();
     b.login_with_access_token("fixture-token-b", "b")
         .await
         .unwrap();
+    b.enable_remote().await.unwrap();
     let (port, echo) = echo().await;
     b.expose(Port::tcp("echo", port, "echo")).await.unwrap();
     let device = a.device("id-b").await.unwrap();
@@ -816,9 +826,11 @@ async fn actual_local_webrtc_mapping_and_idle_reuse() {
     a.login_with_access_token("fixture-token-a", "a")
         .await
         .unwrap();
+    a.enable_remote().await.unwrap();
     b.login_with_access_token("fixture-token-b", "b")
         .await
         .unwrap();
+    b.enable_remote().await.unwrap();
     let (port, echo) = echo().await;
     b.expose(Port::tcp("echo", port, "echo")).await.unwrap();
     let peer = tokio::time::timeout(Duration::from_secs(15), a.connect("id-b"))
@@ -1015,6 +1027,7 @@ async fn epoch_reset_recovers_once_republishes_and_close_stops_recovery() {
     });
     c.set_auth_provider(auth.clone()).await;
     let first = c.login_with_access_token("first", "a").await.unwrap();
+    c.enable_remote().await.unwrap();
     c.expose(Port::tcp("persist", 12345, "intent"))
         .await
         .unwrap();
@@ -1058,6 +1071,7 @@ async fn uncertain_first_snapshot_retires_attempt_before_changing_pin() {
     }))
     .await;
     c.login_with_access_token("first", "a").await.unwrap();
+    c.enable_remote().await.unwrap();
     {
         let mut s = state.lock().unwrap();
         s.epoch = "new-boot".into();
@@ -1103,7 +1117,9 @@ async fn mapping_listener_survives_epoch_reset_and_only_new_tcp_uses_fresh_peer(
         .await;
     }
     a.login_with_access_token("a", "a").await.unwrap();
+    a.enable_remote().await.unwrap();
     b.login_with_access_token("b", "b").await.unwrap();
+    b.enable_remote().await.unwrap();
     let (port, echo) = echo().await;
     b.expose(Port::tcp("echo", port, "echo")).await.unwrap();
     let mapping = a
@@ -1236,6 +1252,7 @@ async fn provider_exit_withdraws_url_and_close_joins_child_without_respawn() {
     }));
     let mut events = c.subscribe();
     c.login_with_access_token("first", "a").await.unwrap();
+    c.enable_remote().await.unwrap();
     tokio::time::timeout(Duration::from_secs(3), async {
         loop {
             if events.recv().await.unwrap().phase == "tunnel-ready" {
@@ -1552,6 +1569,7 @@ async fn close_during_environment_callback_prevents_provider_spawn() {
     }));
     Arc::get_mut(&mut c).unwrap().cfg.cloudflared = Some(provider);
     c.login_with_access_token("first", "a").await.unwrap();
+    c.enable_remote().await.unwrap();
     started.notified().await;
     let close_client = c.clone();
     let close = tokio::spawn(async move { close_client.close().await });
@@ -1607,7 +1625,8 @@ fn iroh_fixture_client(f: &Fixture, strategy: DirectStrategy) -> Arc<Client> {
 }
 async fn iroh_publish_ready(c: &Arc<Client>) {
     for _ in 0..100 {
-        if c.active()
+        if !c
+            .active()
             .await
             .unwrap()
             .iroh
@@ -1615,8 +1634,7 @@ async fn iroh_publish_ready(c: &Arc<Client>) {
             .unwrap()
             .info()
             .addresses
-            .len()
-            > 0
+            .is_empty()
         {
             c.heartbeat().await.unwrap();
             return;
@@ -1644,9 +1662,11 @@ async fn iroh_actual_quic_inner_mtls_smux_halfclose_and_peer_cleanup() {
     a.login_with_access_token("fixture-token-a", "a")
         .await
         .unwrap();
+    a.enable_remote().await.unwrap();
     b.login_with_access_token("fixture-token-b", "b")
         .await
         .unwrap();
+    b.enable_remote().await.unwrap();
     iroh_publish_ready(&a).await;
     iroh_publish_ready(&b).await;
     let (port, echo) = echo().await;
@@ -1716,9 +1736,11 @@ async fn iroh_wrong_inner_identity_and_endpoint_namespace_are_rejected() {
     a.login_with_access_token("fixture-token-a", "a")
         .await
         .unwrap();
+    a.enable_remote().await.unwrap();
     b.login_with_access_token("fixture-token-b", "b")
         .await
         .unwrap();
+    b.enable_remote().await.unwrap();
     iroh_publish_ready(&a).await;
     iroh_publish_ready(&b).await;
     let mut device = a.device("id-b").await.unwrap();
@@ -1742,9 +1764,11 @@ async fn iroh_parallel_first_authenticated_winner_has_no_late_loser_peer() {
     a.login_with_access_token("fixture-token-a", "a")
         .await
         .unwrap();
+    a.enable_remote().await.unwrap();
     b.login_with_access_token("fixture-token-b", "b")
         .await
         .unwrap();
+    b.enable_remote().await.unwrap();
     iroh_publish_ready(&a).await;
     iroh_publish_ready(&b).await;
     let mut events = a.subscribe();
@@ -1789,9 +1813,11 @@ async fn iroh_legacy_peer_skip_fallback_budget_and_cancel() {
     a.login_with_access_token("fixture-token-a", "a")
         .await
         .unwrap();
+    a.enable_remote().await.unwrap();
     b.login_with_access_token("fixture-token-b", "b")
         .await
         .unwrap();
+    b.enable_remote().await.unwrap();
     let mut events = a.subscribe();
     let started = std::time::Instant::now();
     assert!(a.connect("id-b").await.is_err());
@@ -1878,6 +1904,7 @@ async fn port_tunnel_explicit_update_withdraw_preserves_service_snapshot() {
     c.login_with_access_token("fixture-token-a", "a")
         .await
         .unwrap();
+    c.enable_remote().await.unwrap();
     c.expose(Port::tcp("http", 6789, "http")).await.unwrap();
     let url = "https://one-port-only.trycloudflare.com/";
     c.update_port_tunnel_url("http", Some(url)).await.unwrap();
@@ -1923,6 +1950,7 @@ async fn iroh_generation_recovery_rotates_key_and_preserves_port_url() {
     }))
     .await;
     c.login_with_access_token("first", "a").await.unwrap();
+    c.enable_remote().await.unwrap();
     iroh_publish_ready(&c).await;
     let mut port = Port::tcp("public-http", 6789, "http");
     port.tunnel_url = Some("https://one-port-only.trycloudflare.com/".into());
@@ -1970,6 +1998,7 @@ async fn iroh_interface_filter_skips_endpoint_and_parallel_both_fail_before_fall
     let cfg = &mut Arc::get_mut(&mut a).unwrap().cfg;
     cfg.interface_name = Some("cybergrid-no-such-interface".into());
     a.login_with_access_token("a", "a").await.unwrap();
+    a.enable_remote().await.unwrap();
     assert!(a.active().await.unwrap().iroh.is_none());
     assert!(state.lock().unwrap().devices["id-a"]["iroh"].is_null());
     a.close().await.unwrap();
@@ -1981,7 +2010,9 @@ async fn iroh_interface_filter_skips_endpoint_and_parallel_both_fail_before_fall
     cfg.iroh_timeout = Duration::from_millis(100);
     let b = iroh_fixture_client(&f, DirectStrategy::Sequential);
     a.login_with_access_token("a", "a").await.unwrap();
+    a.enable_remote().await.unwrap();
     b.login_with_access_token("b", "b").await.unwrap();
+    b.enable_remote().await.unwrap();
     iroh_publish_ready(&a).await;
     iroh_publish_ready(&b).await;
     state.lock().unwrap().devices.get_mut("id-b").unwrap()["iroh"]["addresses"] =
@@ -2029,7 +2060,9 @@ async fn iroh_parallel_dropped_caller_retires_early_webrtc_creation() {
     Arc::get_mut(&mut a).unwrap().cfg.direct_timeout = Duration::from_secs(1);
     let b = iroh_fixture_client(&f, DirectStrategy::Sequential);
     a.login_with_access_token("a", "a").await.unwrap();
+    a.enable_remote().await.unwrap();
     b.login_with_access_token("b", "b").await.unwrap();
+    b.enable_remote().await.unwrap();
     iroh_publish_ready(&a).await;
     iroh_publish_ready(&b).await;
     state.lock().unwrap().devices.get_mut("id-b").unwrap()["iroh"]["addresses"] =
@@ -2074,7 +2107,9 @@ async fn iroh_mapping_close_joins_cancelled_parallel_reconnect() {
     let a = iroh_fixture_client(&f, DirectStrategy::Parallel);
     let b = iroh_fixture_client(&f, DirectStrategy::Sequential);
     a.login_with_access_token("a", "a").await.unwrap();
+    a.enable_remote().await.unwrap();
     b.login_with_access_token("b", "b").await.unwrap();
+    b.enable_remote().await.unwrap();
     iroh_publish_ready(&a).await;
     iroh_publish_ready(&b).await;
     let (port, echo) = echo().await;
@@ -2108,4 +2143,694 @@ async fn iroh_mapping_close_joins_cancelled_parallel_reconnect() {
     a.close().await.unwrap();
     b.close().await.unwrap();
     echo.abort();
+}
+
+#[derive(Default)]
+struct ContextProvider {
+    requests: Mutex<Vec<AuthTokenRequest>>,
+}
+impl AuthProvider for ContextProvider {
+    fn access_token_for<'a>(
+        &'a self,
+        _: &'a Client,
+        request: &'a AuthTokenRequest,
+    ) -> AuthFuture<'a> {
+        Box::pin(async move {
+            self.requests.lock().unwrap().push(request.clone());
+            Ok(if request.force_refresh {
+                "fresh-host-resource"
+            } else {
+                "host-resource"
+            }
+            .into())
+        })
+    }
+}
+
+#[tokio::test]
+async fn contextual_ram_only_login_forces_once_on_explicit_identity_rejection() {
+    let (f, state) = control().await;
+    state.lock().unwrap().exchange_replies = vec![401];
+    let c = f.client("RealA");
+    let provider = Arc::new(ContextProvider::default());
+    c.set_auth_provider(provider.clone()).await;
+    let watch = c.watch_state();
+    assert_eq!(watch.borrow().revision, 0);
+    assert_eq!(
+        watch.borrow().business_authorization,
+        BusinessAuthorization::Unknown
+    );
+    assert!(!watch.borrow().remote_enabled);
+    c.login_with_auth_provider("a").await.unwrap();
+    {
+        let requests = provider.requests.lock().unwrap();
+        assert_eq!(requests.len(), 2);
+        let first = &requests[0];
+        assert_eq!(first.issuer, format!("{}/oidc", f.base));
+        assert_eq!(first.client_id, "RealA");
+        assert_eq!(first.resource, "https://cybergrid.aixgg.com/api");
+        assert!(first.scopes.iter().any(|s| s == "connect"));
+        assert_eq!(first.min_validity, 60);
+        assert_eq!(first.reason, AuthRequestReason::Connect);
+        assert!(!first.force_refresh);
+        assert_eq!(first.generation, 0);
+        assert!(!first.cancel.is_cancelled());
+        assert!(requests[1].force_refresh);
+        assert_eq!(requests[1].reason, AuthRequestReason::AuthorizationRejected);
+    }
+    {
+        let guard = state.lock().unwrap();
+        let registrations = &guard.registrations;
+        assert_eq!(registrations.len(), 2);
+        assert_eq!(registrations[0]["requestId"], registrations[1]["requestId"]);
+        assert_eq!(
+            registrations[0]["registrationRevision"],
+            registrations[1]["registrationRevision"]
+        );
+        assert_eq!(registrations[0]["accessToken"], "host-resource");
+        assert_eq!(registrations[1]["accessToken"], "fresh-host-resource");
+    }
+    // RAM-only path neither binds nor creates a credential store or takes a grant.
+    assert!(c.grant_store.read().await.is_none());
+    assert!(!c.has_pending_grant().await);
+    assert_eq!(watch.borrow().coordination.phase, StatePhase::Ready);
+    assert_eq!(watch.borrow().identity.phase, StatePhase::Authenticated);
+    assert_eq!(watch.borrow().publication.phase, StatePhase::Disabled);
+    assert_eq!(watch.borrow().generation, 1);
+    let public = serde_json::to_string(&c.snapshot()).unwrap();
+    assert!(!public.contains("host-resource"));
+    assert!(!public.contains("sessionKey"));
+    c.set_business_authorization(BusinessAuthorization::Denied);
+    assert_eq!(
+        watch.borrow().business_authorization,
+        BusinessAuthorization::Denied
+    );
+    c.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn contextual_identity_retry_is_bounded_and_other_denials_never_refresh() {
+    for replies in [vec![401, 401], vec![403]] {
+        let (f, state) = control().await;
+        state.lock().unwrap().exchange_replies = replies.clone();
+        let c = f.client("RealA");
+        let provider = Arc::new(ContextProvider::default());
+        c.set_auth_provider(provider.clone()).await;
+        assert!(c.login_with_auth_provider("a").await.is_err());
+        assert_eq!(
+            provider.requests.lock().unwrap().len(),
+            if replies[0] == 401 { 2 } else { 1 }
+        );
+        assert_eq!(c.snapshot().identity.phase, StatePhase::RequiresLogin);
+        c.close().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn unknown_registration_replays_exact_private_attempt_even_after_401() {
+    let (f, state) = control().await;
+    state.lock().unwrap().exchange_replies = vec![599, 409, 401];
+    let c = f.client("RealA");
+    let provider = Arc::new(ContextProvider::default());
+    c.set_auth_provider(provider.clone()).await;
+    assert!(matches!(
+        c.login_with_auth_provider("a").await,
+        Err(Error::ExchangeOutcomeUnknown)
+    ));
+    assert_eq!(
+        c.snapshot().coordination.reason,
+        StateReason::ExchangeOutcomeUnknown
+    );
+    assert!(matches!(
+        c.login_with_access_token("different-token-must-not-be-used", "different-name")
+            .await,
+        Err(Error::ExchangeOutcomeUnknown)
+    ));
+    assert!(matches!(
+        c.login_with_auth_provider("different-name").await,
+        Err(Error::ExchangeOutcomeUnknown)
+    ));
+    c.login_with_auth_provider("different-name").await.unwrap();
+    assert_eq!(provider.requests.lock().unwrap().len(), 1);
+    {
+        let s = state.lock().unwrap();
+        assert_eq!(s.registrations.len(), 4);
+        assert!(s.registrations.windows(2).all(|r| r[0] == r[1]));
+    }
+    c.close().await.unwrap();
+}
+
+async fn authenticated_duplex(a: &Arc<Client>, b: &Arc<Client>) -> (Arc<Peer>, Arc<Peer>) {
+    let device = a.device("id-b").await.unwrap();
+    let (left, right) = tokio::io::duplex(65536);
+    let (out, incoming) = tokio::join!(
+        a.secure_client(Box::new(left), &device, "test-authenticated"),
+        b.secure_server(Box::new(right), "test-authenticated")
+    );
+    (out.unwrap(), incoming.unwrap())
+}
+
+#[tokio::test]
+async fn explicit_remote_gate_stops_both_directions_and_preserves_local_business() {
+    let (f, state) = control().await;
+    let a = f.client("RealA");
+    let b = f.client("RealA");
+    a.login_with_access_token("a", "a").await.unwrap();
+    b.login_with_access_token("b", "b").await.unwrap();
+    let (port_a, echo_a) = echo().await;
+    let (port_b, echo_b) = echo().await;
+    a.expose(Port::tcp("echo", port_a, "echo")).await.unwrap();
+    b.expose(Port::tcp("echo", port_b, "echo")).await.unwrap();
+    assert!(state.lock().unwrap().devices["id-a"]["ports"]
+        .as_array()
+        .unwrap()
+        .is_empty());
+    assert!(state.lock().unwrap().devices["id-b"]["ports"]
+        .as_array()
+        .unwrap()
+        .is_empty());
+    assert_eq!(a.port_intents().await.len(), 1);
+    // Even an authenticated incoming transport cannot open a disabled receiver.
+    let device = a.device("id-b").await.unwrap();
+    let (left, right) = tokio::io::duplex(65536);
+    let (out, incoming) = tokio::join!(
+        a.secure_client(Box::new(left), &device, "test"),
+        b.secure_server(Box::new(right), "test")
+    );
+    assert!(incoming.is_err());
+    assert!(out.is_err());
+    b.enable_remote().await.unwrap();
+    let (out, incoming) = authenticated_duplex(&a, &b).await;
+    // Reverse streams on an outgoing mux also obey the receiver's gate.
+    assert!(incoming.dial("echo").await.is_err());
+    let mut forward = out.dial("echo").await.unwrap();
+    forward.write_all(b"forward").await.unwrap();
+    let mut data = [0; 7];
+    forward.read_exact(&mut data).await.unwrap();
+    assert_eq!(&data, b"forward");
+    a.enable_remote().await.unwrap();
+    let mut reverse = incoming.dial("echo").await.unwrap();
+    reverse.write_all(b"reverse").await.unwrap();
+    reverse.read_exact(&mut data).await.unwrap();
+    assert_eq!(&data, b"reverse");
+    let result = a.disable_remote().await;
+    assert_eq!(
+        result,
+        RemoteDisableOutcome {
+            local_closed: true,
+            coordinator_revocation: CoordinatorRevocation::Confirmed
+        }
+    );
+    for stream in [&mut forward, &mut reverse] {
+        let read = tokio::time::timeout(Duration::from_secs(2), stream.read(&mut data))
+            .await
+            .unwrap();
+        assert!(matches!(read, Ok(0) | Err(_)));
+    }
+    assert!(incoming.dial("echo").await.is_err());
+    assert!(a.enable_remote().await.is_err());
+    assert_eq!(a.port_intents().await[0].port, port_a);
+    let mut local = tokio::net::TcpStream::connect((std::net::Ipv4Addr::LOCALHOST, port_a))
+        .await
+        .unwrap();
+    local.write_all(b"survive").await.unwrap();
+    local.read_exact(&mut data).await.unwrap();
+    assert_eq!(&data, b"survive");
+    assert_eq!(a.snapshot().publication.phase, StatePhase::Disabled);
+    b.close().await.unwrap();
+    echo_a.abort();
+    echo_b.abort();
+}
+
+#[tokio::test]
+async fn offline_disable_closes_inflight_handshake_and_cannot_recover_or_republish() {
+    let (f, state) = control().await;
+    let c = f.client("RealA");
+    let provider = Arc::new(ContextProvider::default());
+    c.set_auth_provider(provider.clone()).await;
+    c.login_with_auth_provider("a").await.unwrap();
+    c.expose(Port::tcp("echo", 6789, "local-intent"))
+        .await
+        .unwrap();
+    c.enable_remote().await.unwrap();
+    let rt = c.active().await.unwrap();
+    let device = c.device("id-a").await.unwrap();
+    let (_held_outgoing, outgoing_raw) = tokio::io::duplex(65536);
+    let outgoing_client = c.clone();
+    let pending_outgoing = tokio::spawn(async move {
+        outgoing_client
+            .secure_client(Box::new(outgoing_raw), &device, "late-outgoing-handshake")
+            .await
+    });
+    let (_held, right) = tokio::io::duplex(65536);
+    let client = c.clone();
+    let pending = tokio::spawn(async move {
+        client
+            .secure_server(Box::new(right), "late-handshake")
+            .await
+    });
+    // Wait until the incoming side has queried pins and is waiting for TLS bytes.
+    tokio::time::sleep(Duration::from_millis(40)).await;
+    assert!(rt.peers.lock().await.is_empty());
+    state.lock().unwrap().revoke_fails = true;
+    let result = c.disable_remote().await;
+    assert_eq!(
+        result.coordinator_revocation,
+        CoordinatorRevocation::Pending
+    );
+    assert!(result.local_closed);
+    assert!(tokio::time::timeout(Duration::from_secs(1), pending)
+        .await
+        .unwrap()
+        .unwrap()
+        .is_err());
+    assert!(
+        tokio::time::timeout(Duration::from_secs(1), pending_outgoing)
+            .await
+            .unwrap()
+            .unwrap()
+            .is_err()
+    );
+    assert!(rt.cancel.is_cancelled());
+    assert!(c.heartbeat().await.is_err());
+    assert!(c.active().await.is_err());
+    assert!(!c.remote_access_enabled());
+    assert_eq!(provider.requests.lock().unwrap().len(), 1);
+    assert_eq!(c.port_intents().await.len(), 1);
+    assert_eq!(c.snapshot().coordination.phase, StatePhase::Closed);
+    state.lock().unwrap().revoke_fails = false;
+    assert_eq!(
+        c.disable_remote().await.coordinator_revocation,
+        CoordinatorRevocation::Confirmed
+    );
+}
+
+async fn meet_barrier(barrier: &Arc<std::sync::Barrier>) {
+    let barrier = barrier.clone();
+    tokio::task::spawn_blocking(move || barrier.wait())
+        .await
+        .unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn late_publication_never_confirms_newer_intent_or_reopens_disabled_client() {
+    let (f, state) = control().await;
+    let c = f.client("RealA");
+    c.login_with_access_token("a", "a").await.unwrap();
+    c.expose(Port::tcp("one", 1234, "one")).await.unwrap();
+    let barrier = Arc::new(std::sync::Barrier::new(2));
+    {
+        let mut s = state.lock().unwrap();
+        s.pause_publishes = 2;
+        s.publish_barrier = Some(barrier.clone());
+    }
+    let first_client = c.clone();
+    let first = tokio::spawn(async move { first_client.enable_remote().await });
+    meet_barrier(&barrier).await; // Old intent is already captured by the server.
+    let newer_client = c.clone();
+    let newer =
+        tokio::spawn(async move { newer_client.expose(Port::tcp("two", 2345, "two")).await });
+    tokio::time::timeout(Duration::from_secs(1), async {
+        while c.port_intents().await.len() != 2 {
+            tokio::task::yield_now().await;
+        }
+    })
+    .await
+    .unwrap();
+    meet_barrier(&barrier).await; // Allow the old response.
+    first.await.unwrap().unwrap();
+    meet_barrier(&barrier).await; // New publication is now pending.
+    assert_eq!(c.snapshot().publication.phase, StatePhase::Pending);
+    assert_eq!(c.snapshot().confirmed_intent_revision, None);
+    meet_barrier(&barrier).await;
+    newer.await.unwrap().unwrap();
+    assert_eq!(c.snapshot().publication.phase, StatePhase::Ready);
+    assert_eq!(
+        c.snapshot().confirmed_intent_revision,
+        Some(c.snapshot().intent_revision)
+    );
+    {
+        state.lock().unwrap().pause_publishes = 1;
+    }
+    let publishing_client = c.clone();
+    let publishing = tokio::spawn(async move { publishing_client.heartbeat().await });
+    meet_barrier(&barrier).await;
+    let closing_client = c.clone();
+    let closing = tokio::spawn(async move { closing_client.disable_remote().await });
+    tokio::time::timeout(Duration::from_secs(1), async {
+        while !c.is_closed() {
+            tokio::task::yield_now().await;
+        }
+    })
+    .await
+    .unwrap();
+    assert!(!c.remote_access_enabled());
+    meet_barrier(&barrier).await;
+    let _ = publishing.await.unwrap();
+    assert!(closing.await.unwrap().local_closed);
+    assert_eq!(c.snapshot().publication.phase, StatePhase::Disabled);
+    assert_eq!(c.snapshot().confirmed_intent_revision, None);
+    assert!(c.heartbeat().await.is_err());
+}
+
+#[tokio::test]
+async fn recovery_rejects_changed_verified_user_and_keeps_original_binding() {
+    let (f, state) = control().await;
+    let c = f.client("RealA");
+    c.set_auth_provider(Arc::new(ContextProvider::default()))
+        .await;
+    c.login_with_auth_provider("a").await.unwrap();
+    {
+        let mut s = state.lock().unwrap();
+        s.epoch = "new-epoch".into();
+        s.user_override = Some("different-verified-user".into());
+        s.revoke_fails = true;
+    }
+    assert!(c.devices().await.is_err());
+    tokio::time::timeout(Duration::from_secs(2), async {
+        while c.snapshot().identity.phase != StatePhase::RequiresLogin {
+            tokio::task::yield_now().await;
+        }
+    })
+    .await
+    .unwrap();
+    assert_eq!(c.device_session().await.unwrap().user.id, "fixture-user");
+    assert!(c.active().await.is_err());
+    assert_eq!(
+        c.disable_remote().await.coordinator_revocation,
+        CoordinatorRevocation::Pending
+    );
+    state.lock().unwrap().revoke_fails = false;
+    assert_eq!(
+        c.disable_remote().await.coordinator_revocation,
+        CoordinatorRevocation::Confirmed
+    );
+}
+
+struct CheckpointingProvider {
+    started: tokio::sync::Notify,
+    release: tokio::sync::Notify,
+    checkpointed: std::sync::atomic::AtomicBool,
+}
+impl AuthProvider for CheckpointingProvider {
+    fn access_token_for<'a>(&'a self, _: &'a Client, _: &'a AuthTokenRequest) -> AuthFuture<'a> {
+        Box::pin(async move {
+            self.started.notify_one();
+            self.release.notified().await;
+            self.checkpointed.store(true, Ordering::SeqCst);
+            Ok("owned-resource".into())
+        })
+    }
+}
+#[tokio::test]
+async fn disabling_does_not_drop_dispatched_host_rotation_owner() {
+    let (f, _) = control().await;
+    let c = f.client("RealA");
+    let owner = Arc::new(CheckpointingProvider {
+        started: tokio::sync::Notify::new(),
+        release: tokio::sync::Notify::new(),
+        checkpointed: false.into(),
+    });
+    c.set_auth_provider(owner.clone()).await;
+    let login_client = c.clone();
+    let login = tokio::spawn(async move { login_client.login_with_auth_provider("a").await });
+    owner.started.notified().await;
+    let close_client = c.clone();
+    let close = tokio::spawn(async move { close_client.disable_remote().await });
+    tokio::time::timeout(Duration::from_secs(1), async {
+        while !c.is_closed() {
+            tokio::task::yield_now().await;
+        }
+    })
+    .await
+    .unwrap();
+    assert!(!owner.checkpointed.load(Ordering::SeqCst));
+    assert!(!close.is_finished());
+    owner.release.notify_one();
+    assert!(matches!(login.await.unwrap(), Err(Error::Cancelled)));
+    assert!(close.await.unwrap().local_closed);
+    assert!(owner.checkpointed.load(Ordering::SeqCst));
+}
+
+#[tokio::test]
+async fn disable_never_claims_unknown_registration_was_revoked() {
+    let (f, state) = control().await;
+    state.lock().unwrap().exchange_replies = vec![599];
+    let c = f.client("RealA");
+    assert!(matches!(
+        c.login_with_access_token("original-resource", "a").await,
+        Err(Error::ExchangeOutcomeUnknown)
+    ));
+    assert!(c.device_session().await.is_none());
+    let result = c.disable_remote().await;
+    assert!(result.local_closed);
+    assert_eq!(
+        result.coordinator_revocation,
+        CoordinatorRevocation::Pending
+    );
+    assert_eq!(state.lock().unwrap().registrations.len(), 1);
+    assert!(c.login_with_access_token("replacement", "a").await.is_err());
+}
+
+struct UnavailableHost;
+impl AuthProvider for UnavailableHost {
+    fn access_token<'a>(&'a self, _: &'a Client) -> AuthFuture<'a> {
+        Box::pin(async { Err(Error::Credentials("sensitive-host-error".into())) })
+    }
+}
+#[tokio::test]
+async fn provider_errors_are_fixed_and_freshness_budget_is_validated() {
+    for value in [0, 3601] {
+        assert!(matches!(
+            Client::new(Config {
+                app_id: "RealA".into(),
+                auth_min_validity: value,
+                ..Config::default()
+            }),
+            Err(Error::Config(_))
+        ));
+    }
+    for value in [1, 60, 3600] {
+        assert!(Client::new(Config {
+            app_id: "RealA".into(),
+            auth_min_validity: value,
+            ..Config::default()
+        })
+        .is_ok());
+    }
+    let (f, _) = control().await;
+    let c = f.client("RealA");
+    c.set_auth_provider(Arc::new(UnavailableHost)).await;
+    let error = c.login_with_auth_provider("a").await.unwrap_err();
+    assert!(matches!(error, Error::AuthorizationUnavailable));
+    assert!(!error.to_string().contains("sensitive-host-error"));
+    assert_eq!(c.snapshot().identity.phase, StatePhase::RequiresLogin);
+    assert!(!serde_json::to_string(&c.snapshot())
+        .unwrap()
+        .contains("sensitive-host-error"));
+    c.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn unknown_exchange_retires_only_after_trusted_new_epoch() {
+    let (f, state) = control().await;
+    state.lock().unwrap().exchange_replies = vec![599];
+    let c = f.client("RealA");
+    let owner = Arc::new(ContextProvider::default());
+    c.set_auth_provider(owner.clone()).await;
+    assert!(matches!(
+        c.login_with_auth_provider("a").await,
+        Err(Error::ExchangeOutcomeUnknown)
+    ));
+    {
+        let mut s = state.lock().unwrap();
+        s.epoch = "confirmed-new-epoch".into();
+        s.attempts.clear();
+        s.devices.clear();
+        // A reset error from exchange alone must not replace a pending attempt.
+        s.config_failure = true;
+    }
+    assert!(matches!(
+        c.login_with_auth_provider("ignored-name").await,
+        Err(Error::ExchangeOutcomeUnknown)
+    ));
+    assert_eq!(owner.requests.lock().unwrap().len(), 1);
+    {
+        let s = state.lock().unwrap();
+        assert_eq!(s.registrations[0], s.registrations[1]);
+    }
+    state.lock().unwrap().config_failure = false;
+    let session = c.login_with_auth_provider("ignored-name").await.unwrap();
+    assert_eq!(session.coordinator_epoch, "confirmed-new-epoch");
+    assert_eq!(session.device_id, "id-a");
+    assert_eq!(owner.requests.lock().unwrap().len(), 2);
+    {
+        let s = state.lock().unwrap();
+        assert_ne!(
+            s.registrations[0]["requestId"],
+            s.registrations[2]["requestId"]
+        );
+        assert_eq!(s.registrations[2]["registrationRevision"], 2);
+        assert_eq!(
+            s.registrations[0]["registrationKey"],
+            s.registrations[2]["registrationKey"]
+        );
+        assert_eq!(
+            s.registrations[2]["coordinatorEpoch"],
+            "confirmed-new-epoch"
+        );
+    }
+    assert!(!c.remote_access_enabled());
+    c.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn changed_oauth_binding_cannot_replace_unknown_epoch_attempt() {
+    for (field, value) in [
+        ("issuer", "https://untrusted.example/oidc"),
+        ("clientId", "DifferentClient"),
+        ("resource", "https://untrusted.example/api"),
+        ("scope", "openid connect"),
+        ("tokenEndpoint", "https://untrusted.example/token"),
+    ] {
+        let (f, state) = control().await;
+        state.lock().unwrap().exchange_replies = vec![599];
+        let c = f.client("RealA");
+        let owner = Arc::new(ContextProvider::default());
+        c.set_auth_provider(owner.clone()).await;
+        assert!(matches!(
+            c.login_with_auth_provider("a").await,
+            Err(Error::ExchangeOutcomeUnknown)
+        ));
+        {
+            let mut s = state.lock().unwrap();
+            s.epoch = "untrusted-config-new-epoch".into();
+            s.config_override = Some((field.into(), value.into()));
+        }
+        assert!(matches!(
+            c.login_with_auth_provider("a").await,
+            Err(Error::ExchangeOutcomeUnknown)
+        ));
+        assert_eq!(
+            owner.requests.lock().unwrap().len(),
+            1,
+            "refreshed on changed {field}"
+        );
+        {
+            let s = state.lock().unwrap();
+            assert_eq!(
+                s.registrations[0], s.registrations[1],
+                "replaced attempt on changed {field}"
+            );
+        }
+        assert_eq!(
+            c.disable_remote().await.coordinator_revocation,
+            CoordinatorRevocation::Pending
+        );
+    }
+}
+
+#[tokio::test]
+async fn known_first_publication_loss_supports_explicit_retry_without_new_identity() {
+    let (f, state) = control().await;
+    state.lock().unwrap().fail_next_publish = true;
+    let c = f.client("RealA");
+    let owner = Arc::new(ContextProvider::default());
+    c.set_auth_provider(owner).await;
+    assert!(c.login_with_auth_provider("a").await.is_err());
+    assert!(c.device_session().await.is_some());
+    let first: Session = {
+        let s = state.lock().unwrap();
+        let request = s.registrations[0]["requestId"].as_str().unwrap();
+        serde_json::from_value(s.attempts[request].clone()).unwrap()
+    };
+    let recovered = c.login_with_auth_provider("ignored-name").await.unwrap();
+    assert_eq!(first.user.id, recovered.user.id);
+    assert_eq!(first.device_id, recovered.device_id);
+    assert_ne!(first.incarnation, recovered.incarnation);
+    assert_eq!(c.snapshot().coordination.phase, StatePhase::Ready);
+    assert!(!c.remote_access_enabled());
+    {
+        let s = state.lock().unwrap();
+        assert_eq!(s.registrations.len(), 2);
+        assert_eq!(
+            s.registrations[0]["registrationKey"],
+            s.registrations[1]["registrationKey"]
+        );
+        assert_eq!(s.registrations[1]["registrationRevision"], 2);
+        assert_ne!(
+            s.registrations[0]["requestId"],
+            s.registrations[1]["requestId"]
+        );
+        assert_eq!(s.devices["id-a"]["publishRevision"], 1);
+        assert!(s.devices["id-a"]["ports"].as_array().unwrap().is_empty());
+    }
+    // A queued supervisor wakeup cannot cancel the explicitly recovered runtime.
+    tokio::time::sleep(Duration::from_millis(50)).await;
+    assert!(c.active().await.is_ok());
+    assert!(c.login_with_auth_provider("a").await.is_err());
+    c.close().await.unwrap();
+    c.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn known_first_publication_loss_recovers_without_explicit_retry() {
+    let (f, state) = control().await;
+    state.lock().unwrap().fail_next_publish = true;
+    let c = f.client("RealA");
+    c.set_auth_provider(Arc::new(ContextProvider::default()))
+        .await;
+    c.expose(Port::tcp("offline-intent", 1234, "test"))
+        .await
+        .unwrap();
+    assert!(c.login_with_auth_provider("a").await.is_err());
+    assert!(c.device_session().await.is_some());
+    let first: Session = {
+        let s = state.lock().unwrap();
+        let request = s.registrations[0]["requestId"].as_str().unwrap();
+        serde_json::from_value(s.attempts[request].clone()).unwrap()
+    };
+    tokio::time::timeout(Duration::from_secs(3), async {
+        while c.active().await.is_err() {
+            tokio::task::yield_now().await;
+        }
+    })
+    .await
+    .unwrap();
+    let ready = c.device_session().await.unwrap();
+    assert_ne!(first.incarnation, ready.incarnation);
+    assert_eq!(ready.user.id, first.user.id);
+    assert!(!c.remote_access_enabled());
+    assert_eq!(c.snapshot().publication.phase, StatePhase::Disabled);
+    assert_eq!(c.port_intents().await.len(), 1);
+    // Explicit host acknowledgement of background completion uses that same session.
+    let acknowledged = c.login_with_auth_provider("ignored-name").await.unwrap();
+    assert_eq!(acknowledged.incarnation, ready.incarnation);
+    assert_eq!(state.lock().unwrap().registrations.len(), 2);
+    c.close().await.unwrap();
+}
+
+#[tokio::test]
+async fn known_first_publication_manual_token_retry_preserves_committed_identity() {
+    let (f, state) = control().await;
+    state.lock().unwrap().fail_next_publish = true;
+    let c = f.client("RealA");
+    assert!(c
+        .login_with_access_token("manual-resource", "a")
+        .await
+        .is_err());
+    let committed = c.device_session().await.unwrap();
+    let recovered = c
+        .login_with_access_token("manual-resource", "ignored-name")
+        .await
+        .unwrap();
+    assert_eq!(committed.user.id, recovered.user.id);
+    assert_eq!(committed.device_id, recovered.device_id);
+    assert_ne!(committed.incarnation, recovered.incarnation);
+    assert_eq!(state.lock().unwrap().registrations.len(), 2);
+    assert_eq!(c.snapshot().coordination.phase, StatePhase::Ready);
+    assert!(!c.remote_access_enabled());
+    tokio::time::sleep(Duration::from_millis(30)).await;
+    assert!(c.active().await.is_ok());
+    c.close().await.unwrap();
 }

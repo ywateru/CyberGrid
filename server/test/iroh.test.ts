@@ -1,3 +1,4 @@
+import {EndpointPolicy} from '../src/endpoints.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {randomBytes,randomUUID} from 'node:crypto';
@@ -12,11 +13,11 @@ const snapshot={ports:[],tunnelUrl:null,certificateFingerprint:'b'.repeat(64)};
 const key=()=>randomBytes(32).toString('base64url');
 const ADMIN_KEY='x'.repeat(32);
 const errorCode=(code:string)=>(e:unknown)=>e instanceof ApiError&&e.code===code;
-async function fixture(){
+async function fixture(endpointPolicy?:EndpointPolicy){
  const store=new MemoryStore(),identity=new FixtureIdentity(),directory=new FixtureDirectory();
  await identity.register('one@example.test');await identity.register('two@example.test');
  let time=Date.now();
- const handle=createService({store,identity,directory,browserClientId:SPA,now:()=>time,adminKey:ADMIN_KEY,authRateLimit:1000});
+ const handle=createService({store,identity,directory,endpointPolicy,browserClientId:SPA,now:()=>time,adminKey:ADMIN_KEY,authRateLimit:1000});
  const request=async(path:string,method='GET',body?:unknown,bearer?:string,epoch=store.epoch)=>{
   const response=await handle(new Request('https://grid.example/api/v1'+path,{method,headers:{'content-type':'application/json','x-cybergrid-epoch':epoch,...(bearer?{authorization:'Bearer '+bearer}:{})},body:body===undefined?undefined:JSON.stringify(body)}),'iroh-fixture');
   return {status:response.status,data:await response.json() as any};
@@ -128,8 +129,8 @@ test('per-port tunnel declarations reject non-root or non-Cloudflare URLs withou
 });
 
 test('serialized publication budget includes escaped port strings and URLs, and rejected updates never refresh revision or lastSeen',async t=>{
- const f=await fixture();t.after(()=>f.store.close());const a=(await f.login()).data;
- const url='https://'+'p'.repeat(480)+'.trycloudflare.com';
+ const origin='https://'+Array(3).fill('p'.repeat(60)).join('.')+'.example.test',path='/'+'a'.repeat(255),url=origin+path;
+ const f=await fixture(new EndpointPolicy(JSON.stringify({version:1,providers:[{id:'budget',origins:[origin],paths:[path]}]})));t.after(()=>f.store.close());const a=(await f.login()).data;
  const make=(n:number)=>Array.from({length:32},(_,i)=>({id:'port-'+i,port:1000+i,type:'\u0001'.repeat(n),transport:'tcp',tunnelUrl:url}));
  const accepted=await f.publish(a,{ports:make(20),iroh});assert.equal(accepted.status,200);
  const before=await f.store.device(a.deviceId,f.now()),revision=f.store.revision;f.advance(1000);
@@ -140,9 +141,10 @@ test('serialized publication budget includes escaped port strings and URLs, and 
 
 test('custom larger peer limits return an explicit directory capacity error for both device and console projections',async t=>{
  const store=new MemoryStore({devicesPerUser:128,sessionsPerUser:256,registrationKeysPerUser:256});t.after(()=>store.close());const now=Date.now(),identity=new FixtureIdentity(),directory=new FixtureDirectory();const user=(await identity.register('capacity@example.test')).user;
- const ports=Array.from({length:32},(_,i)=>({id:'p'.repeat(60)+i,port:1000+i,type:'t'.repeat(128),transport:'tcp' as const,tunnelUrl:'https://'+'a'.repeat(450)+'.trycloudflare.com'}));let bearer='';
+ const origin='https://'+Array(3).fill('a'.repeat(60)).join('.')+'.example.test',path='/'+'p'.repeat(255),endpointPolicy=new EndpointPolicy(JSON.stringify({version:1,providers:[{id:'budget',origins:[origin],paths:[path]}]}));
+ const ports=Array.from({length:32},(_,i)=>({id:'p'.repeat(60)+i,port:1000+i,type:'t'.repeat(128),transport:'tcp' as const,tunnelUrl:origin+path}));let bearer='';
  for(let i=0;i<100;i++){const r=store.register(user.id,A,'peer',key(),randomUUID(),now,1);bearer=r.sessionKey;await store.publish(r.session as DeviceSession,{...snapshot,ports},(r.session as DeviceSession).incarnation,1,now);}
- const handle=createService({store,identity,directory,browserClientId:SPA,now:()=>now});
+ const handle=createService({store,identity,directory,endpointPolicy,browserClientId:SPA,now:()=>now});
  const get=(path:string,token:string)=>handle(new Request('https://grid.example/api/v1'+path,{headers:{authorization:'Bearer '+token,'x-cybergrid-epoch':store.epoch}}));
  const c=store.register(user.id,null,'',undefined,randomUUID(),now);
  for(const [path,token] of [['/devices',bearer],['/console/devices?appId='+A,c.sessionKey]]){const response=await get(path!,token!);assert.equal(response.status,413);assert.equal((await response.json() as any).error.code,'DIRECTORY_TOO_LARGE');}

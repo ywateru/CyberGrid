@@ -2,7 +2,10 @@ use crate::{
     browser, platform, protocol,
     services::{Incoming, LocalServices},
 };
-use cybergrid_sdk::{Client, Config, CredentialStore, Device, DirectStrategy, Mapping, Port};
+use cybergrid_sdk::{
+    AuthProvider, Client, Config, CoordinatorRevocation, CredentialStore, Device, DirectStrategy,
+    Mapping, Port, RemoteDisableOutcome, StatePhase, StateSnapshot,
+};
 use serde::{Deserialize, Serialize};
 use std::{
     path::{Path, PathBuf},
@@ -21,7 +24,81 @@ pub struct LabConfig {
     pub force_fallback: bool,
     #[serde(default)]
     pub direct_strategy: DirectStrategy,
+    #[serde(default)]
+    pub direct_transport: DirectTransport,
     pub cloudflared_path: String,
+}
+
+#[derive(Clone, Copy, Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum DirectTransport {
+    #[default]
+    Auto,
+    WebrtcOnly,
+    IrohCandidate,
+}
+
+impl LabConfig {
+    fn direct_options(&self) -> (Duration, bool) {
+        // The existing near-zero WebRTC budget is a test preference, not a
+        // protocol disable switch. Actual transport remains the result.
+        (
+            if self.force_fallback || self.direct_transport == DirectTransport::IrohCandidate {
+                Duration::from_nanos(1)
+            } else {
+                Duration::from_secs(12)
+            },
+            !self.force_fallback && self.direct_transport != DirectTransport::WebrtcOnly,
+        )
+    }
+}
+
+#[cfg(test)]
+mod direct_transport_tests {
+    use super::*;
+
+    #[test]
+    fn missing_test_preference_preserves_existing_settings_and_rejects_unknown_values() {
+        let mut old = serde_json::to_value(LabConfig::default()).unwrap();
+        old.as_object_mut().unwrap().remove("directTransport");
+        let config: LabConfig = serde_json::from_value(old.clone()).unwrap();
+        assert_eq!(config.direct_transport, DirectTransport::Auto);
+        assert_eq!(config.direct_options(), (Duration::from_secs(12), true));
+        for value in [
+            serde_json::json!("iroh-only"),
+            serde_json::json!(true),
+            serde_json::json!(null),
+        ] {
+            old["directTransport"] = value;
+            assert!(serde_json::from_value::<LabConfig>(old.clone()).is_err());
+        }
+    }
+
+    #[test]
+    fn test_preferences_keep_fallback_priority_and_direct_strategy() {
+        let mut config = LabConfig {
+            direct_strategy: DirectStrategy::Parallel,
+            ..Default::default()
+        };
+        for (mode, expected) in [
+            (DirectTransport::Auto, (Duration::from_secs(12), true)),
+            (
+                DirectTransport::WebrtcOnly,
+                (Duration::from_secs(12), false),
+            ),
+            (
+                DirectTransport::IrohCandidate,
+                (Duration::from_nanos(1), true),
+            ),
+        ] {
+            config.direct_transport = mode;
+            config.force_fallback = false;
+            assert_eq!(config.direct_options(), expected);
+            assert!(matches!(config.direct_strategy, DirectStrategy::Parallel));
+            config.force_fallback = true;
+            assert_eq!(config.direct_options(), (Duration::from_nanos(1), false));
+        }
+    }
 }
 
 // Only these fixed codes cross the browser-start IPC boundary. Never serialize
@@ -100,7 +177,11 @@ mod lifecycle_tests {
         assert!(!error.contains("授权撤销失败"));
         assert_eq!(state.retired.lock().await.len(), 1);
         assert_eq!(std::fs::read(&path).unwrap(), b"old private grant fixture");
-        let error = state.start_login(config, false).await.unwrap_err();
+        let error = state.start_login(config.clone(), false).await.unwrap_err();
+        assert_eq!(error, BrowserStartError::Failed.message());
+        // New browser login exports only fixed codes; resume preserves the
+        // existing private-owner exclusion and its actionable fixed message.
+        let error = state.start_login(config, true).await.unwrap_err();
         assert!(error.contains("上一次授权正在安全结束"));
         release.send(()).unwrap();
         saved_rx.await.unwrap();
@@ -126,6 +207,7 @@ impl Default for LabConfig {
             },
             force_fallback: false,
             direct_strategy: DirectStrategy::Sequential,
+            direct_transport: DirectTransport::Auto,
             cloudflared_path: String::new(),
         }
     }
@@ -196,6 +278,11 @@ pub struct View {
     records: Vec<Record>,
     connection: Option<Connection>,
     status: String,
+    sdk_snapshot: Option<StateSnapshot>,
+    remote_action: String,
+    local_closed: bool,
+    coordinator_revocation: Option<CoordinatorRevocation>,
+    directory_known: bool,
 }
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -217,6 +304,7 @@ struct Pending {
 }
 struct Running {
     client: Arc<Client>,
+    owner: Arc<dyn AuthProvider>,
     services: Arc<LocalServices>,
     cancel: CancellationToken,
     mapping: Mutex<Option<Arc<Mapping>>>,
@@ -238,7 +326,16 @@ struct Inner {
     running: Option<Arc<Running>>,
     record_id: u64,
     sdk_generation: u64,
+    sdk_snapshot: Option<StateSnapshot>,
+    remote_action: String,
+    local_closed: bool,
+    coordinator_revocation: Option<CoordinatorRevocation>,
+    directory_known: bool,
+    remote_generation: u64,
+    opening: Option<Arc<Client>>,
 }
+#[cfg(test)]
+type ClientFactory = Arc<dyn Fn(&LabConfig) -> Result<Arc<Client>, String> + Send + Sync>;
 pub struct LabState {
     inner: Mutex<Inner>,
     data_dir: PathBuf,
@@ -249,6 +346,10 @@ pub struct LabState {
     auth_setup: Mutex<()>,
     browser_diagnostic: Mutex<BrowserDiagnostic>,
     browser: Mutex<Option<Arc<browser::Transaction>>>,
+    remote_operation: Mutex<()>,
+    disabled_clients: Mutex<Vec<Arc<Client>>>,
+    #[cfg(test)]
+    client_factory: Option<ClientFactory>,
 }
 fn timestamp() -> String {
     time::OffsetDateTime::now_utc()
@@ -304,6 +405,13 @@ impl LabState {
                 running: None,
                 record_id: 0,
                 sdk_generation: 0,
+                sdk_snapshot: None,
+                remote_action: "off".into(),
+                local_closed: true,
+                coordinator_revocation: None,
+                directory_known: false,
+                remote_generation: 0,
+                opening: None,
             }),
             data_dir,
             cache_dir,
@@ -313,6 +421,10 @@ impl LabState {
             auth_setup: Mutex::new(()),
             browser_diagnostic: Mutex::new(BrowserDiagnostic::default()),
             browser: Mutex::new(None),
+            remote_operation: Mutex::new(()),
+            disabled_clients: Mutex::new(Vec::new()),
+            #[cfg(test)]
+            client_factory: None,
         }))
     }
     pub async fn browser_trace(
@@ -412,9 +524,18 @@ impl LabState {
             records: s.records.clone(),
             connection: s.connection.clone(),
             status: s.status.clone(),
+            sdk_snapshot: s.sdk_snapshot.clone(),
+            remote_action: s.remote_action.clone(),
+            local_closed: s.local_closed,
+            coordinator_revocation: s.coordinator_revocation,
+            directory_known: s.directory_known,
         }
     }
     fn create_client(&self, config: &LabConfig) -> Result<Arc<Client>, String> {
+        #[cfg(test)]
+        if let Some(factory) = &self.client_factory {
+            return factory(config);
+        }
         if config.device_name.trim().is_empty() || config.device_name.len() > 80 {
             return Err("本机名称必须为1至80字节".into());
         }
@@ -431,15 +552,12 @@ impl LabState {
                     })
             }))
         };
+        let (direct_timeout, iroh_enabled) = config.direct_options();
         let c = Config {
             base_url: config.base_url.clone(),
             app_id: config.app_id.clone(),
-            direct_timeout: if config.force_fallback {
-                Duration::from_nanos(1)
-            } else {
-                Duration::from_secs(12)
-            },
-            iroh_enabled: !config.force_fallback,
+            direct_timeout,
+            iroh_enabled,
             direct_strategy: config.direct_strategy,
             fallback_timeout: Duration::from_secs(45),
             cloudflared: Some(provider),
@@ -558,17 +676,23 @@ impl LabState {
             .use_credential_store(credentials.clone())
             .await
             .map_err(|error| error.to_string());
-        client
-            .set_auth_provider(Arc::new(credentials.clone()))
-            .await;
+        let owner: Arc<dyn AuthProvider> = Arc::new(credentials.clone());
+        client.set_auth_provider(owner.clone()).await;
         let flow = async {
             binding?;
             let tokens = credentials
                 .refresh(&client)
                 .await
                 .map_err(|e| e.to_string())?;
-            self.install_session(&config, &client, &cancel, generation, &tokens.access_token)
-                .await
+            self.install_session(
+                &config,
+                &client,
+                owner,
+                &cancel,
+                generation,
+                &tokens.access_token,
+            )
+            .await
         };
         // Never drop an in-flight
         // rotating refresh/exchange: finish persistence, then close by generation.
@@ -595,6 +719,7 @@ impl LabState {
         self: &Arc<Self>,
         config: &LabConfig,
         client: &Arc<Client>,
+        owner: Arc<dyn AuthProvider>,
         cancel: &CancellationToken,
         generation: u64,
         access_token: &str,
@@ -640,7 +765,8 @@ impl LabState {
         };
         let runtime = Arc::new(Running {
             client: client.clone(),
-            services,
+            owner,
+            services: services.clone(),
             cancel: CancellationToken::new(),
             mapping: Mutex::new(None),
             operation: Mutex::new(()),
@@ -664,10 +790,16 @@ impl LabState {
             s.running = Some(runtime.clone());
             s.pending = None;
             s.phase = "ready".into();
-            s.status = "已登录，正在准备端到端连接入口".into();
+            s.status = "已授权，远程访问关闭；本地服务可用，端口仅保存为本地意图".into();
+            s.sdk_snapshot = Some(client.snapshot());
+            s.remote_action = "off".into();
+            s.local_closed = true;
+            s.directory_known = true;
+            s.coordinator_revocation = None;
             s.error = None;
         }
-        self.spawn_runtime(runtime, rx);
+        self.spawn_incoming(services, rx);
+        self.spawn_runtime(runtime);
         Ok(())
     }
     async fn prepare_browser_cleanup(&self) -> Result<(), String> {
@@ -748,7 +880,8 @@ impl LabState {
                 .use_credential_store(store.clone())
                 .await
                 .map_err(|_| "无法绑定私有凭据存储".to_string())?;
-            client.set_auth_provider(Arc::new(store)).await;
+            let owner: Arc<dyn AuthProvider> = Arc::new(store);
+            client.set_auth_provider(owner.clone()).await;
             if cancel.is_cancelled() {
                 return Err("网页登录已取消".into());
             }
@@ -786,6 +919,7 @@ impl LabState {
                             .install_session(
                                 &worker_config,
                                 &client,
+                                owner,
                                 &worker_cancel,
                                 generation,
                                 &access,
@@ -910,59 +1044,113 @@ impl LabState {
             Ok("Staged".into())
         }
     }
-    fn spawn_runtime(
+    fn spawn_incoming(
         self: &Arc<Self>,
-        runtime: Arc<Running>,
+        services: Arc<LocalServices>,
         mut incoming: mpsc::Receiver<Incoming>,
     ) {
-        let mut events = runtime.client.subscribe();
+        let state = self.clone();
+        tokio::spawn(async move {
+            let cancel = services.closed_token();
+            loop {
+                let message = tokio::select! { _=cancel.cancelled()=>break, message=incoming.recv()=>match message {Some(message)=>message,None=>break} };
+                let mut s = state.inner.lock().await;
+                if s.running
+                    .as_ref()
+                    .is_none_or(|r| !Arc::ptr_eq(&r.services, &services))
+                {
+                    break;
+                }
+                let peer = message
+                    .peer_id
+                    .as_ref()
+                    .and_then(|id| s.devices.iter().find(|d| &d.id == id))
+                    .map(|d| d.name.clone())
+                    .unwrap_or_else(|| {
+                        message
+                            .peer_id
+                            .clone()
+                            .unwrap_or_else(|| "本地业务端口".into())
+                    });
+                s.record_id += 1;
+                let id = s.record_id;
+                s.records.push(Record {
+                    id,
+                    time: timestamp(),
+                    direction: "received".into(),
+                    peer,
+                    kind: message.kind.into(),
+                    message: message.text,
+                    bytes: message.bytes,
+                    sha256: message.sha256,
+                    transport: Some("本地业务服务".into()),
+                });
+                if s.records.len() > 100 {
+                    s.records.remove(0);
+                }
+            }
+        });
+    }
+    async fn accept_snapshot(&self, runtime: &Arc<Running>, snapshot: StateSnapshot) {
+        let mut s = self.inner.lock().await;
+        if s.running.as_ref().is_none_or(|r| !Arc::ptr_eq(r, runtime))
+            || runtime.cancel.is_cancelled()
+        {
+            return;
+        }
+        if s.sdk_snapshot
+            .as_ref()
+            .is_some_and(|old| snapshot.revision < old.revision)
+        {
+            return;
+        }
+        s.sdk_generation = snapshot.generation;
+        if snapshot.coordination.phase != StatePhase::Ready {
+            s.directory_known = false;
+            s.devices.clear();
+            if let Some(connection) = s.connection.as_mut() {
+                connection.connected = false;
+            }
+        }
+        s.phase = if snapshot.coordination.phase == StatePhase::Recovering {
+            "recovering"
+        } else {
+            "ready"
+        }
+        .into();
+        if s.remote_action != "enabling" && s.remote_action != "disabling" {
+            s.remote_action = if snapshot.remote_enabled { "on" } else { "off" }.into();
+        }
+        s.local_closed = !snapshot.remote_enabled;
+        s.sdk_snapshot = Some(snapshot);
+    }
+    fn spawn_runtime(self: &Arc<Self>, runtime: Arc<Running>) {
         let state = self.clone();
         let run = runtime.clone();
+        let mut watch = runtime.client.watch_state();
+        let mut events = runtime.client.subscribe();
         tokio::spawn(async move {
+            let initial = watch.borrow_and_update().clone();
+            state.accept_snapshot(&run, initial).await;
             loop {
                 tokio::select! {
                     _=run.cancel.cancelled()=>break,
-                    Some(message)=incoming.recv()=>{
-                        let mut s=state.inner.lock().await;
-                        if s.running.as_ref().is_none_or(|r|!Arc::ptr_eq(r,&run)){break;}
-                        let peer=message.peer_id.as_ref().and_then(|id|s.devices.iter().find(|d|&d.id==id)).map(|d|d.name.clone()).unwrap_or_else(||message.peer_id.clone().unwrap_or_else(||"远端设备".into()));
-                        s.record_id+=1;let id=s.record_id;
-                        s.records.push(Record{id,time:timestamp(),direction:"received".into(),peer,kind:message.kind.into(),message:message.text,bytes:message.bytes,sha256:message.sha256,transport:Some("已认证的端到端端口".into())});
-                        if s.records.len()>100{s.records.remove(0);}
+                    changed=watch.changed()=>{
+                        if changed.is_err(){break;}
+                        let snapshot=watch.borrow_and_update().clone();
+                        state.accept_snapshot(&run,snapshot).await;
                     },
                     event=events.recv()=>match event {
                         Ok(event)=>{
-                            {let s=state.inner.lock().await;if event.generation<s.sdk_generation{continue;}}
-                            if event.phase=="requires-login" {state.lose_session(&run,"身份或应用授权已失效，请重新登录；本机授权保留".into()).await;break;}
                             let mut s=state.inner.lock().await;
-                            if s.running.as_ref().is_none_or(|r|!Arc::ptr_eq(r,&run)){break;}
-                            s.sdk_generation=event.generation;
-                            if event.phase=="recovering" {s.phase="recovering".into();for device in &mut s.devices {device.online=false;}if let Some(connection)=s.connection.as_mut(){connection.connected=false;connection.transport="等待新代际通道".into();}}
-                            if event.phase=="coordination-ready" {s.phase="ready".into();s.error=None;}
-                            if event.phase=="mapping-disconnected" {if let Some(connection)=s.connection.as_mut(){connection.connected=false;}}
-                            if event.phase=="mapping-ready" {if let Some(connection)=s.connection.as_mut(){if event.peer_id.as_ref()==Some(&connection.peer_id){connection.connected=true;connection.transport=event.transport.clone().unwrap_or_default();}}}
-                            s.status=match event.phase.as_str(){
-                                "recovering"=>"协调服务已失效，正在自动恢复；旧 TCP 流已中断，业务字节不会重放".into(),
-                                "coordination-ready"=>"新代际已注册，端口已重新发布；本地映射等待新的连接".into(),
-                                "mapping-disconnected"=>"远端通道已断开，本地映射意图保留".into(),
-                                "mapping-ready"=>"本地映射已建立新的加密通道".into(),
-                                "provider-restarting"=>"匿名隧道异常，正在有限重启".into(),
-                                "provider-failed"=>"匿名隧道重启次数已用完；直连仍可尝试".into(),
-                                "direct-attempt"=>"正在尝试 WebRTC 直连".into(),
-                                "iroh-attempt"=>"WebRTC 未建立，正在尝试 iroh 直连".into(),
-                                "iroh-skipped"=>"对端没有可用的 iroh 直连地址，继续检查回退通道".into(),
-                                "fallback-attempt"=>"直连未建立，正在尝试 Cloudflare 匿名隧道".into(),
-                                "tunnel-ready"=>"匿名隧道已就绪，可以接受另一端连接".into(),
-                                "port-open"=>"远端端口已打开".into(),
-                                "error"=>"连接发生错误，请查看提示".into(),
-                                "session-ready"=>"本机设备会话已就绪".into(),
-                                "multiplexer-ready"=>"端到端加密通道已就绪".into(),
-                                "mutual-tls-ready"=>"双向 TLS 身份认证通过".into(),
-                                _=>"连接状态已更新".into()
-                            };
-                            if event.phase=="error"{s.error=event.message;}
+                            if s.running.as_ref().is_none_or(|r|!Arc::ptr_eq(r,&run))||run.cancel.is_cancelled(){break;}
+                            if event.generation<s.sdk_generation {continue;}
+                            if event.phase=="mapping-disconnected" {if let Some(c)=s.connection.as_mut(){c.connected=false;}}
+                            if event.phase=="mapping-ready" {if let Some(c)=s.connection.as_mut(){if event.peer_id.as_ref()==Some(&c.peer_id){c.connected=true;c.transport=event.transport.unwrap_or_default();}}}
+                            if event.phase=="requires-login" {s.error=Some("协调授权不可用，请关闭远程后恢复授权或退出".into());}
+                            if event.phase=="error" {s.error=Some("连接未完成，请检查协调与发布状态后重试".into());}
                         },
-                        Err(tokio::sync::broadcast::error::RecvError::Lagged(_))=>{state.inner.lock().await.error=Some("连接状态事件过多，请刷新设备状态".into());},
+                        Err(tokio::sync::broadcast::error::RecvError::Lagged(_))=>state.accept_snapshot(&run,run.client.snapshot()).await,
                         Err(_)=>break,
                     }
                 }
@@ -973,50 +1161,37 @@ impl LabState {
             let mut tick = tokio::time::interval(Duration::from_secs(15));
             tick.tick().await;
             loop {
-                tokio::select! {
-                    _=runtime.cancel.cancelled()=>break,
-                    _=tick.tick()=>{
-                        let result=runtime.client.devices().await;
-
-                        let mapping=runtime.mapping.lock().await.clone();
-                        let path=match mapping {Some(m)=>m.current_transport().await,None=>None};
-                        let mut s=state.inner.lock().await;
-                        if s.running.as_ref().is_none_or(|r|!Arc::ptr_eq(r,&runtime)){break;}
-                        if let Some(connection)=s.connection.as_mut(){connection.connected=path.is_some();if let Some(path)=path{connection.transport=path;}}
-                        match result {Ok(devices)=>s.devices=devices,Err(error)=>{if s.phase!="recovering"{s.error=Some(error.to_string());s.status="设备刷新失败，等待协调状态更新".into();}}}
+                tokio::select! { _=runtime.cancel.cancelled()=>break, _=tick.tick()=>{} }
+                let result = tokio::select! { _=runtime.cancel.cancelled()=>break, result=runtime.client.devices()=>result };
+                let mapping = runtime.mapping.lock().await.clone();
+                let path = match mapping {
+                    Some(m) => m.current_transport().await,
+                    None => None,
+                };
+                let mut s = state.inner.lock().await;
+                if s.running.as_ref().is_none_or(|r| !Arc::ptr_eq(r, &runtime))
+                    || runtime.cancel.is_cancelled()
+                {
+                    break;
+                }
+                if let Some(c) = s.connection.as_mut() {
+                    c.connected = path.is_some();
+                    if let Some(path) = path {
+                        c.transport = path;
+                    }
+                }
+                match result {
+                    Ok(devices) => {
+                        s.devices = devices;
+                        s.directory_known = true;
+                    }
+                    Err(_) => {
+                        s.devices.clear();
+                        s.directory_known = false;
                     }
                 }
             }
         });
-    }
-    async fn lose_session(&self, runtime: &Arc<Running>, message: String) {
-        let current = {
-            let mut s = self.inner.lock().await;
-            if s.running.as_ref().is_some_and(|r| Arc::ptr_eq(r, runtime)) {
-                s.running = None;
-                s.phase = "signed_out".into();
-                s.local = None;
-                s.devices.clear();
-                s.connection = None;
-                s.error = Some(message);
-                s.status = "本机授权保留，可恢复登录或撤销".into();
-                true
-            } else {
-                false
-            }
-        };
-        if current {
-            runtime.cancel.cancel();
-            runtime.services.close().await;
-            let mapping = runtime.mapping.lock().await.take();
-            if let Some(mapping) = mapping {
-                mapping.close().await;
-            }
-            let _ = runtime.client.close().await;
-            if runtime.client.has_pending_grant().await {
-                self.grant_owners.lock().await.push(runtime.client.clone());
-            }
-        }
     }
     pub async fn cancel_login(&self) -> Result<(), String> {
         if let Some(tx) = self.browser.lock().await.clone() {
@@ -1054,17 +1229,38 @@ impl LabState {
     }
     pub async fn refresh_devices(&self) -> Result<(), String> {
         let runtime = self.runtime().await?;
-        let devices = tokio::select! {_=runtime.cancel.cancelled()=>return Err("会话已关闭".into()),d=runtime.client.devices()=>d.map_err(|e|e.to_string())?};
+        let result = tokio::select! {_=runtime.cancel.cancelled()=>return Err("远程已关闭，设备目录状态未知".into()),result=runtime.client.devices()=>result};
         let mut s = self.inner.lock().await;
-        if s.running.as_ref().is_some_and(|r| Arc::ptr_eq(r, &runtime)) {
-            s.devices = devices;
-            s.error = None;
-            s.status = "设备列表已刷新".into();
+        if s.running.as_ref().is_none_or(|r| !Arc::ptr_eq(r, &runtime))
+            || runtime.cancel.is_cancelled()
+        {
+            return Err("设备目录结果已失效".into());
         }
-        Ok(())
+        match result {
+            Ok(devices) => {
+                s.devices = devices;
+                s.directory_known = true;
+                s.error = None;
+                Ok(())
+            }
+            Err(_) => {
+                s.devices.clear();
+                s.directory_known = false;
+                s.error = Some("设备目录暂不可用".into());
+                Err("设备目录暂不可用".into())
+            }
+        }
+    }
+    fn require_remote(runtime: &Running) -> Result<(), String> {
+        if runtime.cancel.is_cancelled() || !runtime.client.remote_access_enabled() {
+            Err("远程访问已关闭，请明确开启后再连接或传输".into())
+        } else {
+            Ok(())
+        }
     }
     pub async fn connect_device(&self, id: String) -> Result<(), String> {
         let runtime = self.runtime().await?;
+        Self::require_remote(&runtime)?;
         let _op = tokio::select! {_=runtime.cancel.cancelled()=>return Err("会话已关闭".into()),lock=runtime.operation.lock()=>lock};
         let peer = {
             let s = self.inner.lock().await;
@@ -1098,7 +1294,9 @@ impl LabState {
         };
         *runtime.mapping.lock().await = Some(Arc::new(mapping));
         let mut s = self.inner.lock().await;
-        if s.running.as_ref().is_some_and(|r| Arc::ptr_eq(r, &runtime)) {
+        if s.running.as_ref().is_some_and(|r| Arc::ptr_eq(r, &runtime))
+            && !runtime.cancel.is_cancelled()
+        {
             s.connection = Some(connection);
             s.status = "已连接，发送消息后等待对端确认".into();
         }
@@ -1111,12 +1309,15 @@ impl LabState {
             mapping.close().await;
         }
         let mut s = self.inner.lock().await;
-        s.connection = None;
-        s.status = "已断开当前设备连接".into();
+        if s.running.as_ref().is_some_and(|r| Arc::ptr_eq(r, &runtime)) {
+            s.connection = None;
+            s.status = "已断开当前设备连接".into();
+        }
         Ok(())
     }
     pub async fn send_message(&self, text: String) -> Result<(), String> {
         let runtime = self.runtime().await?;
+        Self::require_remote(&runtime)?;
         let _op = tokio::select! {_=runtime.cancel.cancelled()=>return Err("会话已关闭".into()),lock=runtime.operation.lock()=>lock};
         let mapping = runtime
             .mapping
@@ -1127,7 +1328,9 @@ impl LabState {
         let peer = mapping.peer.device_id.clone();
         tokio::select! {_=runtime.cancel.cancelled()=>return Err("会话已关闭".into()),result=protocol::send_message(mapping.addr,&runtime.device_id,&peer,&text)=>result?};
         let mut s = self.inner.lock().await;
-        if s.running.as_ref().is_none_or(|r| !Arc::ptr_eq(r, &runtime)) {
+        if s.running.as_ref().is_none_or(|r| !Arc::ptr_eq(r, &runtime))
+            || runtime.cancel.is_cancelled()
+        {
             return Err("消息确认返回时会话已退出".into());
         }
         let peer = s
@@ -1157,6 +1360,7 @@ impl LabState {
     }
     pub async fn probe_device(&self, id: String) -> Result<(), String> {
         let runtime = self.runtime().await?;
+        Self::require_remote(&runtime)?;
         let _op = tokio::select! {_=runtime.cancel.cancelled()=>return Err("会话已关闭".into()),lock=runtime.operation.lock()=>lock};
         let mapping = tokio::select! {_=runtime.cancel.cancelled()=>return Err("会话已关闭".into()),m=runtime.client.map(&id,protocol::ECHO_PORT,"127.0.0.1:0".parse().unwrap())=>m.map_err(|e|e.to_string())?};
         let result = tokio::select! {_=runtime.cancel.cancelled()=>Err("会话已关闭".into()),result=protocol::probe(mapping.addr)=>result};
@@ -1167,7 +1371,9 @@ impl LabState {
         mapping.close().await;
         let (bytes, sha256) = result?;
         let mut s = self.inner.lock().await;
-        if s.running.as_ref().is_none_or(|r| !Arc::ptr_eq(r, &runtime)) {
+        if s.running.as_ref().is_none_or(|r| !Arc::ptr_eq(r, &runtime))
+            || runtime.cancel.is_cancelled()
+        {
             return Err("校验完成时会话已退出".into());
         }
         let peer = s
@@ -1195,11 +1401,314 @@ impl LabState {
         s.status = "64 KiB 传输完成，字节数及 SHA256 一致".into();
         Ok(())
     }
+    /// Start one owned operation so IPC/ADB remains available for priority close.
+    pub async fn start_enable_remote(self: &Arc<Self>) -> Result<(), String> {
+        use std::{future::Future, task::Poll};
+        let expected = self.remote_enable_generation().await?;
+        let state = self.clone();
+        let mut operation = Box::pin(async move { state.enable_remote_generation(expected).await });
+        let first = std::future::poll_fn(|cx| Poll::Ready(operation.as_mut().poll(cx))).await;
+        match first {
+            Poll::Ready(result) => result,
+            Poll::Pending => {
+                let task = tokio::spawn(async move {
+                    let _ = operation.await;
+                });
+                let mut retired = self.retired.lock().await;
+                retired.retain(|task| !task.is_finished());
+                retired.push(task);
+                Ok(())
+            }
+        }
+    }
+    #[cfg(test)]
+    async fn enable_remote(self: &Arc<Self>) -> Result<(), String> {
+        let expected = self.remote_enable_generation().await?;
+        self.enable_remote_generation(expected).await
+    }
+    async fn remote_enable_generation(&self) -> Result<u64, String> {
+        let s = self.inner.lock().await;
+        if s.phase == "closing" || s.remote_action == "disabling" {
+            return Err("正在安全关闭，请等待云端撤回结果后再开启".into());
+        }
+        Ok(s.remote_generation)
+    }
+    async fn enable_remote_generation(self: &Arc<Self>, expected: u64) -> Result<(), String> {
+        let _single = match self.remote_operation.try_lock() {
+            Ok(lock) => lock,
+            Err(_) => return Ok(()), // Duplicate enable observes the same transition.
+        };
+        let (old, config, generation, user) = {
+            let mut s = self.inner.lock().await;
+            if s.remote_generation != expected {
+                return Err("开启动作已被关闭或新的操作取代".into());
+            }
+            if s.phase == "closing" || s.remote_action == "disabling" {
+                return Err("正在安全关闭，请等待云端撤回结果后再开启".into());
+            }
+            let run = s.running.clone().ok_or("请先登录")?;
+            if run.client.remote_access_enabled() && !run.cancel.is_cancelled() {
+                return Ok(());
+            }
+            s.remote_generation += 1;
+            s.remote_action = "enabling".into();
+            s.error = None;
+            let user = s.local.as_ref().ok_or("本机身份不可用")?.user_id.clone();
+            (run, s.config.clone(), s.remote_generation, user)
+        };
+        let reopening = old.cancel.is_cancelled();
+        if reopening {
+            // A completed close joins dispatched SDK authorization work. Before
+            // creating another Client, also settle any retained checkpoint owner;
+            // sharing an Arc alone is not permission to consume an older grant.
+            let owners = self.grant_owners.lock().await.clone();
+            for owner in &owners {
+                if owner.retry_pending_grant().await.is_err() {
+                    let message = "最新授权尚未安全保存，请恢复存储后重试开启";
+                    let mut s = self.inner.lock().await;
+                    if s.remote_generation == generation {
+                        s.remote_action = "off".into();
+                        s.error = Some(message.into());
+                    }
+                    return Err(message.into());
+                }
+            }
+            self.grant_owners
+                .lock()
+                .await
+                .retain(|owner| !owners.iter().any(|done| Arc::ptr_eq(owner, done)));
+        }
+        let client = if reopening {
+            match self.create_client(&config) {
+                Ok(client) => client,
+                Err(_) => {
+                    let mut s = self.inner.lock().await;
+                    if s.remote_generation == generation {
+                        s.remote_action = "off".into();
+                        s.error = Some("无法准备新的设备会话，请检查配置".into());
+                    }
+                    return Err("无法准备新的设备会话，请检查配置".into());
+                }
+            }
+        } else {
+            old.client.clone()
+        };
+        {
+            let mut s = self.inner.lock().await;
+            if s.remote_generation != generation {
+                return Err("开启动作已被关闭取代".into());
+            }
+            s.opening = Some(client.clone());
+        }
+        let result: Result<Arc<Running>, String> = async {
+            let run = if reopening {
+                // Reuse the actual provider owner (CredentialStore clones share
+                // auth_gate, pending rotation and file lease), never a second store.
+                client.set_auth_provider(old.owner.clone()).await;
+                let session = client
+                    .login_with_auth_provider(&config.device_name)
+                    .await
+                    .map_err(|_| "本机授权恢复未完成，请检查授权状态后重试".to_string())?;
+                if session.user.id != user {
+                    return Err("恢复后的账号与原授权不一致".into());
+                }
+                for port in old.client.port_intents().await {
+                    client
+                        .expose(port)
+                        .await
+                        .map_err(|_| "无法恢复本地端口意图".to_string())?;
+                }
+                let run = Arc::new(Running {
+                    client: client.clone(),
+                    owner: old.owner.clone(),
+                    services: old.services.clone(),
+                    cancel: CancellationToken::new(),
+                    mapping: Mutex::new(None),
+                    operation: Mutex::new(()),
+                    device_id: session.device_id.clone(),
+                });
+                {
+                    let mut s = self.inner.lock().await;
+                    if s.remote_generation != generation || s.remote_action != "enabling" {
+                        return Err("开启动作已被关闭取代".into());
+                    }
+                    // Update ACK identity without replacing listeners or active local TCP.
+                    run.services
+                        .update_device_id(session.device_id.clone())
+                        .await;
+                    if let Some(local) = s.local.as_mut() {
+                        local.device_id = session.device_id;
+                    }
+                    s.sdk_snapshot = Some(client.snapshot());
+                    s.sdk_generation = 0;
+                    s.running = Some(run.clone());
+                    s.devices.clear();
+                    s.directory_known = false;
+                }
+                self.spawn_runtime(run.clone());
+                run
+            } else {
+                old.clone()
+            };
+            {
+                let s = self.inner.lock().await;
+                if s.remote_generation != generation || s.remote_action != "enabling" {
+                    return Err("开启动作已被关闭取代".into());
+                }
+            }
+            client
+                .enable_remote()
+                .await
+                .map_err(|_| "远程开启尚未获服务确认，请查看发布状态".to_string())?;
+            Ok(run)
+        }
+        .await;
+        let mut s = self.inner.lock().await;
+        if s.remote_generation != generation || s.remote_action != "enabling" {
+            drop(s);
+            let outcome = client.disable_remote().await;
+            if outcome.coordinator_revocation == CoordinatorRevocation::Pending {
+                let mut clients = self.disabled_clients.lock().await;
+                if !clients.iter().any(|old| Arc::ptr_eq(old, &client)) {
+                    clients.push(client.clone());
+                }
+            }
+            if client.has_pending_grant().await {
+                self.grant_owners.lock().await.push(client);
+            }
+            return Err("开启动作已被关闭取代".into());
+        }
+        s.opening = None;
+        s.sdk_snapshot = Some(client.snapshot());
+        s.local_closed = !client.remote_access_enabled();
+        s.remote_action = if client.remote_access_enabled() {
+            "on"
+        } else {
+            "off"
+        }
+        .into();
+        s.coordinator_revocation = None;
+        match result {
+            Ok(_) => {
+                s.status = "远程访问已开启；端口确认状态由 SDK 快照显示".into();
+                s.error = None;
+                Ok(())
+            }
+            Err(message) => {
+                s.error = Some(message.clone());
+                s.status = "开启未完成，本地业务服务继续可用".into();
+                // An uninstalled candidate must remain privately owned for safe
+                // checkpoint/revocation. No failed login future is dropped.
+                let installed = s
+                    .running
+                    .as_ref()
+                    .is_some_and(|r| Arc::ptr_eq(&r.client, &client));
+                drop(s);
+                if !installed {
+                    let outcome = client.disable_remote().await;
+                    if outcome.coordinator_revocation == CoordinatorRevocation::Pending {
+                        self.disabled_clients.lock().await.push(client.clone());
+                    }
+                    if client.has_pending_grant().await {
+                        self.grant_owners.lock().await.push(client);
+                    }
+                }
+                Err(message)
+            }
+        }
+    }
+    pub async fn disable_remote(&self) -> Result<RemoteDisableOutcome, String> {
+        use std::{future::Future, task::Poll};
+        let (run, unique, generation) = {
+            let mut s = self.inner.lock().await;
+            let run = s.running.clone().ok_or("请先登录")?;
+            s.remote_generation += 1;
+            s.remote_action = "disabling".into();
+            let mut clients = self.disabled_clients.lock().await;
+            clients.push(run.client.clone());
+            if let Some(client) = s.opening.take() {
+                clients.push(client);
+            }
+            let mut unique: Vec<Arc<Client>> = Vec::new();
+            for client in clients.iter() {
+                if !unique.iter().any(|old| Arc::ptr_eq(old, client)) {
+                    unique.push(client.clone());
+                }
+            }
+            *clients = unique.clone();
+            (run, unique, s.remote_generation)
+        };
+        // Poll every close once before awaiting any cloud result. The SDK closes
+        // its atomic gate/lifetime before its first await, including candidates.
+        let mut closing = Vec::new();
+        for client in &unique {
+            let mut future = Box::pin(client.disable_remote());
+            let first = std::future::poll_fn(|cx| Poll::Ready(future.as_mut().poll(cx))).await;
+            closing.push((future, first));
+        }
+        run.cancel.cancel();
+        {
+            let mut s = self.inner.lock().await;
+            if s.remote_generation == generation {
+                s.sdk_snapshot = Some(run.client.snapshot());
+                s.local_closed = true;
+                s.coordinator_revocation = Some(CoordinatorRevocation::Pending);
+                s.devices.clear();
+                s.directory_known = false;
+                s.connection = None;
+                s.status = "本机远程访问已关闭，本地服务可用；正在确认云端撤回".into();
+                s.error = None;
+            }
+        }
+        let mut pending = Vec::new();
+        for (client, (future, first)) in unique.iter().zip(closing) {
+            let outcome = match first {
+                Poll::Ready(outcome) => outcome,
+                Poll::Pending => future.await,
+            };
+            if outcome.coordinator_revocation == CoordinatorRevocation::Pending {
+                pending.push(client.clone());
+            }
+            if client.has_pending_grant().await {
+                let mut owners = self.grant_owners.lock().await;
+                if !owners.iter().any(|old| Arc::ptr_eq(old, client)) {
+                    owners.push(client.clone());
+                }
+            }
+        }
+        // The first SDK poll may already own the peer's RTC cleanup lock.
+        // Finish driving those owned futures before Mapping::close joins the
+        // same peer; awaiting the mapping first would strand its SDK owner.
+        if let Some(mapping) = run.mapping.lock().await.take() {
+            mapping.close().await;
+        }
+        let outcome = RemoteDisableOutcome {
+            local_closed: true,
+            coordinator_revocation: if pending.is_empty() {
+                CoordinatorRevocation::Confirmed
+            } else {
+                CoordinatorRevocation::Pending
+            },
+        };
+        let mut s = self.inner.lock().await;
+        if s.remote_generation == generation {
+            *self.disabled_clients.lock().await = pending;
+            s.remote_action = "off".into();
+            s.local_closed = true;
+            s.coordinator_revocation = Some(outcome.coordinator_revocation);
+            s.sdk_snapshot = Some(run.client.snapshot());
+            s.status = "本机远程访问已关闭；本地服务和本机授权保留".into();
+        }
+        Ok(outcome)
+    }
     pub async fn shutdown(&self, revoke: bool) -> Result<(), String> {
         self.shutdown_with_wait(revoke, Duration::from_secs(45))
             .await
     }
     async fn shutdown_with_wait(&self, revoke: bool, wait: Duration) -> Result<(), String> {
+        if self.inner.lock().await.running.is_some() {
+            let _ = self.disable_remote().await;
+        }
         if let Some(tx) = self.browser.lock().await.clone() {
             #[cfg(target_os = "android")]
             crate::android_browser::cancel(&tx.id).await?;
@@ -1216,6 +1725,7 @@ impl LabState {
                 p.cancel.cancel();
             }
             s.generation += 1;
+            s.remote_generation += 1;
             s.phase = "closing".into();
             s.status = "正在关闭本机连接".into();
             (s.running.take(), s.config.clone(), pending)
@@ -1304,6 +1814,10 @@ impl LabState {
         let mut s = self.inner.lock().await;
         s.phase = "signed_out".into();
         s.local = None;
+        s.sdk_snapshot = None;
+        s.remote_action = "off".into();
+        s.local_closed = true;
+        s.directory_known = false;
         s.devices.clear();
         s.records.clear();
         s.connection = None;
@@ -1436,3 +1950,7 @@ mod browser_setup_tests {
         std::fs::remove_dir_all(root).unwrap();
     }
 }
+
+#[cfg(test)]
+#[path = "state_remote_tests.rs"]
+mod remote_tests;

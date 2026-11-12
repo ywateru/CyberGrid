@@ -14,7 +14,7 @@
 | API resource | 创建标识为 `https://cybergrid.local/api` 的资源，添加 `connect` permission。将该 permission 分配给测试用户的 User role，已有用户也要分配该角色。资源标识是固定的 OAuth audience，无需解析这个域名 |
 | Native Application | 创建普通 Native 类型应用并关闭 Device Flow，登记 `http://127.0.0.1:17896/callback` 和 `tech.tinadev.cybergrid.lab://tech.tinadev.cybergrid.lab/callback`，记录公开 Application ID。Mac 和 Android 都填写这个 ID，保留大小写；不要填写 SPA 或 M2M 的 ID |
 | SPA Application | 为网站个人控制台创建独立 SPA 应用，其 Application ID 填入 `LOGTO_BROWSER_CLIENT_ID`。第 3 步拿到 HTTPS 地址后再登记回跳；Lab 登录不依赖 SPA 回跳 |
-| Machine-to-machine Application | 创建 M2M 应用，授予内置 Logto Management API 的 `all` 权限（通过相应 M2M role）。ID 和 secret 填入两个 `LOGTO_MANAGEMENT_*` 配置，供服务读取应用目录 |
+| 应用允许策略 | 推荐下面的 `CYBERGRID_PRODUCTS` 静态模式，无需 M2M；仅选择动态 Logto 目录时才创建 M2M 应用、授予 Management API `all` 并配置两个 `LOGTO_MANAGEMENT_*` 服务端参数 |
 
 Logto 应签发面向上述 API resource、包含 `connect` 的 ES384 用户 access token。API resource 的用户权限与 Management API 的 M2M 权限是两项独立配置。新注册用户也需要测试角色；可在 Logto 将该 User role 配置为新用户的默认角色。登录／注册方式及邮件连接器在 Logto 配置。
 
@@ -38,8 +38,8 @@ CYBERGRID_PUBLIC_ORIGIN=
 LOGTO_ISSUER=https://你的租户.logto.app/oidc
 LOGTO_RESOURCE=https://cybergrid.local/api
 LOGTO_BROWSER_CLIENT_ID=你的SPA应用ID
-LOGTO_MANAGEMENT_CLIENT_ID=你的M2M应用ID
-LOGTO_MANAGEMENT_CLIENT_SECRET=你的M2M应用secret
+# 将下面 nativeDesktop / workspaceWeb 全部替换为实际 Native / SPA ID
+CYBERGRID_PRODUCTS={"version":1,"products":[{"id":"nativeDesktop","name":"My workspace","nativeClientIds":["nativeDesktop"],"browserClientIds":["workspaceWeb"]}]}
 CYBERGRID_ADMIN_KEY=
 CYBERGRID_BIND=127.0.0.1
 PORT=7400
@@ -49,6 +49,8 @@ CYBERGRID_REDIS_PREFIX=cybergrid:v1
 ```
 
 需要管理后台时，在同一文件填入独立随机的 32–256 UTF-8 字节 `CYBERGRID_ADMIN_KEY`，更新服务后访问 `/admin/`。不需要时保持空。不要把 secret 或管理密钥写进 Git、客户端或截图。
+
+此示例采用最小权限静态目录：应用仍在 Logto 创建和管理，CyberGrid 只声明允许的产品绑定。`LOGTO_BROWSER_CLIENT_ID` 要与 JSON 中实际 SPA 一致；Native client 须为普通 Native 并关闭 Device Flow，部署者自行核对这些 Logto 类型。若两平台各用一个 Native client，把两个真实 ID 放入同产品 nativeClientIds，产品 id 保留其中一个，不给客户端复制 refresh token。未设置 `CYBERGRID_PRODUCTS` 才进入需要 M2M 的动态模式；不能将空值当作未设置。详情见 [部署策略](deployment.md#配置-logto)。
 
 ```sh
 docker compose up --build -d
@@ -150,7 +152,7 @@ python3 apps/tauri-test/tools/android-adb.py --serial "$ANDROID_SERIAL" status
 | 手机无法访问官网 | 两端是否使用同一个公网 HTTPS 地址，入口进程是否仍运行；不要使用 `localhost` 或自签名证书 |
 | 应用不存在或不支持 | Native ID 的大小写、是否误填 SPA / M2M ID、Device Flow 是否关闭、是否登记两平台精确回调 |
 | audience / permission 错误 | `LOGTO_RESOURCE` 与 Logto API resource 是否完全一致，测试用户角色是否包含该资源的 `connect` |
-| 应用目录不可用 | M2M ID / secret、内置 Management API `all` 权限及租户是否对应；用 `docker compose logs --tail=50` 查看错误，分享前去除私密信息 |
+| 应用目录不可用 | 静态模式检查 JSON/允许 client 和 canonical product；动态模式检查 M2M ID / secret、Management audience/权限。用 `docker compose logs --tail=50` 查看固定错误，分享前去除私密信息 |
 | 协调服务不可用 | 检查 Redis 连接、两种连接配置是否混用、provider 配额与实例是否使用相同 namespace；不得靠切回 RAM 规避 |
 | 登录一直等待 | 是否在系统浏览器完成登录、是否用了正确租户页面；重新查 `status`，不要把受理回执当成功 |
 | 看不到对端 | 两端中央地址、Native ID、账号是否一致，对端是否仍前台运行；两端分别刷新 |

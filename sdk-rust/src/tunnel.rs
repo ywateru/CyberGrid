@@ -20,30 +20,14 @@ use tokio_util::sync::CancellationToken;
 use url::Url;
 
 pub fn validate_tunnel_url(value: &str) -> Result<()> {
-    let u = Url::parse(value).map_err(|_| protocol("invalid tunnel URL"))?;
-    let host = u
-        .host_str()
-        .ok_or_else(|| protocol("tunnel host missing"))?;
-    let label = host
-        .strip_suffix(".trycloudflare.com")
-        .ok_or_else(|| protocol("tunnel must use trycloudflare.com"))?;
-    if u.scheme() != "https"
-        || u[..url::Position::BeforeHost].contains('@')
-        || u.port().is_some()
-        || label.is_empty()
-        || label.contains('.')
-        || !label
-            .chars()
-            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
-        || u.query().is_some()
-        || u.fragment().is_some()
-        || !(u.path().is_empty() || u.path() == "/")
-    {
-        return Err(protocol(
-            "tunnel must be root HTTPS random-name.trycloudflare.com",
-        ));
-    }
-    Ok(())
+    crate::endpoints::quick_tunnel(value).map(|_| ())
+}
+pub(crate) fn device_websocket_url(raw: &str) -> Result<String> {
+    let u = Url::parse(raw).map_err(|_| protocol("invalid tunnel"))?;
+    Ok(format!(
+        "wss://{}/connect",
+        &u[url::Position::BeforeHost..url::Position::AfterPort]
+    ))
 }
 fn allocated(line: &str) -> Option<String> {
     line.split('|')
@@ -118,14 +102,8 @@ impl Client {
             .tunnel_url
             .as_deref()
             .ok_or_else(|| protocol("remote tunnel not ready"))?;
-        validate_tunnel_url(url)?;
-        let endpoint = format!(
-            "wss://{}/connect",
-            Url::parse(url)
-                .map_err(|_| protocol("invalid tunnel"))?
-                .host_str()
-                .ok_or_else(|| protocol("missing tunnel host"))?
-        );
+        self.validate_endpoint(url, true).await?;
+        let endpoint = device_websocket_url(url)?;
         self.dial_ws_endpoint(d, &endpoint, rt.cancel.child_token())
             .await
     }
@@ -150,7 +128,16 @@ impl Client {
             Some(&d.id),
             None,
         );
-        let (ws, response) = tokio::select! {_=cancel.cancelled()=>return Err(Error::Cancelled),r=tokio::time::timeout(Duration::from_secs(10),tokio_tungstenite::connect_async_with_config(request,Some(tungstenite::protocol::WebSocketConfig::default().max_message_size(Some(1<<20)).max_frame_size(Some(1<<20))),true))=>r.map_err(|_|Error::Timeout("WebSocket connect"))?.map_err(|_|transport("WebSocket upgrade failed"))?};
+        #[cfg(test)]
+        let connector = self
+            .ws_connector
+            .read()
+            .expect("test connector lock")
+            .clone()
+            .map(tokio_tungstenite::Connector::Rustls);
+        #[cfg(not(test))]
+        let connector = None;
+        let (ws, response) = tokio::select! {_=cancel.cancelled()=>return Err(Error::Cancelled),r=tokio::time::timeout(Duration::from_secs(10),tokio_tungstenite::connect_async_tls_with_config(request,Some(tungstenite::protocol::WebSocketConfig::default().max_message_size(Some(1<<20)).max_frame_size(Some(1<<20))),true,connector))=>r.map_err(|_|Error::Timeout("WebSocket connect"))?.map_err(|_|transport("WebSocket upgrade failed"))?};
         if response
             .headers()
             .get("Sec-WebSocket-Protocol")

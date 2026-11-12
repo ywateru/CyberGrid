@@ -8,6 +8,8 @@ use url::Url;
 pub struct Config {
     pub base_url: String,
     pub app_id: String,
+    /// Host access-token freshness budget, in seconds (1..=3600).
+    pub auth_min_validity: u64,
     pub direct_timeout: Duration,
     pub direct_strategy: DirectStrategy,
     /// Enable only direct-IP iroh QUIC; no relay or address lookup service.
@@ -25,6 +27,7 @@ impl Default for Config {
         Self {
             base_url: "https://cybergrid.aixgg.com".into(),
             app_id: String::new(),
+            auth_min_validity: 60,
             direct_timeout: Duration::from_secs(12),
             direct_strategy: DirectStrategy::Sequential,
             iroh_enabled: true,
@@ -100,6 +103,11 @@ pub(crate) fn validate_app_id(id: &str) -> Result<()> {
 }
 pub(crate) fn validate_config(c: &mut Config) -> Result<()> {
     validate_app_id(&c.app_id)?;
+    if !(1..=3600).contains(&c.auth_min_validity) {
+        return Err(Error::Config(
+            "auth_min_validity must be 1..=3600 seconds".into(),
+        ));
+    }
     let u = Url::parse(&c.base_url).map_err(|_| Error::Config("invalid server URL".into()))?;
     let loopback = u.host_str().is_some_and(|h| {
         h == "localhost" || h.parse::<std::net::IpAddr>().is_ok_and(|a| a.is_loopback())
@@ -151,9 +159,6 @@ impl Port {
         }
     }
     pub(crate) fn validate(&self) -> Result<()> {
-        if let Some(url) = &self.tunnel_url {
-            crate::validate_tunnel_url(url)?;
-        }
         if self.id.is_empty()
             || self.id.len() > 64
             || self.port == 0
@@ -169,6 +174,8 @@ impl Port {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Device {
+    #[serde(default)]
+    pub bridges: Vec<crate::BrowserBridge>,
     #[serde(default)]
     pub iroh: Option<IrohInfo>,
     #[serde(default)]
@@ -291,6 +298,8 @@ pub struct Session {
     pub incarnation: String,
     pub purpose: String,
     pub app_id: String,
+    #[serde(default)]
+    pub product_id: Option<String>,
     #[serde(skip_serializing)]
     pub(crate) session_key: String,
     pub expires_at: DateTime<Utc>,

@@ -1,0 +1,3 @@
+# RAM-only sample npm notices
+
+Exact locked desktop/Web dependency license texts. No dependency implementation or optional binary is vendored. Same-version platform-wrapper text is explicitly labelled and requires exact optional-package metadata integrity/license validation; other absent packages require their integrity-verified archive. Missing text blocks collection. Regenerate with `python3 scripts/release/collect-sample-licenses.py` after the sample npm ci commands. Rust texts remain in sdk-rust/licenses and apps/tauri-test/notices/rust; the final release audits sample Cargo.lock against those exact versions. Project LICENSE grants remain unchanged.

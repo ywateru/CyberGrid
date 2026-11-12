@@ -26,9 +26,14 @@ env:
   NDK_VERSION: '27.2.12479018'
 
 jobs:
+  integration:
+    uses: ./.github/workflows/integration.yml
+
   sources:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
+    env:
+      REQUIRE_REDIS: '1'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -36,6 +41,11 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: ${{ env.NODE_VERSION }}
+      - name: Install actual Redis prerequisite
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y redis-server
+          command -v redis-server
       - name: Build website and typecheck coordinator plus middleware
         working-directory: server
         run: |
@@ -47,8 +57,13 @@ jobs:
           npm ci --include=dev --ignore-scripts
           npm test
           npm run test:integration
-      - name: Verify fixed resources and package committed source and licenses
-        run: python3 scripts/release/package.py sources
+          npm run test:bridge-integration
+      - name: Verify explicit binary policy and package committed source and licenses
+        run: |
+          python3 scripts/release/test-source-policy.py
+          python3 scripts/release/test-package.py
+          python3 scripts/release/test-sample-licenses.py
+          python3 scripts/release/package.py sources
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-sources
@@ -155,7 +170,7 @@ jobs:
           retention-days: 1
 
   publish:
-    needs: [sources, macos, android]
+    needs: [sources, macos, android, integration]
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:

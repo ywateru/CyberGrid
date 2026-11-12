@@ -6,6 +6,11 @@ import json
 from pathlib import Path
 import re
 import shutil
+import importlib.util
+
+_spec = importlib.util.spec_from_file_location("public_policy", Path(__file__).with_name("plan-source.py"))
+_policy = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_policy)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -35,6 +40,10 @@ def main():
         if relative.is_absolute() or '..' in relative.parts:
             raise RuntimeError('Unsafe allowlist path')
         source = ROOT / relative
+        if source.is_symlink() or not source.is_file():
+            raise RuntimeError('Nonregular public source input')
+        if not _policy.eligible(relative) or not _policy.binary_allowed(relative, source.read_bytes()):
+            raise RuntimeError('Source is outside current public policy')
         if source.is_symlink() or sha(source) != item['sha256']:
             raise RuntimeError('Source changed since the plan; regenerate after freeze')
         target = out / relative
@@ -81,6 +90,17 @@ def main():
     update(notice_root / 'source-files-sha256.json', (json.dumps(notice_map, indent=2) + '\n').encode(), 'Rebind copied notice metadata to this public source snapshot')
     # No original-license content is changed. The snapshot's CI creates fresh
     # source manifests from git; old local audit manifests are excluded by policy.
+    # Finder may create metadata in a newly browsed output directory. It is not
+    # a source input and must not enter the immutable public file manifest.
+    finder_metadata_removed = 0
+    for path in out.rglob('.DS_Store'):
+        if path.is_file() and not path.is_symlink():
+            path.unlink()
+            finder_metadata_removed += 1
+    expected_files = {item['path'] for item in plan['keep']}
+    actual_files = {path.relative_to(out).as_posix() for path in out.rglob('*') if path.is_file()}
+    if actual_files != expected_files:
+        raise RuntimeError('Snapshot inventory differs from explicit source plan')
     personal_values = [x.encode() for x in json.loads(args.private_values.read_text())] if args.private_values else []
     violations = []
     for path in sorted(p for p in out.rglob('*') if p.is_file()):
@@ -105,6 +125,7 @@ def main():
     report = {'status': 'PUBLIC_SNAPSHOT_READY_FOR_PRIVACY_REVIEW' if not violations else 'PUBLIC_SNAPSHOT_PRIVACY_BLOCKED',
               'files': files, 'fileCount': len(files), 'totalBytes': sum(p['bytes'] for p in files), 'treeSha256': tree.hexdigest(),
               'transformations': changes, 'knownPersonalValueFindings': violations, 'providerRawPinsUnchanged': raw_pins,
+              'generatedFinderMetadataRemoved': finder_metadata_removed, 'actualInventoryEqualsPlan': True,
               'originalSourceNotMutated': True, 'gitInitialized': False, 'pushed': False}
     args.report.parent.mkdir(parents=True, exist_ok=True)
     write_json(args.report, report)

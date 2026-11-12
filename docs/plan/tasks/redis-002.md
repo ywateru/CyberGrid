@@ -7,7 +7,7 @@ depends-on: [redis-001]
 
 ## objective
 
-构建实际 Vercel Node Function，配置独立 Redis namespace，验证预览后切换正式域名，生产路径不再依赖 xgy-w。提供一键部署与配置文档。只使用已授权免费资源，不启用自动付费升级。
+构建实际 Vercel Node Function，配置独立 Redis namespace，验证预览后切换正式域名，生产路径不再依赖旧远程节点。提供一键部署与配置文档。只使用已授权免费资源，不启用自动付费升级。
 
 ## context
 

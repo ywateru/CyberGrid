@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Package committed public inputs and freshly built outputs; never reuse a local audit freeze."""
 import argparse
+import importlib.util
 import gzip
 import hashlib
 import io
@@ -14,7 +15,35 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'dist' / 'release'
-VERSIONS = {'go': '0.4.0', 'rust': '0.2.0', 'lab': '0.3.0', 'js': '0.1.0'}
+PROJECT_VERSION = '0.8.0'
+VERSIONS = {'go': '0.4.0', 'rust': '0.3.0', 'lab': '0.4.0', 'js': '0.2.0', 'server': '0.2.0', 'sample': '0.1.0'}
+
+
+def public_sources(*prefixes):
+    spec = importlib.util.spec_from_file_location('source_policy', ROOT / 'scripts/release/plan-source.py')
+    policy = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(policy)
+    files = [path for path in tracked(*prefixes) if policy.eligible(path.relative_to(ROOT))]
+    if any(not policy.binary_allowed(path.relative_to(ROOT), path.read_bytes()) for path in files):
+        raise RuntimeError('Unreviewed binary in public source inputs')
+    return files
+
+
+def expected_assets():
+    return {
+        *(f'{name}-{version}-source.tar.gz' for name, version in [
+            ('cybergrid-sdk', VERSIONS['go']), ('cybergrid-sdk-rust', VERSIONS['rust']), ('cybergrid-sdk-js', VERSIONS['js']),
+            ('CyberGrid-Lab', VERSIONS['lab']), ('CyberGrid', PROJECT_VERSION)]),
+        'cybergrid-sdk-source-manifest.json', 'cybergrid-sdk-rust-source-manifest.json',
+        'cybergrid-sdk-js-source-manifest.json', 'lab-source-manifest.json', 'cybergrid-source-manifest.json',
+        f'cybergrid-sdk-js-{VERSIONS["js"]}-esm.tar.gz', 'CyberGrid-licenses.tar.gz',
+        f'CyberGrid-Lab-{VERSIONS["lab"]}-macos-arm64-test.zip',
+        f'CyberGrid-Lab-{VERSIONS["lab"]}-android-arm64-test.apk',
+        f'CyberGrid-Lab-{VERSIONS["lab"]}-android-arm64-test.zip',
+        f'cybergrid-sdk-{VERSIONS["go"]}-macos-arm64.tar.gz',
+        f'cybergrid-sdk-{VERSIONS["go"]}-android-arm64.tar.gz',
+        'build-sources.json', 'build-macos.json', 'build-android.json',
+    }
 
 
 def sha(path):
@@ -41,7 +70,7 @@ def write_json(name, data):
 
 
 def source_map(prefix):
-    return {p.relative_to(ROOT / prefix).as_posix(): sha(p) for p in tracked(prefix)}
+    return {p.relative_to(ROOT / prefix).as_posix(): sha(p) for p in public_sources(prefix)}
 
 
 def tar(name, paths, prefix, extra=None):
@@ -77,15 +106,27 @@ def providers():
 
 
 def build_metadata(platform):
-    return {'platform': platform, 'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT).decode().strip(),
+    return {'platform': platform, 'projectVersion': PROJECT_VERSION, 'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT).decode().strip(),
             'versions': VERSIONS, 'profile': 'debug-test' if platform != 'sources' else 'source',
             'githubRunId': os.environ.get('GITHUB_RUN_ID'), 'githubRunAttempt': os.environ.get('GITHUB_RUN_ATTEMPT'),
             'sourceDateEpoch': int(os.environ.get('SOURCE_DATE_EPOCH', '0')), 'providerManifestSha256': sha(ROOT / 'tools/cloudflared/bundled-manifest.json')}
 
 
+def package_repository_sources():
+    # Package only the explicitly reviewed public tree. The complete repository
+    # preserves the sample's relative SDK, server and official-owner imports.
+    files = public_sources()
+    mapping = {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
+    meta = {**build_metadata('sources'), 'projectVersion': PROJECT_VERSION, 'sha256': mapping}
+    write_json('cybergrid-source-manifest.json', meta)
+    tar(f'CyberGrid-{PROJECT_VERSION}-source.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in files],
+        f'CyberGrid-{PROJECT_VERSION}', {'SOURCE-MANIFEST.json': (json.dumps(meta, indent=2, sort_keys=True) + '\n').encode()})
+
+
 def package_sources():
+    package_repository_sources()
     for prefix, name, version in [('sdk', 'cybergrid-sdk', VERSIONS['go']), ('sdk-rust', 'cybergrid-sdk-rust', VERSIONS['rust']), ('sdk-js', 'cybergrid-sdk-js', VERSIONS['js'])]:
-        files = tracked(prefix)
+        files = public_sources(prefix)
         mapping = source_map(prefix)
         meta = {'version': version, 'commit': build_metadata('sources')['commit'], 'sha256': mapping}
         write_json(name + '-source-manifest.json', meta)
@@ -93,25 +134,26 @@ def package_sources():
     js_root = ROOT / 'sdk-js'
     # The sources job builds these exact committed TypeScript inputs first.
     # Only the allowlisted ESM and declaration outputs can enter the browser kit.
-    outputs = [js_root / 'dist/index.js', js_root / 'dist/index.d.ts']
-    if {p.name for p in (js_root / 'dist').iterdir()} != {'index.js', 'index.d.ts'} or any(p.is_symlink() or not p.is_file() for p in outputs):
+    expected_outputs = {module + suffix for module in ['index', 'bridge', 'directory', 'endpoints'] for suffix in ['.js', '.d.ts']}
+    outputs = [js_root / 'dist' / name for name in sorted(expected_outputs)]
+    if {p.name for p in (js_root / 'dist').iterdir()} != expected_outputs or any(p.is_symlink() or not p.is_file() for p in outputs):
         raise RuntimeError('Build the exact JS ESM and types before source packaging')
-    js_files = tracked('sdk-js/package.json', 'sdk-js/README.md', 'sdk-js/LICENSE', 'sdk-js/notices') + outputs
+    js_files = public_sources('sdk-js/package.json', 'sdk-js/README.md', 'sdk-js/LICENSE', 'sdk-js/notices') + outputs
     js_meta = {**build_metadata('sources'), 'version': VERSIONS['js'], 'sourceManifestSha256': sha(OUT / 'cybergrid-sdk-js-source-manifest.json'), 'sha256': {p.relative_to(js_root).as_posix(): sha(p) for p in js_files}}
     tar(f'cybergrid-sdk-js-{VERSIONS["js"]}-esm.tar.gz', [(p, p.relative_to(js_root).as_posix()) for p in js_files], f'cybergrid-sdk-js-{VERSIONS["js"]}', {'BUILD-INFO.json': (json.dumps(js_meta, indent=2, sort_keys=True) + '\n').encode()})
-    app_files = tracked('apps/tauri-test', 'sdk-rust', 'tools/cloudflared', 'scripts/release', 'docs/lab-browser-login.md')
+    app_files = public_sources('apps/tauri-test', 'sdk-rust', 'tools/cloudflared', 'scripts/release', 'docs/lab-browser-login.md')
     mapping = {p.relative_to(ROOT).as_posix(): sha(p) for p in app_files}
     meta = {'version': VERSIONS['lab'], 'commit': build_metadata('sources')['commit'], 'sha256': mapping, 'sdkSourceManifestSha256': sha(OUT / 'cybergrid-sdk-rust-source-manifest.json')}
     write_json('lab-source-manifest.json', meta)
-    tar('CyberGrid-Lab-0.3.0-source.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in app_files], 'CyberGrid-Lab-0.3.0', {'SOURCE-MANIFEST.json': (json.dumps(meta, indent=2, sort_keys=True) + '\n').encode()})
-    license_files = tracked('LICENSE', 'server/notices', 'sdk/LICENSE', 'sdk/third_party', 'sdk/THIRD_PARTY_NOTICES.md', 'sdk-rust/LICENSE', 'sdk-rust/licenses', 'sdk-rust/THIRD_PARTY_NOTICES.md', 'sdk-js/LICENSE', 'sdk-js/notices', 'apps/tauri-test/notices', 'tools/cloudflared/LICENSE', 'tools/cloudflared/BUNDLED_THIRD_PARTY_NOTICES.md')
+    tar(f'CyberGrid-Lab-{VERSIONS["lab"]}-source.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in app_files], f'CyberGrid-Lab-{VERSIONS["lab"]}', {'SOURCE-MANIFEST.json': (json.dumps(meta, indent=2, sort_keys=True) + '\n').encode()})
+    license_files = public_sources('LICENSE', 'server/notices', 'sdk/LICENSE', 'sdk/third_party', 'sdk/THIRD_PARTY_NOTICES.md', 'sdk-rust/LICENSE', 'sdk-rust/licenses', 'sdk-rust/THIRD_PARTY_NOTICES.md', 'sdk-js/LICENSE', 'sdk-js/notices', 'apps/tauri-test/notices', 'scripts/release/sample-notices', 'tools/cloudflared/LICENSE', 'tools/cloudflared/BUNDLED_THIRD_PARTY_NOTICES.md')
     tar('CyberGrid-licenses.tar.gz', [(p, p.relative_to(ROOT).as_posix()) for p in license_files], 'CyberGrid-licenses')
     write_json('build-sources.json', build_metadata('sources'))
 
 
 def go_package(platform, binary):
     paths = [(binary, 'cybergrid-' + platform)]
-    docs = tracked('sdk/LICENSE', 'sdk/README.md', 'sdk/CHANGELOG.md', 'sdk/THIRD_PARTY_NOTICES.md', 'sdk/third_party', 'sdk/scripts/prepare-android-provider.py', 'sdk/provider-assets')
+    docs = public_sources('sdk/LICENSE', 'sdk/README.md', 'sdk/CHANGELOG.md', 'sdk/THIRD_PARTY_NOTICES.md', 'sdk/third_party', 'sdk/scripts/prepare-android-provider.py', 'sdk/provider-assets')
     for path in docs:
         name = path.relative_to(ROOT / 'sdk').as_posix()
         if 'darwin-arm64/cloudflared' in name:
@@ -119,7 +161,7 @@ def go_package(platform, binary):
         if platform == 'macos-arm64' and 'android-arm64/jniLibs/' in name:
             continue
         paths.append((path, name))
-    tar('cybergrid-sdk-0.4.0-' + platform + '.tar.gz', paths, 'cybergrid-sdk-0.4.0-' + platform,
+    tar('cybergrid-sdk-' + VERSIONS['go'] + '-' + platform + '.tar.gz', paths, 'cybergrid-sdk-' + VERSIONS['go'] + '-' + platform,
         {'BUILD-INFO.json': (json.dumps(build_metadata(platform), indent=2, sort_keys=True) + '\n').encode()})
 
 
@@ -129,10 +171,10 @@ def package_macos(app, binary):
     native = app / 'Contents/MacOS/cybergrid-tauri-lab'
     subprocess.run(['lipo', str(native), '-verify_arch', 'arm64'], check=True)
     subprocess.run(['codesign', '--verify', '--deep', '--strict', str(app)], check=True)
-    target = OUT / 'CyberGrid-Lab-0.3.0-macos-arm64-test.zip'
+    target = OUT / f'CyberGrid-Lab-{VERSIONS["lab"]}-macos-arm64-test.zip'
     subprocess.run(['ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', str(app), str(target)], check=True)
     with zipfile.ZipFile(target, 'a', compression=zipfile.ZIP_DEFLATED) as archive:
-        for path in tracked('apps/tauri-test/notices', 'apps/tauri-test/README.md'):
+        for path in public_sources('apps/tauri-test/notices', 'apps/tauri-test/README.md'):
             archive.write(path, path.relative_to(ROOT / 'apps/tauri-test').as_posix())
     go_package('macos-arm64', binary)
     meta = build_metadata('macos-arm64')
@@ -160,11 +202,11 @@ def package_android(apk, binary, manifest):
         data = archive.read(names[0])
         if len(data) != fixed['bytes'] or hashlib.sha256(data).hexdigest() != fixed['sha256']:
             raise RuntimeError('APK provider changed')
-    target = OUT / 'CyberGrid-Lab-0.3.0-android-arm64-test.apk'
+    target = OUT / f'CyberGrid-Lab-{VERSIONS["lab"]}-android-arm64-test.apk'
     shutil.copyfile(apk, target)
-    with zipfile.ZipFile(OUT / 'CyberGrid-Lab-0.3.0-android-arm64-test.zip', 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(OUT / f'CyberGrid-Lab-{VERSIONS["lab"]}-android-arm64-test.zip', 'w', compression=zipfile.ZIP_DEFLATED) as archive:
         archive.write(target, target.name)
-        for path in tracked('apps/tauri-test/notices', 'apps/tauri-test/README.md', 'apps/tauri-test/tools/android-adb.py'):
+        for path in public_sources('apps/tauri-test/notices', 'apps/tauri-test/README.md', 'apps/tauri-test/tools/android-adb.py'):
             archive.write(path, path.relative_to(ROOT / 'apps/tauri-test').as_posix())
     go_package('android-arm64', binary)
     meta = build_metadata('android-arm64')
@@ -174,12 +216,14 @@ def package_android(apk, binary, manifest):
 
 
 def finalize():
-    apk = OUT / 'CyberGrid-Lab-0.3.0-android-arm64-test.apk'
-    wrapper = OUT / 'CyberGrid-Lab-0.3.0-android-arm64-test.zip'
+    if os.environ.get('RELEASE_TAG', 'v' + PROJECT_VERSION) != 'v' + PROJECT_VERSION:
+        raise RuntimeError('Release tag differs from reviewed project version')
+    apk = OUT / f'CyberGrid-Lab-{VERSIONS["lab"]}-android-arm64-test.apk'
+    wrapper = OUT / f'CyberGrid-Lab-{VERSIONS["lab"]}-android-arm64-test.zip'
     if apk.is_file() and not wrapper.exists():
         with zipfile.ZipFile(wrapper, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
             archive.write(apk, apk.name)
-            for path in tracked('apps/tauri-test/notices', 'apps/tauri-test/README.md', 'apps/tauri-test/tools/android-adb.py'):
+            for path in public_sources('apps/tauri-test/notices', 'apps/tauri-test/README.md', 'apps/tauri-test/tools/android-adb.py'):
                 archive.write(path, path.relative_to(ROOT / 'apps/tauri-test').as_posix())
     for name in ['build-macos.json', 'build-android.json', 'build-sources.json']:
         if not (OUT / name).is_file():
@@ -188,15 +232,7 @@ def finalize():
         current = build_metadata('release')
         if data['commit'] != current['commit'] or data['versions'] != VERSIONS or data['providerManifestSha256'] != current['providerManifestSha256']:
             raise RuntimeError('Build job provenance differs from this release commit')
-    expected = {
-        'cybergrid-sdk-0.4.0-source.tar.gz', 'cybergrid-sdk-source-manifest.json',
-        'cybergrid-sdk-rust-0.2.0-source.tar.gz', 'cybergrid-sdk-rust-source-manifest.json',
-        'cybergrid-sdk-js-0.1.0-source.tar.gz', 'cybergrid-sdk-js-source-manifest.json', 'cybergrid-sdk-js-0.1.0-esm.tar.gz',
-        'CyberGrid-Lab-0.3.0-source.tar.gz', 'lab-source-manifest.json', 'CyberGrid-licenses.tar.gz',
-        'CyberGrid-Lab-0.3.0-macos-arm64-test.zip', 'cybergrid-sdk-0.4.0-macos-arm64.tar.gz',
-        'CyberGrid-Lab-0.3.0-android-arm64-test.apk', 'CyberGrid-Lab-0.3.0-android-arm64-test.zip',
-        'cybergrid-sdk-0.4.0-android-arm64.tar.gz', 'build-sources.json', 'build-macos.json', 'build-android.json',
-    }
+    expected = expected_assets()
     actual = {p.name for p in OUT.iterdir() if p.is_file()} - {'SHA256SUMS', 'release-manifest.json'}
     if actual != expected:
         raise RuntimeError('Unexpected or incomplete release asset allowlist')
@@ -216,6 +252,8 @@ def main():
     parser.add_argument('--apk', type=Path)
     parser.add_argument('--go-binary', type=Path)
     args = parser.parse_args()
+    if subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--'], cwd=ROOT).returncode != 0:
+        raise RuntimeError('Package only a clean reviewed commit; tracked inputs differ from HEAD')
     OUT.mkdir(parents=True, exist_ok=True)
     manifest = providers()
     if args.mode == 'sources':

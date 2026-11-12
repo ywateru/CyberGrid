@@ -1,6 +1,6 @@
 {
   "name": "@cybergrid/sdk-js",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Read-only, memory-only CyberGrid console client",
@@ -21,7 +21,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test test/*.test.mjs",
-    "test:integration": "npm run build && node --import ../server/node_modules/tsx/dist/loader.mjs --test test/service.integration.mjs"
+    "test:integration": "npm run build && node --import ../server/node_modules/tsx/dist/loader.mjs --test test/service.integration.mjs",
+    "test:bridge-integration": "npm run build && node --import ../server/node_modules/tsx/dist/loader.mjs --test test/bridge.integration.mjs"
   },
   "devDependencies": {
     "typescript": "5.9.3"

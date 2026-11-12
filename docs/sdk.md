@@ -9,6 +9,12 @@
 
 后续 SDK 功能以 Rust 为主要实现；Go SDK 保持兼容。完整API示例以 [Rust README](../sdk-rust/README.md)、[Lab README](../apps/tauri-test/README.md) 和 [Go README](../sdk/README.md) 为准。下载位于 [GitHub Releases](https://github.com/ywateru/CyberGrid/releases)，不要把网站HTML下载当作SDK压缩包。
 
+本次集成改进的 Rust 源码默认关闭远程入站：登录后 `expose()` 只记录本地端口意图，宿主明确调用 `enable_remote()` 后才发布并开放。`disable_remote()` 先关闭本机入口和远程流，再返回当前协调域的撤销确认/待确认；本地业务服务由宿主独立管理。重新启用需新建 Client 并沿同一授权 owner 恢复意图，不能复活已经关闭的 Client。它是行为变更，现有已发布 Lab/SDK 下载包不会自动获得或适配这些接口；[Lab 开关集成](lab-remote-controls.md) 单独验收。
+
+Rust 的 `login_with_auth_provider()` 支持宿主内存 token owner，不必创建 CredentialStore；`access_token_for()` 请求最短有效期、刷新原因与受限强制刷新。JS 回调提供相同上下文。未知交换保持原私有 token/幂等操作；只有明确身份拒绝且此前没有未知结果时才允许一次强制刷新，或经完整可信配置证明协调 epoch 已改变后进入新域。Rust `watch_state()` 和 JS `snapshot()/subscribe()` 分开身份、协调、发布、可达性及宿主业务授权，不将 online 当成业务允许。
+
+部署者可用 [静态产品策略](integration-contract.md) 显式绑定同产品的 SPA/Native 集合，无需运行期 Management 凭据。当前浏览器业务桥接、finite-v2 准入和共同样例的交付状态以 [改进覆盖表](plan/analysis/integration-progress.md) 为准；接口设计不代表现网已支持。元数据、兼容矩阵和分发授权边界见 [元数据与兼容性](metadata-and-compatibility.md)。
+
 接入需要中央HTTPS地址、关闭 Device Flow 的普通 Logto Native client_id、设备名称，以及应用自己的loopback TCP服务。SDK完成托管登录后取得中央短会话，公开端口声明包含端口号与应用定义的type字符串；发现接口返回同账号、同应用的其他设备及端口；映射接口把选定远端端口暴露为本机loopback监听。
 
 Lab 0.3.0 统一使用官方 SDK 网页登录，预置公开测试服务和普通 Native 应用 ID。Mac 使用官方 Logto JavaScript SDK，Android 使用官方 Android SDK；授权交接给 Rust 后，由同一个 CredentialStore/AuthProvider 恢复和刷新。Device Flow 入口已移除；历史 SDK API 在服务器声明 `loginFlow: "authorization_code"` 时明确拒绝设备码请求。平台回调和令牌边界见 [Lab 网页登录](lab-browser-login.md)。新服务和客户端需配套更新，现有旧版本下载包不会自动更新。

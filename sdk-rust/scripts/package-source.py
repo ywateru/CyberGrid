@@ -8,7 +8,7 @@ from pathlib import Path
 import tarfile
 
 root = Path(__file__).resolve().parents[1]
-version = "0.2.0"
+version = "0.3.0"
 prefix = f"cybergrid-sdk-rust-{version}"
 files = [root / name for name in ["Cargo.toml", "Cargo.lock", "LICENSE", "README.md", "THIRD_PARTY_NOTICES.md"]]
 for directory, pattern in [("src", "*.rs"), ("examples", "*.rs"), ("docs", "*.md"), ("scripts", "*.py")]:

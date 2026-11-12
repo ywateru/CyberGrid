@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import ts from 'typescript';
+const source = readFileSync(new URL('../src/remote-state.ts', import.meta.url), 'utf8');
+const output = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.ES2022}}).outputText;
+const {remoteStatus} = await import(`data:text/javascript;base64,${Buffer.from(output).toString('base64')}`);
+const layer = phase => ({phase, reason: 'test', retryable: false});
+const view = {remoteAction:'off', localClosed:true, coordinatorRevocation:null, directoryKnown:true,
+ sdkSnapshot:{remoteEnabled:false,intentRevision:2,confirmedIntentRevision:null,publication:layer('disabled'),coordination:layer('ready')}};
+assert.equal(remoteStatus(view).publication, '仅本地意图');
+assert.equal(remoteStatus(view).canTransfer, false);
+assert.equal(remoteStatus(view).canEnable, true);
+const opening={...view,remoteAction:'enabling'};
+assert.equal(remoteStatus(opening).showClose, true);
+assert.equal(remoteStatus(opening).canEnable, false);
+const pending={...view,localClosed:false,remoteAction:'on',sdkSnapshot:{...view.sdkSnapshot,remoteEnabled:true,publication:layer('pending')}};
+assert.equal(remoteStatus(pending).publication, '等待服务确认');
+const ready={...pending,sdkSnapshot:{...pending.sdkSnapshot,publication:layer('ready'),confirmedIntentRevision:2}};
+assert.equal(remoteStatus(ready).publication, '服务已确认');
+assert.equal(remoteStatus(ready).canTransfer, true);
+assert.equal(remoteStatus({...ready,directoryKnown:false}).canTransfer, false);
+assert.equal(remoteStatus({...ready,sdkSnapshot:{...ready.sdkSnapshot,intentRevision:3}}).confirmed,false);
+const closed={...ready,remoteAction:'off',localClosed:true,coordinatorRevocation:'pending'};
+assert.equal(remoteStatus(closed).open,false);
+assert.equal(remoteStatus(closed).canTransfer,false);
+assert.equal(remoteStatus({...pending,sdkSnapshot:{...pending.sdkSnapshot,coordination:layer('unavailable')}}).publication,'状态未知');
+console.log('remote-state controls and publication assertions passed');

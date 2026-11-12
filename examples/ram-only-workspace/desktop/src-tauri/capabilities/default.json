@@ -1,0 +1,1 @@
+{"$schema":"../gen/schemas/desktop-schema.json","identifier":"main-only","description":"Bundled main WebView; commands also check its exact URL and label.","windows":["main"],"permissions":["core:default"]}

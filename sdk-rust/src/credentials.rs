@@ -426,13 +426,11 @@ impl CredentialStore {
                     "pending grant binding unavailable; producing owner retained".into(),
                 )
             })?;
-            let mut expected = binding.2;
-            let mut current = client.auth_config().await?;
-            expected.coordination = None;
-            current.coordination = None;
+            let expected = binding.2;
+            let current = client.auth_config().await?;
             if binding.0 != client.cfg.base_url
                 || binding.1 != client.cfg.app_id
-                || expected != current
+                || !expected.same_oauth_binding(&current)
             {
                 return Err(Error::Credentials(
                     "pending grant OAuth binding differs".into(),

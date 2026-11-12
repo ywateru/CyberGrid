@@ -25,7 +25,8 @@
     "sdk-rust",
     "sdk-js",
     "apps/tauri-test",
-    "tools/cloudflared"
+    "tools/cloudflared",
+    "examples/ram-only-workspace"
   ],
   "exactFiles": [
     "server/package.json",
@@ -36,7 +37,8 @@
     "server/release/build.mjs",
     "server/Dockerfile",
     "server/compose.yaml",
-    "server/.dockerignore"
+    "server/.dockerignore",
+    "examples/ram-only-workspace/web/.env.example"
   ],
   "publicDocs": [
     "docs/architecture.md",
@@ -54,7 +56,51 @@
     "docs/plan/reviews/redis-003.md",
     "docs/plan/tasks/kv-001.md",
     "docs/plan/tasks/wan-001.md",
-    "docs/plan/reviews/kv-001.md"
+    "docs/plan/reviews/kv-001.md",
+    "docs/integration-contract.md",
+    "docs/registration-admission.md",
+    "docs/browser-bridge.md",
+    "docs/lab-remote-controls.md",
+    "docs/metadata-and-compatibility.md",
+    "docs/plan/analysis/anywork-integration-2026-11-10.md",
+    "docs/plan/analysis/integration-progress.md",
+    "docs/plan/tasks/integration-001.md",
+    "docs/plan/tasks/integration-002.md",
+    "docs/plan/tasks/integration-003.md",
+    "docs/plan/tasks/integration-004.md",
+    "docs/plan/tasks/integration-005.md",
+    "docs/plan/tasks/integration-006.md",
+    "docs/plan/tasks/integration-007.md",
+    "docs/plan/tasks/integration-008.md",
+    "docs/plan/tasks/integration-009.md",
+    "docs/plan/reviews/integration-001.md",
+    "docs/plan/reviews/integration-002.md",
+    "docs/plan/reviews/integration-003.md",
+    "docs/common-sample.md",
+    "docs/plan/tasks/integration-010.md",
+    "docs/plan/tasks/integration-011.md",
+    "docs/plan/tasks/integration-012.md",
+    "docs/plan/reviews/integration-004.md",
+    "docs/plan/reviews/integration-005.md",
+    "docs/plan/reviews/integration-006-r2.md",
+    "docs/plan/reviews/integration-006.md",
+    "docs/plan/reviews/integration-007-r2.md",
+    "docs/plan/reviews/integration-007.md",
+    "docs/plan/reviews/integration-008-r2.md",
+    "docs/plan/reviews/integration-008.md",
+    "docs/plan/reviews/integration-009.md",
+    "docs/plan/reviews/integration-011-r2.md",
+    "docs/plan/reviews/integration-011.md",
+    "docs/plan/reviews/integration-010.md",
+    "docs/plan/reviews/integration-010-r2.md",
+    "docs/plan/reviews/integration-012.md",
+    "docs/plan/reviews/integration-012-r2.md",
+    "docs/plan/tasks/integration-013.md",
+    "docs/plan/reviews/integration-013.md",
+    "docs/plan/reviews/integration-010-time.md",
+    "docs/plan/reviews/integration-013-r2.md",
+    "docs/plan/reviews/integration-010-echo.md",
+    "docs/plan/reviews/integration-010-echo-r2.md"
   ],
   "excludedParts": [
     ".git",
@@ -113,5 +159,9 @@
     "tools/cloudflared/android-startup-check.json",
     "tools/cloudflared/check-android.sh",
     "apps/tauri-test/scripts/package-test.py"
+  ],
+  "allowedBinaryFiles": [
+    "apps/tauri-test/src-tauri/gen/android/gradle/wrapper/gradle-wrapper.jar",
+    "examples/ram-only-workspace/desktop/src-tauri/icons/icon.png"
   ]
 }

@@ -36,6 +36,8 @@ def main():
             classes['symlink'] = 1
         if any(p in {'.vercel', 'node_modules', 'credentials', 'private-device', '.private', '.ssh', '.gnupg'} for p in relative.parts):
             classes['privateOrGeneratedDirectory'] = 1
+        if path.name == '.DS_Store':
+            classes['privateFileClass'] = 1
         if (path.name.startswith('.env') and path.name != '.env.example') or path.suffix in {'.keystore', '.jks', '.key', '.p12', '.pfx', '.pem', '.log'}:
             classes['privateFileClass'] = 1
         data = path.read_bytes()  # Includes binaries; never patch executable bytes.

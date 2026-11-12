@@ -7,11 +7,20 @@ CyberGrid 支持 Node.js 22 / Docker 和 Vercel Functions。两种入口使用�
 在自己的 Logto 租户中准备：
 
 - 一个独立 SPA Application，用于网站 `/console/`。登记完整回跳 URI，默认 `https://你的域名/console/callback/`，以及该 HTTPS origin。
-- 关闭 Device Flow 的普通 Native Application。Mac 和 Android 使用同一个真实 `client_id`，各自独立授权。登记 Mac 回调 `http://127.0.0.1:17896/callback` 与 Android 回调 `tech.tinadev.cybergrid.lab://tech.tinadev.cybergrid.lab/callback`。已有 Device Flow 应用需要替换，不能迁用另一个 client 的 refresh token。
+- 关闭 Device Flow 的普通 Native Application。Mac 和 Android 可使用同一个真实 `client_id`；也可用静态产品策略将各自的 Native client 绑定到同一产品，各端仍独立授权。登记对应客户端的 Mac 回调 `http://127.0.0.1:17896/callback` 与 Android 回调 `tech.tinadev.cybergrid.lab://tech.tinadev.cybergrid.lab/callback`。不能迁用另一个 client 的 refresh token。
 - 一个固定 API resource，提供 `connect` 用户 scope，并向测试用户分配相应角色。显式设置 `LOGTO_RESOURCE` 最清楚，例如 `https://cybergrid.local/api`；它是 OAuth audience，不需要解析或实际 HTTP 服务。Logto 须签发面向该 resource 的 ES384 用户 access token。
-- 读取应用目录的 M2M Management API 凭据。当前使用内置 Management API 的 `all` 权限，须只保存在服务端；运行代码只读取目录。
+- 应用允许策略：推荐配置下面的 `CYBERGRID_PRODUCTS` 静态模式，不需要 M2M。只有未配置静态策略、选择动态目录时才需要 M2M Management API 凭据；其 `all` 权限只保存在服务端，运行代码只读取目录。
 
 SMTP、用户注册、邮件验证与发件域在 Logto 配置。不要把 M2M、SMTP、Redis 凭据或管理后台密钥放进 SDK、前端或 Git。
+
+静态策略示例（将示例 client ID 替换为 Logto 的真实公开 ID）：
+
+```dotenv
+CYBERGRID_PRODUCTS={"version":1,"products":[{"id":"nativeDesktop","name":"My workspace","nativeClientIds":["nativeDesktop","nativeMobile"],"browserClientIds":["workspaceWeb"]}]}
+LOGTO_BROWSER_CLIENT_ID=workspaceWeb
+```
+
+产品 id 必须是其中一个 Native ID，Native 只能属于一个产品，SPA 只查询明确允许的产品；静态配置存在时不调用 Management。部署者在 Logto 核对 Native/SPA 类型及 Device Flow，静态声明不能代替 Logto 元数据验证。策略错误拒绝启动，不退回动态全目录。更新策略需重新部署并停用旧实例/旧公开端点；旧配置 worker 不会被新配置即时全局撤销。完整字段限制与会话模式迁移见 [产品契约](integration-contract.md)。
 
 ## Docker
 
@@ -51,7 +60,7 @@ npm start
 
 ## Vercel Functions
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid&env=LOGTO_ISSUER,LOGTO_RESOURCE,LOGTO_BROWSER_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_SECRET,CYBERGRID_REDIS_TRANSPORT,KV_REST_API_URL,KV_REST_API_TOKEN&envDescription=Set%20CYBERGRID_REDIS_TRANSPORT%20to%20vercel-kv%20and%20connect%20Marketplace%20Upstash&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md%23vercel-functions)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid&env=LOGTO_ISSUER,LOGTO_RESOURCE,LOGTO_BROWSER_CLIENT_ID,CYBERGRID_PRODUCTS,CYBERGRID_REDIS_TRANSPORT,KV_REST_API_URL,KV_REST_API_TOKEN&envDescription=Configure%20the%20static%20product%20policy%20and%20select%20vercel-kv&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md%23vercel-functions)
 
 本项目在 Vercel 上推荐使用 **Vercel KV 兼容配置**，由 Vercel Marketplace 的 **Upstash Redis** 提供托管存储。根据 [Vercel 官方说明](https://vercel.com/docs/redis)，旧版独立 Vercel KV 已停止提供，原实例于 2024 年 12 月自动迁移到 Upstash Redis。新项目在 Marketplace 创建或连接资源即可，无需自建 Redis；底层仍使用 Redis 协议与 Lua 原子操作，不是另一个独立 KV 引擎，也不需要安装已弃用的 `@vercel/kv`。
 
@@ -93,7 +102,9 @@ Vercel 的环境变量修改需要重新部署后生效。免费 Redis 有存储
 | `CYBERGRID_LIMITS` | 可选 JSON 共享容量限制，只能下调以下硬上限；同 namespace 所有实例必须一致 |
 | `LOGTO_ISSUER` | 必填，可信租户 HTTPS issuer，以 `/oidc` 结尾；JWT 和 CSP 均固定使用它 |
 | `LOGTO_BROWSER_CLIENT_ID` | 必填，独立控制台 SPA 的 client ID |
-| `LOGTO_MANAGEMENT_CLIENT_ID` / `LOGTO_MANAGEMENT_CLIENT_SECRET` | 必填，目录读取 M2M 凭据，仅服务端保存 |
+| `CYBERGRID_PRODUCTS` | 推荐，版本化静态 Native/SPA 产品允许策略 JSON；配置后不需要 M2M、不调用 Management，错误不回退 |
+| `LOGTO_MANAGEMENT_CLIENT_ID` / `LOGTO_MANAGEMENT_CLIENT_SECRET` | 仅动态目录模式必填，目录读取 M2M 凭据；静态模式不需要，仅服务端保存 |
+| `LOGTO_MANAGEMENT_ORIGIN` / `LOGTO_MANAGEMENT_RESOURCE` | 动态目录可选固定 HTTPS origin / 精确 resource，分别默认 issuer origin / Management origin 加 `/api`；不由请求 Host 推导 |
 | `LOGTO_RESOURCE` | 固定 OAuth audience；建议显式设置。默认有公开 origin 则为该 origin 加 `/api`，否则 `https://cybergrid.local/api` |
 | `CYBERGRID_PUBLIC_ORIGIN` | 可选，对外 HTTPS origin，不含路径、凭据、query 或 fragment；留空按每次请求地址识别 |
 | `CYBERGRID_ADMIN_KEY` | 可选，独立随机 32–256 UTF-8 字节；未设置时管理 API 返回 503 |

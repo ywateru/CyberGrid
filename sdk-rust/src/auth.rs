@@ -19,8 +19,56 @@ pub struct Coordination {
     pub max_signal_wait_seconds: u64,
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RegistrationAdmission {
+    pub version: u8,
+    pub challenge_seconds: u64,
+    pub ticket_seconds: u64,
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PublicProduct {
+    pub id: String,
+    pub name: String,
+}
+fn present<'de, D: serde::Deserializer<'de>, T: Deserialize<'de>>(
+    d: D,
+) -> std::result::Result<Option<T>, D::Error> {
+    T::deserialize(d).map(Some)
+}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AuthConfig {
+    #[serde(
+        default,
+        deserialize_with = "present",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub registration_admission: Option<RegistrationAdmission>,
+    #[serde(
+        default,
+        deserialize_with = "present",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub endpoint_policy: Option<crate::EndpointPolicy>,
+    #[serde(
+        default,
+        deserialize_with = "present",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub product_id: Option<String>,
+    #[serde(
+        default,
+        deserialize_with = "present",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub policy_version: Option<String>,
+    #[serde(
+        default,
+        deserialize_with = "present",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub products: Option<Vec<PublicProduct>>,
     #[serde(default)]
     pub login_flow: Option<String>,
     #[serde(default)]
@@ -49,6 +97,32 @@ fn https(raw: &str) -> Result<Url> {
     Ok(u)
 }
 impl AuthConfig {
+    pub(crate) fn same_oauth_binding(&self, other: &Self) -> bool {
+        self.provider == other.provider
+            && self.issuer == other.issuer
+            && self.client_id == other.client_id
+            && self.resource == other.resource
+            && self.scope == other.scope
+            && self.login_flow == other.login_flow
+            && self.device_authorization_endpoint == other.device_authorization_endpoint
+            && self.token_endpoint == other.token_endpoint
+            && self.revocation_endpoint == other.revocation_endpoint
+    }
+    pub(crate) fn same_binding(&self, other: &Self, app: &str) -> bool {
+        self.same_oauth_binding(other)
+            && self.product_id.as_deref().unwrap_or(app)
+                == other.product_id.as_deref().unwrap_or(app)
+    }
+    /// Compare the complete immutable OAuth binding and the selected canonical product.
+    /// Both configurations are validated against the explicit Native client ID first.
+    /// Coordination epochs and verified capability/policy metadata may change; this
+    /// comparison never authorizes a product migration or validates provenance.
+    /// Obtain each configuration through the same trusted coordinator before use.
+    pub fn same_client_binding(&self, other: &Self, app_id: &str) -> Result<bool> {
+        self.validate(app_id)?;
+        other.validate(app_id)?;
+        Ok(self.same_binding(other, app_id))
+    }
     pub(crate) fn validate(&self, app_id: &str) -> Result<()> {
         if self
             .login_flow
@@ -56,6 +130,44 @@ impl AuthConfig {
             .is_some_and(|flow| !["authorization_code", "device_code"].contains(&flow))
         {
             return Err(protocol("unsupported loginFlow"));
+        }
+        if self.registration_admission.as_ref().is_some_and(|a| {
+            a.version != 2 || a.challenge_seconds != 120 || a.ticket_seconds != 86400
+        }) {
+            return Err(protocol("unsupported required registration admission"));
+        }
+        if let Some(policy) = &self.endpoint_policy {
+            policy.validate()?;
+        }
+        let product = self.product_id.as_deref().unwrap_or(app_id);
+        if product.is_empty()
+            || product.len() > 21
+            || !product
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+        {
+            return Err(protocol("invalid canonical product"));
+        }
+        if self.policy_version.is_some() != self.products.is_some()
+            || self.policy_version.is_some() && self.product_id.is_none()
+        {
+            return Err(protocol("incomplete Native product policy"));
+        }
+        if let Some(version) = &self.policy_version {
+            if version.len() != 64
+                || !version
+                    .bytes()
+                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+                || self.products.as_ref().is_none_or(|ps| {
+                    ps.len() != 1
+                        || ps[0].id != product
+                        || ps[0].name.is_empty()
+                        || ps[0].name.len() > 1024
+                        || ps[0].name.chars().any(|c| c.is_control())
+                })
+            {
+                return Err(protocol("invalid Native product policy"));
+            }
         }
         let issuer = https(&self.issuer)?;
         https(&self.resource)?;
@@ -193,17 +305,15 @@ impl Client {
         })?;
         let _auth = store.auth_gate.lock().await;
         expected.validate(&self.cfg.app_id)?;
-        let mut expected = expected.clone();
-        expected.coordination = None;
+        let expected = expected.clone();
         // A lost ACK is confirmed from private ownership state, without a
         // network dependency, refresh, or rewriting the credential file.
         if let Some(imported) = self.browser_imported.lock().await.as_ref() {
-            let mut cached =
+            let cached =
                 self.auth.lock().await.clone().ok_or_else(|| {
                     Error::Credentials("browser handoff binding unavailable".into())
                 })?;
-            cached.coordination = None;
-            if imported != &tokens.refresh_token || cached != expected {
+            if imported != &tokens.refresh_token || !cached.same_oauth_binding(&expected) {
                 return Err(Error::Credentials(
                     "browser handoff cannot replace an owned grant".into(),
                 ));
@@ -213,9 +323,8 @@ impl Client {
         if self.is_closed() {
             return Err(Error::Cancelled);
         }
-        let mut current = self.auth_config().await?;
-        current.coordination = None;
-        if current != expected {
+        let current = self.auth_config().await?;
+        if !current.same_oauth_binding(&expected) {
             return Err(Error::Credentials(
                 "browser handoff OAuth binding differs".into(),
             ));
@@ -252,19 +361,52 @@ impl Client {
         let mut url = Url::parse(&format!("{}/api/v1/auth/config", self.cfg.base_url))
             .map_err(|_| protocol("invalid API URL"))?;
         url.query_pairs_mut().append_pair("appId", &self.cfg.app_id);
-        let a: AuthConfig = self
-            .http_json(reqwest::Method::GET, url, None, false, 2 << 20)
-            .await?;
+        let result = self
+            .http_json::<AuthConfig>(reqwest::Method::GET, url, None, false, 2 << 20)
+            .await;
+        let a = match result {
+            Ok(a) => a,
+            Err(e) => {
+                if matches!(
+                    &e,
+                    Error::Api {
+                        status: 401 | 403 | 404,
+                        ..
+                    }
+                ) && self.auth.lock().await.is_some()
+                {
+                    self.reject_binding().await;
+                }
+                return Err(e);
+            }
+        };
         a.validate(&self.cfg.app_id)?;
         let mut cached = self.auth.lock().await;
+        if cached
+            .as_ref()
+            .is_some_and(|old| !old.same_binding(&a, &self.cfg.app_id))
+        {
+            let moved = cached.as_ref().is_some_and(|old| {
+                old.product_id.as_deref().unwrap_or(&self.cfg.app_id)
+                    != a.product_id.as_deref().unwrap_or(&self.cfg.app_id)
+            });
+            drop(cached);
+            if moved {
+                self.reject_binding().await;
+            }
+            return Err(protocol(
+                "OAuth or product binding changed; create a new client",
+            ));
+        }
         if cached.as_ref().is_some_and(|old| {
-            let mut old = old.clone();
-            let mut current = a.clone();
-            old.coordination = None;
-            current.coordination = None;
-            old != current
+            old.registration_admission.is_some()
+                && a.registration_admission.is_none()
+                && old.coordination.as_ref().map(|c| &c.epoch)
+                    == a.coordination.as_ref().map(|c| &c.epoch)
         }) {
-            return Err(protocol("OAuth configuration changed; create a new client"));
+            return Err(protocol(
+                "finite admission cannot disappear within the same epoch",
+            ));
         }
         *cached = Some(a.clone());
         Ok(a)

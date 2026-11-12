@@ -127,21 +127,46 @@ def metadata(value):
 
 def wait_for_result(adb, request, pid, timeout):
     deadline = time.monotonic() + timeout
+    def matches(value):
+        return isinstance(value, dict) and all(value.get(k) == request[k]
+                                               for k in ("requestId", "sequence", "controlEpoch"))
     while True:
-        # A successful close can exit before a new status exists: result wins.
-        result = adb.read("result.json")
-        if result and all(result.get(k) == request[k] for k in ("requestId", "sequence", "controlEpoch")):
+        # A successful close may exit before another status is published.
+        latest = adb.read("result.json")
+        result = latest if matches(latest) else None
+        try:
+            status = adb.read("status.json")
+        except Failure:
+            if result is None:
+                raise
+            status = None
+        current = None
+        if status:
+            epoch, current_pid, _ = metadata(status)
+            if epoch == request["controlEpoch"] and current_pid == pid:
+                current = status
+                completed = status.get("completed", [])
+                if not isinstance(completed, list) or len(completed) > 16:
+                    raise Failure("INVALID_RESPONSE", "Invalid completed outcome cache")
+                summary = next((item for item in reversed(completed) if matches(item)), None)
+                if summary is not None:
+                    result = summary
+        if result is not None:
             if result.get("ok") is True:
-                return result
+                # A cached outcome is historical; only the independently read
+                # live status may supply state. Never revive its old snapshot.
+                outcome = {key: result[key] for key in
+                           ("version", "controlEpoch", "requestId", "sequence", "ok", "code")
+                           if key in result}
+                if current and isinstance(current.get("state"), dict):
+                    outcome["state"] = current["state"]
+                return outcome
             code = result.get("code", "APP_ERROR")
             raise Failure(code, "App rejected or failed the operation", 5 if code == "OUTCOME_UNKNOWN" else 3)
         if adb.live_pid() != pid:
             raise Failure("OUTCOME_UNKNOWN", "App exited or restarted; original request will not be replayed", 5)
-        status = adb.read("status.json")
-        if status:
-            epoch, current_pid, _ = metadata(status)
-            if epoch != request["controlEpoch"] or current_pid != pid:
-                raise Failure("OUTCOME_UNKNOWN", "App restarted; original request will not be replayed", 5)
+        if status and current is None:
+            raise Failure("OUTCOME_UNKNOWN", "App restarted; original request will not be replayed", 5)
         if time.monotonic() >= deadline:
             raise Failure("OUTCOME_UNKNOWN", "No matching result before timeout; query status, do not replay", 5)
         time.sleep(0.2)
@@ -152,7 +177,7 @@ def parser():
     p.add_argument("--serial", required=True)
     p.add_argument("--timeout", type=float, default=90)
     sub = p.add_subparsers(dest="action", required=True)
-    for action in ("start", "status", "cancel-login", "refresh", "disconnect", "logout", "close"):
+    for action in ("start", "status", "cancel-login", "refresh", "enable-remote", "disable-remote", "disconnect", "logout", "close"):
         sub.add_parser(action)
     for action in ("login", "web-login", "resume"):
         description = ("Alias for web-login" if action == "login" else
@@ -166,6 +191,8 @@ def parser():
         q.add_argument("--name")
         q.add_argument("--force-fallback", action="store_true")
         q.add_argument("--direct-strategy", choices=("sequential", "parallel"))
+        q.add_argument("--direct-transport", choices=("auto", "webrtc-only", "iroh-candidate"),
+                       help="Test preference; iroh-candidate uses a near-zero WebRTC budget, not protocol disable")
     for action in ("connect", "probe"):
         sub.add_parser(action).add_argument("--device-id", required=True)
     sub.add_parser("send").add_argument("--text", required=True)
@@ -202,6 +229,8 @@ def main(argv=None, adb_factory=Adb):
         payload["forceFallback"] = args.force_fallback
         if args.direct_strategy is not None:
             payload["directStrategy"] = args.direct_strategy
+        if args.direct_transport is not None:
+            payload["directTransport"] = args.direct_transport
     elif args.action in ("connect", "probe"):
         payload = {"deviceId": args.device_id}
     elif args.action == "send":

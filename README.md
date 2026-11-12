@@ -1,5 +1,7 @@
 # CyberGrid
 
+> 目标 v0.8.0 正在准备：Rust 0.3.0 / JS 0.2.0 / Lab 0.4.0 / server 0.2.0 / RAM-only 样例 0.1.0。完整仓库源码包将保留 SDK、服务和样例的相对依赖；外部 Noise adapter 不随包分发。该版本尚未发布，以下下载仍为不可变 v0.7.0，完整样例与生产验收仍单独记录。
+
 CyberGrid 用于同一账号、同一应用的终端发现和 TCP 端口互通。用户与应用由 Logto 管理；中央使用 Redis 保存有有效期的会话、在线状态、端口和连接信令，不保存或转发应用数据。
 
 Rust 是主要 SDK，默认按 WebRTC → iroh 直连 → Cloudflare Quick Tunnel 连接，也支持 WebRTC / iroh 并行直连。Go SDK 保留 WebRTC → Quick Tunnel 策略。业务流使用内层双向 TLS。两语言 SDK 随包预置 macOS arm64／Android arm64 Cloudflared。Tauri 2 测试程序提供登录、设备发现、消息确认及 64 KiB 校验；Android 测试通过 ADB 命令控制。
@@ -10,7 +12,7 @@ Rust 是主要 SDK，默认按 WebRTC → iroh 直连 → Cloudflare Quick Tunne
 
 网站、Logto 控制台、管理后台和 API 支持 Node.js 22 / Docker 或 Vercel Functions。各实例使用 Redis 共享协调状态，不依赖单进程内存。Docker Compose 包含带持久化卷的 Redis；Vercel 推荐使用 Vercel KV 兼容接入，由 Marketplace 的 Upstash Redis 提供托管存储。
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid&env=LOGTO_ISSUER,LOGTO_RESOURCE,LOGTO_BROWSER_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_ID,LOGTO_MANAGEMENT_CLIENT_SECRET,CYBERGRID_REDIS_TRANSPORT,KV_REST_API_URL,KV_REST_API_TOKEN&envDescription=Set%20CYBERGRID_REDIS_TRANSPORT%20to%20vercel-kv%20and%20connect%20Marketplace%20Upstash&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid&env=LOGTO_ISSUER,LOGTO_RESOURCE,LOGTO_BROWSER_CLIENT_ID,CYBERGRID_PRODUCTS,CYBERGRID_REDIS_TRANSPORT,KV_REST_API_URL,KV_REST_API_TOKEN&envDescription=Configure%20the%20static%20product%20policy%20and%20select%20vercel-kv&envLink=https%3A%2F%2Fgithub.com%2Fywateru%2FCyberGrid%2Fblob%2Fmain%2Fdocs%2Fdeployment.md)
 
 首次部署请阅读 [Vercel 配置步骤](docs/deployment.md#vercel-functions)，连接 Marketplace Upstash 资源，设置 `CYBERGRID_REDIS_TRANSPORT=vercel-kv`，直接使用集成注入的 `KV_REST_API_URL` / `KV_REST_API_TOKEN`。部署按钮中的 transport 也填 `vercel-kv`；它不会自动创建存储。Logto 回跳需登记实际域名。旧独立 Vercel KV 已停止提供并迁移到 Upstash，因此无需自行维护 Redis，底层仍是 Redis 兼容存储。
 

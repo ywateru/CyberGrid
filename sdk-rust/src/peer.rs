@@ -398,6 +398,7 @@ impl Peer {
                         let id =
                             std::str::from_utf8(&b).map_err(|_| protocol("invalid port UTF8"))?;
                         c.active().await?;
+                        c.require_remote_access()?;
                         let port = c.ports.read().await.get(id).cloned();
                         if let Some(port) = port {
                             if let Ok(Ok(stream)) = tokio::time::timeout(
@@ -406,6 +407,11 @@ impl Peer {
                             )
                             .await
                             {
+                                c.require_remote_access()?;
+                                c.active().await?;
+                                if cancel.is_cancelled() {
+                                    return Err(Error::Cancelled);
+                                }
                                 raw.write_u8(0).await?;
                                 return Ok(stream);
                             }

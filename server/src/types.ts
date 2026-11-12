@@ -1,3 +1,4 @@
+import type {RegistrationMode,AdmissionChallenge,AdmissionTicket} from './admission.js';
 export const SESSION_TTL=24*60*60*1000;
 export const ONLINE_TTL=65_000;
 export const SIGNAL_TTL=120_000;
@@ -7,9 +8,12 @@ export interface User {id:string;email?:string}
 export interface VerifiedIdentity extends User {clientId:string}
 export interface Port {id:string;port:number;type:string;transport:'tcp';tunnelUrl?:string|null}
 export interface IrohReachability {endpointId:string;addresses:string[]}
-export interface DevicePublication {ports:Port[];tunnelUrl:string|null;certificateFingerprint:string|null;iroh?:IrohReachability|null}
+export interface BrowserBridge {id:string;protocol:string;providerId:string;url:string;installationId:string;publicKey:string;addressRevision:number;expiresAt:string;limits:{maxFrameBytes:number;maxStreams:number;maxPendingRequests:number}}
+export interface DirectorySample {epoch:string;sampledAt:number;scopeTag:string;devices:Device[]}
+export interface DevicePublication {bridges?:BrowserBridge[];ports:Port[];tunnelUrl:string|null;certificateFingerprint:string|null;iroh?:IrohReachability|null}
 export interface DeviceRow extends DevicePublication {id:string;userId:string;appId:string;name:string;lastSeen:number;iroh:IrohReachability|null;incarnation?:string;publishRevision?:number}
-interface SessionBase {hash:string;userId:string;expiresAt:number;protocol?:'memory-v1';incarnation?:string;superseded?:boolean}
+export interface SessionBinding {authClientId:string;policyMode:'static'|'dynamic'}
+interface SessionBase {authClientId?:string;policyMode?:'static'|'dynamic';hash:string;userId:string;expiresAt:number;protocol?:'memory-v1';incarnation?:string;superseded?:boolean;admissionDomain?:string;admissionNotAfter?:number}
 export interface DeviceSession extends SessionBase {purpose:'device';appId:string;deviceId:string}
 export interface ConsoleSession extends SessionBase {purpose:'console';appId:null;deviceId:null}
 export type Session=DeviceSession|ConsoleSession;
@@ -27,6 +31,10 @@ export interface AdminOverview {
  devices:AdminDevice[];
 }
 export interface Store {
+ readonly registrationMode:RegistrationMode;
+ sampleDirectory(session:Session,productId:string,endpointPolicyVersion:string,now:number):Promise<DirectorySample>;
+ challenge(userId:string,productId:string,authClientId:string,key:string):Promise<AdmissionChallenge>;
+ admit(userId:string,productId:string,authClientId:string,key:string,challenge:unknown,requestId:string):Promise<AdmissionTicket>;
  ready?():Promise<void>;
  getRevision?():Promise<number>;
  adminOverview(now:number,query:AdminOverviewQuery):AdminOverview|Promise<AdminOverview>;
@@ -34,7 +42,7 @@ export interface Store {
  readonly revision:number;
  close():void;
  current(s:Session,now:number):void|Promise<void>;
- register(userId:string,appId:string|null,name:string,registrationKey:string|undefined,requestId:string,now:number,registrationRevision?:unknown,expectedEpoch?:string):{session:Session;sessionKey:string}|Promise<{session:Session;sessionKey:string}>;
+ register(userId:string,appId:string|null,name:string,registrationKey:string|undefined,requestId:string,now:number,registrationRevision?:unknown,expectedEpoch?:string,binding?:SessionBinding,admissionTicket?:unknown):{session:Session;sessionKey:string}|Promise<{session:Session;sessionKey:string}>;
  publish(s:DeviceSession,update:DevicePublication,incarnation:unknown,revision:unknown,now:number):Promise<void>;
  postSignal(s:DeviceSession,value:Omit<StoredSignal,'id'|'expiresAt'|'fromDeviceId'>,messageId:unknown,now:number):Promise<number>;
  wait(s:DeviceSession,after:number,seconds:number,now:()=>number,signal:AbortSignal):Promise<void>;

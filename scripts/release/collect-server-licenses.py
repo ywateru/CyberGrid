@@ -118,14 +118,19 @@ def tree(folder):
     return {p.relative_to(folder).as_posix(): p.read_bytes() for p in folder.rglob("*") if p.is_file()}
 
 
-with tempfile.TemporaryDirectory(prefix="cybergrid-server-notices-") as temporary:
-    generated = Path(temporary)
-    count = collect(generated)
-    destination = SERVER / "notices"
-    if "--check" in sys.argv:
-        if tree(destination) != tree(generated):
-            raise SystemExit("Server notices differ from the current lockfile and original texts")
-    else:
-        destination.mkdir(exist_ok=True)
-        shutil.copytree(generated, destination, dirs_exist_ok=True)
-    print(f"Server notices verified: {count} lockfile packages")
+def main():
+    with tempfile.TemporaryDirectory(prefix="cybergrid-server-notices-") as temporary:
+        generated = Path(temporary)
+        count = collect(generated)
+        destination = SERVER / "notices"
+        if "--check" in sys.argv:
+            if tree(destination) != tree(generated):
+                raise SystemExit("Server notices differ from the current lockfile and original texts")
+        else:
+            destination.mkdir(exist_ok=True)
+            shutil.copytree(generated, destination, dirs_exist_ok=True)
+        print(f"Server notices verified: {count} lockfile packages")
+
+
+if __name__ == "__main__":
+    main()

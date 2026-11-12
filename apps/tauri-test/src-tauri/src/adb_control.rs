@@ -38,6 +38,8 @@ struct Login {
     force_fallback: bool,
     #[serde(default)]
     direct_strategy: cybergrid_sdk::DirectStrategy,
+    #[serde(default)]
+    direct_transport: crate::state::DirectTransport,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -57,6 +59,8 @@ enum Action {
     WebLogin(LabConfig),
     Cancel,
     Refresh,
+    EnableRemote,
+    DisableRemote,
     Connect(String),
     Disconnect,
     Send(String),
@@ -117,6 +121,7 @@ fn parse(bytes: &[u8]) -> Result<(Request, Action), &'static str> {
                     device_name: name,
                     force_fallback: p.force_fallback,
                     direct_strategy: p.direct_strategy,
+                    direct_transport: p.direct_transport,
                     cloudflared_path: String::new(),
                 };
                 if r.action != "resume" {
@@ -148,6 +153,8 @@ fn parse(bytes: &[u8]) -> Result<(Request, Action), &'static str> {
                 match action {
                     "cancel-login" => Action::Cancel,
                     "refresh" => Action::Refresh,
+                    "enable-remote" => Action::EnableRemote,
+                    "disable-remote" => Action::DisableRemote,
                     "disconnect" => Action::Disconnect,
                     "logout" => Action::Logout,
                     "close" => Action::Close,
@@ -190,10 +197,14 @@ struct Ledger {
     epoch: String,
     highwater: u64,
     results: VecDeque<(Claim, Value)>,
+    pending: Vec<Claim>,
+    completed: VecDeque<Value>,
+    published_sequence: u64,
 }
 enum Acceptance {
     New(Claim),
     Existing(Value),
+    InFlight,
 }
 impl Ledger {
     fn open(root: PathBuf) -> std::io::Result<Self> {
@@ -225,6 +236,9 @@ impl Ledger {
             epoch: new_epoch(),
             highwater: 0,
             results: VecDeque::new(),
+            pending: Vec::new(),
+            completed: VecDeque::new(),
+            published_sequence: 0,
         })
     }
     fn accept(&mut self, r: &Request, bytes: &[u8]) -> Result<Acceptance, &'static str> {
@@ -244,7 +258,15 @@ impl Ledger {
                     Ok(Acceptance::Existing(result.clone()))
                 }
                 Some(_) => Err("SEQUENCE_CONFLICT"),
-                None => Err("OUTCOME_UNKNOWN"),
+                None => match self.pending.iter().find(|c| c.sequence == r.sequence) {
+                    Some(old)
+                        if old.request_id == claim.request_id && old.digest == claim.digest =>
+                    {
+                        Ok(Acceptance::InFlight)
+                    }
+                    Some(_) => Err("SEQUENCE_CONFLICT"),
+                    None => Err("OUTCOME_UNKNOWN"),
+                },
             };
         }
         if r.sequence != self.highwater + 1 {
@@ -258,15 +280,50 @@ impl Ledger {
         .map_err(|_| "CLAIM_IO_ERROR")?;
         // Advance only after durable publication and before any operation.
         self.highwater = r.sequence;
+        self.pending.push(claim.clone());
         Ok(Acceptance::New(claim))
     }
     fn finish(&mut self, claim: Claim, result: Value) -> std::io::Result<()> {
-        atomic(&self.root.join("result.json"), &bounded(&result)?)?;
+        self.publish_response(&result)?;
+        self.pending.retain(|p| p.sequence != claim.sequence);
         self.results.push_back((claim, result));
         while self.results.len() > CACHE {
             self.results.pop_front();
         }
         Ok(())
+    }
+    fn publish_response(&mut self, result: &Value) -> std::io::Result<()> {
+        let sequence = result["sequence"].as_u64().unwrap_or(0);
+        if sequence >= self.published_sequence {
+            atomic(&self.root.join("result.json"), &bounded(result)?)?;
+            self.published_sequence = sequence;
+        }
+        self.record_response(result);
+        Ok(())
+    }
+    fn record_response(&mut self, result: &Value) {
+        // Outcomes are independently addressable even when a lower sequence
+        // finishes later. Only the live status carries state, once, below.
+        let summary = select(
+            result,
+            &[
+                "version",
+                "controlEpoch",
+                "sequence",
+                "requestId",
+                "ok",
+                "code",
+            ],
+        );
+        self.completed.retain(|old| {
+            ["controlEpoch", "sequence", "requestId"]
+                .iter()
+                .any(|key| old[key] != summary[key])
+        });
+        self.completed.push_back(summary);
+        while self.completed.len() > CACHE {
+            self.completed.pop_front();
+        }
     }
 }
 fn bounded(value: &Value) -> std::io::Result<Vec<u8>> {
@@ -289,10 +346,54 @@ fn select(value: &Value, fields: &[&str]) -> Value {
     Value::Object(result)
 }
 fn public_projection(source: &Value) -> Value {
-    let mut value = select(source, &["phase", "canResume", "platform", "authMode"]);
+    let mut value = select(
+        source,
+        &[
+            "phase",
+            "canResume",
+            "platform",
+            "authMode",
+            "remoteAction",
+            "localClosed",
+            "coordinatorRevocation",
+            "directoryKnown",
+        ],
+    );
+    value["sdkSnapshot"] = select(
+        &source["sdkSnapshot"],
+        &[
+            "revision",
+            "generation",
+            "epoch",
+            "identity",
+            "coordination",
+            "publication",
+            "reachability",
+            "businessAuthorization",
+            "remoteEnabled",
+            "intentRevision",
+            "confirmedIntentRevision",
+            "serverPublishRevision",
+        ],
+    );
+    if value["sdkSnapshot"].is_object() {
+        for layer in ["identity", "coordination", "publication", "reachability"] {
+            value["sdkSnapshot"][layer] = select(
+                &source["sdkSnapshot"][layer],
+                &["phase", "reason", "retryable"],
+            );
+        }
+    }
     value["config"] = select(
         &source["config"],
-        &["baseUrl", "appId", "deviceName", "forceFallback", "directStrategy"],
+        &[
+            "baseUrl",
+            "appId",
+            "deviceName",
+            "forceFallback",
+            "directStrategy",
+            "directTransport",
+        ],
     );
     value["local"] = select(
         &source["local"],
@@ -380,6 +481,15 @@ async fn safe_view(state: &LabState) -> Value {
     value["recordsTruncated"] = json!(truncated);
     value
 }
+#[cfg(test)]
+pub(crate) async fn dispatch_public_test(
+    state: &Arc<LabState>,
+    bytes: &[u8],
+) -> Result<Value, String> {
+    let (_, action) = parse(bytes).map_err(str::to_owned)?;
+    dispatch(state, action).await?;
+    Ok(safe_view(state).await)
+}
 async fn dispatch(state: &Arc<LabState>, action: Action) -> Result<(), String> {
     match action {
         Action::Login(config, resume) => state.start_login(config, resume).await,
@@ -390,6 +500,8 @@ async fn dispatch(state: &Arc<LabState>, action: Action) -> Result<(), String> {
             .map_err(|error| error.message().to_string()),
         Action::Cancel => state.cancel_login().await,
         Action::Refresh => state.refresh_devices().await,
+        Action::EnableRemote => state.start_enable_remote().await,
+        Action::DisableRemote => state.disable_remote().await.map(|_| ()),
         Action::Connect(id) => state.connect_device(id).await,
         Action::Disconnect => state.disconnect_device().await,
         Action::Send(text) => state.send_message(text).await,
@@ -411,90 +523,116 @@ pub fn start(root: PathBuf, state: Arc<LabState>, handle: tauri::AppHandle) -> s
     tauri::async_runtime::spawn(run(ledger, state, move || handle.exit(0)));
     Ok(())
 }
+async fn publish_status(ledger: &Ledger, state: &LabState) -> std::io::Result<()> {
+    let status = json!({"version":1,"controlEpoch":ledger.epoch,"pid":std::process::id(),
+        "highwater":ledger.highwater,"completed":ledger.completed,"state":safe_view(state).await});
+    atomic(&ledger.root.join("status.json"), &bounded(&status)?)
+}
+struct Completion {
+    claim: Claim,
+    priority: bool,
+    close: bool,
+    ok: bool,
+}
 async fn run(mut ledger: Ledger, state: Arc<LabState>, exit: impl Fn() + Send + 'static) {
+    let mut work = tokio::task::JoinSet::new();
+    let mut priority_active = false;
+    let mut stopping = false;
+    let mut exit_requested = false;
+    let mut tick = tokio::time::interval(std::time::Duration::from_millis(200));
+    tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
     loop {
-        let status = json!({"version":1,"controlEpoch":ledger.epoch,"pid":std::process::id(),"highwater":ledger.highwater,"state":safe_view(&state).await});
-        if atomic(&ledger.root.join("status.json"), &bounded(&status).unwrap()).is_err() {
+        if stopping && work.is_empty() {
+            if exit_requested {
+                state
+                    .exiting
+                    .store(true, std::sync::atomic::Ordering::SeqCst);
+                exit();
+            }
             return;
         }
-        let path = ledger.root.join("request.json");
-        match read_request(&path) {
-            Ok(bytes) => {
-                let parsed = parse(&bytes);
-                let mut close = false;
-                let (id, seq, result) = match parsed {
-                    Ok((r, action)) => {
-                        let id = r.request_id.clone();
-                        let seq = r.sequence;
-                        let result = match ledger.accept(&r, &bytes) {
-                            Ok(Acceptance::Existing(value)) => value,
-                            Ok(Acceptance::New(claim)) => {
-                                // Publish accepted highwater before publishing a result so a
-                                // sequential host command cannot reuse a stale sequence.
-                                let metadata = json!({"version":1,"controlEpoch":ledger.epoch,"pid":std::process::id(),"highwater":ledger.highwater,"state":safe_view(&state).await});
-                                if atomic(
-                                    &ledger.root.join("status.json"),
-                                    &bounded(&metadata).unwrap(),
-                                )
-                                .is_err()
-                                {
-                                    return;
-                                }
-                                let is_close = matches!(action, Action::Close);
-                                let ok = dispatch(&state, action).await.is_ok();
-                                let value = json!({"version":1,"controlEpoch":ledger.epoch,"requestId":id,"sequence":seq,"ok":ok,"code":if ok {"OK"} else {"APP_ERROR"},"state":safe_view(&state).await});
-                                if ledger.finish(claim, value.clone()).is_err() {
-                                    return;
-                                }
-                                close = is_close && ok;
-                                value
-                            }
-                            Err(code) => {
-                                json!({"version":1,"controlEpoch":ledger.epoch,"requestId":id,"sequence":seq,"ok":false,"code":code})
-                            }
-                        };
-                        (id, seq, result)
+        tokio::select! {
+            completion = work.join_next(), if !work.is_empty() => {
+                match completion {
+                    Some(Ok(Completion {claim,priority,close,ok})) => {
+                        if priority {priority_active=false;}
+                        let value=json!({"version":1,"controlEpoch":ledger.epoch,"requestId":claim.request_id,
+                            "sequence":claim.sequence,"ok":ok,"code":if ok {"OK"} else {"APP_ERROR"},"state":safe_view(&state).await});
+                        if ledger.finish(claim,value).is_err() { stopping=true; }
+                        if close && ok { exit_requested=true;stopping=true; }
+                        if publish_status(&ledger,&state).await.is_err() {stopping=true;}
                     }
-                    Err(code) => {
-                        let untrusted: Value =
-                            serde_json::from_slice(&bytes).unwrap_or(Value::Null);
-                        let id = untrusted
-                            .get("requestId")
-                            .and_then(Value::as_str)
-                            .filter(|v| uuid(v))
-                            .unwrap_or("")
-                            .to_string();
-                        let seq = untrusted
-                            .get("sequence")
-                            .and_then(Value::as_u64)
-                            .unwrap_or(0);
-                        (
-                            id.clone(),
-                            seq,
-                            json!({"version":1,"controlEpoch":ledger.epoch,"requestId":id,"sequence":seq,"ok":false,"code":code}),
-                        )
-                    }
-                };
-                let _ = (id, seq);
-                if atomic(&ledger.root.join("result.json"), &bounded(&result).unwrap()).is_err() {
-                    return;
-                }
-                if fs::remove_file(path).is_err() {
-                    return;
-                }
-                if close {
-                    state
-                        .exiting
-                        .store(true, std::sync::atomic::Ordering::SeqCst);
-                    exit();
-                    return;
+                    // A panicked operation has an unknown result. Never dispatch
+                    // its claim again; drain all other owned work before return.
+                    _ => stopping=true,
                 }
             }
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => (),
-            Err(_) => return,
+            _=tick.tick()=> {
+                if publish_status(&ledger,&state).await.is_err() {stopping=true;}
+                if stopping {continue;}
+                let path=ledger.root.join("request.json");
+                let bytes=match read_request(&path) {
+                    Ok(bytes)=>bytes,
+                    Err(error) if error.kind()==std::io::ErrorKind::NotFound=>continue,
+                    Err(_)=>{stopping=true;continue;}
+                };
+                match parse(&bytes) {
+                    Ok((request,action))=>match ledger.accept(&request,&bytes) {
+                        Ok(Acceptance::New(claim))=> {
+                            // Claim is durable; publish its highwater before
+                            // freeing the mailbox or dispatching any effect.
+                            if publish_status(&ledger,&state).await.is_err() {
+                                stopping=true;continue;
+                            }
+                            if fs::remove_file(&path).is_err() {stopping=true;continue;}
+                            let priority=matches!(action,Action::DisableRemote);
+                            if !work.is_empty() && (!priority || priority_active) {
+                                let value=json!({"version":1,"controlEpoch":ledger.epoch,"requestId":claim.request_id,
+                                    "sequence":claim.sequence,"ok":false,"code":"BUSY","state":safe_view(&state).await});
+                                if ledger.finish(claim,value).is_err() {stopping=true;}
+                            } else {
+                                let close=matches!(action,Action::Close);
+                                priority_active|=priority;
+                                let state=state.clone();
+                                work.spawn(async move { let ok=dispatch(&state,action).await.is_ok();Completion{claim,priority,close,ok} });
+                            }
+                        }
+                        Ok(Acceptance::InFlight)=> {
+                            // Proven same owned operation: join its eventual
+                            // outcome by identity, without a waiter task, false
+                            // terminal result, or occupying the mailbox.
+                            if fs::remove_file(&path).is_err() {stopping=true;}
+                        }
+                        Ok(Acceptance::Existing(value))=> {
+                            if ledger.publish_response(&value).is_err() {stopping=true;}
+                            if fs::remove_file(&path).is_err() {stopping=true;}
+                        }
+                        Err(code)=> {
+                            let value=json!({"version":1,"controlEpoch":ledger.epoch,"requestId":request.request_id,
+                                "sequence":request.sequence,"ok":false,"code":code});
+                            ledger.record_response(&value);
+                            if fs::remove_file(&path).is_err() {stopping=true;}
+                        }
+                    },
+                    Err(code)=> {
+                        let untrusted:Value=serde_json::from_slice(&bytes).unwrap_or(Value::Null);
+                        let id=untrusted.get("requestId").and_then(Value::as_str).filter(|v|uuid(v)).unwrap_or("");
+                        let sequence=untrusted.get("sequence").and_then(Value::as_u64).unwrap_or(0);
+                        let value=json!({"version":1,"controlEpoch":ledger.epoch,"requestId":id,"sequence":sequence,"ok":false,"code":code});
+                        ledger.record_response(&value);
+                        if fs::remove_file(&path).is_err() {stopping=true;}
+                    }
+                }
+                if publish_status(&ledger,&state).await.is_err() {stopping=true;}
+            }
         }
-        tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+        // No early return while a dispatched authorization/cleanup future is
+        // owned. IO failure stops admission, not checkpoint completion.
     }
+}
+#[cfg(test)]
+pub(crate) async fn run_test(root: PathBuf, state: Arc<LabState>) {
+    run(Ledger::open(root).unwrap(), state, || {}).await;
 }
 
 #[cfg(test)]
@@ -505,6 +643,36 @@ mod tests {
     }
     fn request(ledger: &Ledger, seq: u64) -> Vec<u8> {
         serde_json::to_vec(&json!({"version":1,"controlEpoch":ledger.epoch,"sequence":seq,"requestId":format!("00000000-0000-4000-8000-{seq:012x}"),"action":"refresh","payload":{}})).unwrap()
+    }
+    #[test]
+    fn transport_preference_is_bounded_and_shared_by_browser_login_and_resume() {
+        let directory = root();
+        let ledger = Ledger::open(directory.clone()).unwrap();
+        let mut value: Value = serde_json::from_slice(&request(&ledger, 1)).unwrap();
+        for action in ["web-login", "resume"] {
+            value["action"] = json!(action);
+            for (mode, expected) in [
+                ("auto", crate::state::DirectTransport::Auto),
+                ("webrtc-only", crate::state::DirectTransport::WebrtcOnly),
+                (
+                    "iroh-candidate",
+                    crate::state::DirectTransport::IrohCandidate,
+                ),
+            ] {
+                value["payload"] = json!({"directTransport": mode});
+                let (_, parsed) = parse(&serde_json::to_vec(&value).unwrap()).unwrap();
+                let config = match parsed {
+                    Action::WebLogin(c) | Action::Login(c, true) => c,
+                    _ => panic!(),
+                };
+                assert_eq!(config.direct_transport, expected);
+                assert!(!config.force_fallback);
+                assert!(config.cloudflared_path.is_empty());
+            }
+            value["payload"] = json!({"directTransport": "iroh-only"});
+            assert!(parse(&serde_json::to_vec(&value).unwrap()).is_err());
+        }
+        fs::remove_dir_all(directory).unwrap();
     }
     #[test]
     fn strict_inputs_and_size() {
@@ -550,6 +718,38 @@ mod tests {
         fs::remove_dir_all(directory).unwrap();
     }
     #[test]
+    fn remote_control_strict_empty_payload_and_duplicate_ledger() {
+        for action in ["enable-remote", "disable-remote"] {
+            let directory = root();
+            let mut ledger = Ledger::open(directory.clone()).unwrap();
+            let mut value: Value = serde_json::from_slice(&request(&ledger, 1)).unwrap();
+            value["action"] = json!(action);
+            let bytes = serde_json::to_vec(&value).unwrap();
+            let (request, parsed) = parse(&bytes).unwrap();
+            assert!(matches!(
+                parsed,
+                Action::EnableRemote | Action::DisableRemote
+            ));
+            let Acceptance::New(claim) = ledger.accept(&request, &bytes).unwrap() else {
+                panic!()
+            };
+            let result = json!({"localClosed":true,"coordinatorRevocation":"pending"});
+            ledger.finish(claim, result.clone()).unwrap();
+            assert!(
+                matches!(ledger.accept(&request,&bytes),Ok(Acceptance::Existing(existing)) if existing==result)
+            );
+            for payload in [
+                json!({"token":"secret"}),
+                json!({"enabled":true}),
+                json!(null),
+            ] {
+                value["payload"] = payload;
+                assert!(parse(&serde_json::to_vec(&value).unwrap()).is_err());
+            }
+            fs::remove_dir_all(directory).unwrap();
+        }
+    }
+    #[test]
     fn durable_claim_cache_fence_and_new_boot() {
         let directory = root();
         let mut ledger = Ledger::open(directory.clone()).unwrap();
@@ -562,7 +762,15 @@ mod tests {
             serde_json::from_slice(&fs::read(directory.join("claim.json")).unwrap()).unwrap();
         assert_eq!(disk["highwater"], 1);
         // Claimed but unfinished never executes again, even before a restart.
-        assert!(matches!(ledger.accept(&r, &bytes), Err("OUTCOME_UNKNOWN")));
+        assert!(matches!(
+            ledger.accept(&r, &bytes),
+            Ok(Acceptance::InFlight)
+        ));
+        let changed = bytes.iter().copied().chain(*b" ").collect::<Vec<_>>();
+        assert!(matches!(
+            ledger.accept(&r, &changed),
+            Err("SEQUENCE_CONFLICT")
+        ));
         let result = json!({"ok":true,"sequence":1});
         ledger.finish(claim, result.clone()).unwrap();
         assert!(
@@ -610,9 +818,45 @@ mod tests {
         fs::remove_dir_all(directory).unwrap();
     }
     #[test]
+    fn late_completion_keeps_latest_result_and_bounded_metadata_only_cache() {
+        let directory = root();
+        let mut ledger = Ledger::open(directory.clone()).unwrap();
+        let mut claims = Vec::new();
+        for sequence in 1..=2 {
+            let bytes = request(&ledger, sequence);
+            let (r, _) = parse(&bytes).unwrap();
+            let Acceptance::New(claim) = ledger.accept(&r, &bytes).unwrap() else {
+                panic!()
+            };
+            claims.push(claim);
+        }
+        let old = claims.remove(0);
+        let new = claims.remove(0);
+        let outcome = |claim: &Claim| json!({"version":1,"controlEpoch":ledger.epoch,"sequence":claim.sequence,"requestId":claim.request_id,"ok":true,"code":"OK","state":{"localClosed":claim.sequence==2,"private":"never-copy"}});
+        let old_result = outcome(&old);
+        let new_result = outcome(&new);
+        ledger.finish(new, new_result.clone()).unwrap();
+        ledger.finish(old, old_result).unwrap();
+        let disk: Value =
+            serde_json::from_slice(&fs::read(directory.join("result.json")).unwrap()).unwrap();
+        assert_eq!(disk, new_result);
+        assert_eq!(ledger.completed.len(), 2);
+        assert!(ledger.completed.iter().all(|v| v.get("state").is_none()));
+        assert!(ledger.pending.is_empty());
+        fs::remove_dir_all(directory).unwrap();
+    }
+    #[test]
     fn public_projection_excludes_legacy_auth_display_and_secrets() {
         let source = json!({"phase":"authorizing","error":"private-response-secret","status":"private-error-chain","accessToken":"secret","config":{"baseUrl":"https://example.test","appId":"id","cloudflaredPath":"private-path"},"authorization":{"verificationUri":"https://login.example.test/activate","userCode":"PUBLIC-CODE","expiresAt":"later","deviceCode":"secret","refreshToken":"secret"},"local":{"deviceId":"device","ports":[{"id":"message","port":1234,"type":"message","transport":"tcp","registrationKey":"secret"}],"privateKey":"secret"},"devices":[],"records":[],"connection":null});
+        let mut source = source;
+        source["remoteAction"] = json!("off");
+        source["localClosed"] = json!(true);
+        source["coordinatorRevocation"] = json!("pending");
+        source["sdkSnapshot"] = json!({"remoteEnabled":false,"publication":{"phase":"disabled","reason":"remote-disabled","retryable":false,"token":"secret"},"providerError":"private-secret"});
         let value = public_projection(&source);
+        assert_eq!(value["localClosed"], true);
+        assert_eq!(value["coordinatorRevocation"], "pending");
+        assert_eq!(value["sdkSnapshot"]["publication"]["phase"], "disabled");
         assert!(value.get("authorization").is_none());
         assert_eq!(value["local"]["ports"][0]["port"], 1234);
         assert!(value["connection"].is_null());
@@ -626,6 +870,8 @@ mod tests {
         let state = LabState::new(directory.join("data"), directory.join("cache")).unwrap();
         // Exercise real state methods without a network or an OAuth grant.
         assert!(dispatch(&state, Action::Refresh).await.is_err());
+        assert!(dispatch(&state, Action::EnableRemote).await.is_err());
+        assert!(dispatch(&state, Action::DisableRemote).await.is_err());
         assert!(dispatch(&state, Action::Connect("missing".into()))
             .await
             .is_err());

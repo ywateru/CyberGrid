@@ -21,6 +21,7 @@ pub struct LocalServices {
     pub message_port: u16,
     pub echo_port: u16,
     cancel: CancellationToken,
+    device_id: Arc<tokio::sync::RwLock<String>>,
     tasks: tokio::sync::Mutex<Vec<JoinHandle<()>>>,
 }
 impl LocalServices {
@@ -38,10 +39,12 @@ impl LocalServices {
             message_port: messages.local_addr().map_err(|e| e.to_string())?.port(),
             echo_port: echo.local_addr().map_err(|e| e.to_string())?.port(),
             cancel: CancellationToken::new(),
+            device_id: Arc::new(tokio::sync::RwLock::new(device_id)),
             tasks: tokio::sync::Mutex::new(Vec::new()),
         });
         let cancel = service.cancel.clone();
         let tx = incoming.clone();
+        let device_id = service.device_id.clone();
         let messages_task = tokio::spawn(async move {
             let mut children = JoinSet::new();
             loop {
@@ -56,7 +59,7 @@ impl LocalServices {
                             tokio::select! { _=child_cancel.cancelled()=>{}, _=tokio::time::timeout(Duration::from_secs(20),async {
                                 let request:MessageRequest=protocol::read_json(&mut stream).await?;
                                 request.validate()?;
-                                let ack=MessageAck{version:1,kind:"ack".into(),id:request.id,receiver_device_id:device_id,sha256:protocol::text_hash(&request.text)};
+                                let ack=MessageAck{version:1,kind:"ack".into(),id:request.id,receiver_device_id:device_id.read().await.clone(),sha256:protocol::text_hash(&request.text)};
                                 tx.send(Incoming{peer_id:Some(request.from_device_id),kind:"message",text:Some(request.text),bytes:None,sha256:None}).await.map_err(|_|"消息收件服务已停止".to_string())?;
                                 protocol::write_json(&mut stream,&ack).await?;
                                 stream.shutdown().await.map_err(|e|e.to_string())?;
@@ -105,6 +108,12 @@ impl LocalServices {
             .extend([messages_task, echo_task]);
         Ok(service)
     }
+    pub fn closed_token(&self) -> CancellationToken {
+        self.cancel.clone()
+    }
+    pub async fn update_device_id(&self, device_id: String) {
+        *self.device_id.write().await = device_id;
+    }
     pub async fn close(&self) {
         self.cancel.cancel();
         for task in self.tasks.lock().await.drain(..) {
@@ -122,6 +131,39 @@ impl Drop for LocalServices {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[tokio::test]
+    async fn identity_update_preserves_already_accepted_local_connections() {
+        let (tx, _rx) = mpsc::channel(8);
+        let service = LocalServices::start("old-device".into(), tx).await.unwrap();
+        let mut message = tokio::net::TcpStream::connect(("127.0.0.1", service.message_port))
+            .await
+            .unwrap();
+        let mut echo = tokio::net::TcpStream::connect(("127.0.0.1", service.echo_port))
+            .await
+            .unwrap();
+        echo.write_all(b"before").await.unwrap();
+        let mut data = [0; 6];
+        echo.read_exact(&mut data).await.unwrap();
+        service.update_device_id("new-device".into()).await;
+        protocol::write_json(
+            &mut message,
+            &MessageRequest {
+                version: 1,
+                kind: "message".into(),
+                id: "a".repeat(32),
+                from_device_id: "local".into(),
+                text: "still connected".into(),
+            },
+        )
+        .await
+        .unwrap();
+        let ack: MessageAck = protocol::read_json(&mut message).await.unwrap();
+        assert_eq!(ack.receiver_device_id, "new-device");
+        echo.write_all(b"after!").await.unwrap();
+        echo.read_exact(&mut data).await.unwrap();
+        assert_eq!(&data, b"after!");
+        service.close().await;
+    }
     #[tokio::test]
     async fn two_real_loopback_services_deliver_both_directions_and_verify_echo() {
         let (a_tx, mut a_rx) = mpsc::channel(8);

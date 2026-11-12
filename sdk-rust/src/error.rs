@@ -19,6 +19,14 @@ pub enum Error {
     Timeout(&'static str),
     #[error("not logged in or session unavailable")]
     NotLoggedIn,
+    #[error("registration result is not yet confirmed")]
+    ExchangeOutcomeUnknown,
+    #[error("coordinator revocation is not yet confirmed")]
+    RevocationPending,
+    #[error("the verified recovery identity changed")]
+    IdentityChanged,
+    #[error("the configured authorization provider is unavailable")]
+    AuthorizationUnavailable,
     #[error("transport failed: {0}")]
     Transport(String),
     #[error("I/O failure: {0}")]
