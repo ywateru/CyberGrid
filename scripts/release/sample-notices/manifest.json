@@ -1,7 +1,7 @@
 {
   "scope": "All locked desktop/Web npm packages including optional platforms and build dependencies; original license bytes only, not dependency code/binaries",
   "locks": {
-    "examples/ram-only-workspace/desktop/package-lock.json": "4b411869cf94017f19b95dad2ecaa0572a87eef0fa4034968f281eadbbd505d4",
+    "examples/ram-only-workspace/desktop/package-lock.json": "2e864af89f8fd477d81fd5fbbb103bfad1845c5e00e09b254b398068682174d8",
     "examples/ram-only-workspace/web/package-lock.json": "28fc6af5e8ad03e9c67f77ec0d8cca9ac6caf3f0d77f0b6a2a7dc927ca59bbe2"
   },
   "packages": [
