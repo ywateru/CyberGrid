@@ -23,18 +23,34 @@ impl AddressRecord {
         Ok(())
     }
 }
+#[derive(Clone)]
 struct PublicationOwnerGuard {
     host: std::sync::Weak<Host>,
     action: u64,
+    endpoints: watch::Receiver<GatewayEndpointState>,
+    initial: GatewayEndpointState,
+}
+impl PublicationOwnerGuard {
+    fn reason(&self) -> AutomaticCloseReason {
+        // The gateway observer cancels the shared token after publishing its
+        // endpoint failure. Either publisher may observe cancellation first.
+        if self.endpoints.has_changed().is_err() {
+            AutomaticCloseReason::endpoint(None)
+        } else {
+            let state = self.endpoints.borrow();
+            if *state != self.initial {
+                AutomaticCloseReason::endpoint(Some(&state))
+            } else {
+                AutomaticCloseReason::PublicationOwnerEnded
+            }
+        }
+    }
 }
 impl Drop for PublicationOwnerGuard {
     fn drop(&mut self) {
         if let Some(host) = self.host.upgrade() {
             if host.is_generation(self.action) {
-                host.seal_generation_with_reason(
-                    self.action,
-                    AutomaticCloseReason::PublicationOwnerEnded,
-                );
+                host.seal_generation_with_reason(self.action, self.reason());
                 let owner = host.clone();
                 host.runtime.spawn(async move {
                     let _ = owner.disable().await;
@@ -238,14 +254,18 @@ impl Host {
         cancel: CancellationToken,
     ) {
         let initial = endpoints.borrow_and_update().clone();
+        let owner = PublicationOwnerGuard {
+            host: Arc::downgrade(self),
+            action,
+            endpoints: endpoints.clone(),
+            initial: initial.clone(),
+        };
+        let watchdog_owner = owner.clone();
         let host = self.clone();
         let guard_cancel = cancel.clone();
         // Independent of a slow publish request and of every browser/JS poll.
         self.runtime.spawn(async move {
-            let _owner = PublicationOwnerGuard {
-                host: Arc::downgrade(&host),
-                action,
-            };
+            let owner = watchdog_owner;
             let reason = loop {
                 let deadline = host
                     .bridge_history
@@ -258,7 +278,7 @@ impl Host {
                     break AutomaticCloseReason::PublicationOwnerEnded;
                 };
                 tokio::select! { biased;
-                    _ = guard_cancel.cancelled() => break AutomaticCloseReason::PublicationOwnerEnded,
+                    _ = guard_cancel.cancelled() => break owner.reason(),
                     r = endpoints.changed() => {
                         if r.is_ok() && *endpoints.borrow_and_update() == initial { continue; }
                         break if r.is_err() { AutomaticCloseReason::endpoint(None) } else { AutomaticCloseReason::endpoint(Some(&endpoints.borrow_and_update())) };
@@ -277,10 +297,6 @@ impl Host {
         });
         let host = self.clone();
         self.runtime.spawn(async move {
-            let _owner = PublicationOwnerGuard {
-                host: Arc::downgrade(&host),
-                action,
-            };
             loop {
                 tokio::select! { biased; _ = cancel.cancelled() => break,
                 _ = tokio::time::sleep(Duration::from_secs(60)) => {} }
@@ -300,10 +316,12 @@ impl Host {
                     .await
                 {
                     if host.is_generation(action) {
-                        host.seal_generation_with_reason(
-                            action,
-                            AutomaticCloseReason::PublicationFailure(error),
-                        );
+                        let reason = if cancel.is_cancelled() {
+                            owner.reason()
+                        } else {
+                            AutomaticCloseReason::PublicationFailure(error)
+                        };
+                        host.seal_generation_with_reason(action, reason);
                         let _ = host.disable().await;
                     }
                     break;
@@ -316,6 +334,59 @@ impl Host {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[tokio::test]
+    async fn endpoint_failure_keeps_its_reason_when_cancellation_is_already_ready() {
+        let host = Host::new(BuildConfig::default(), None).await.unwrap();
+        let reservation = host.reserve_enable().unwrap();
+        let action = reservation.generation;
+        *host.bridge_history.lock().unwrap() = Some(AddressRecord {
+            scope: ("fixture".into(), "fixture".into()),
+            action,
+            descriptor: serde_json::from_value(serde_json::json!({
+                "id":"workspace", "protocol":"anywork.remote.v1", "providerId":"quick-tunnel",
+                "url":"wss://fixture.trycloudflare.com/remote/v1/ws", "installationId":"fixture",
+                "publicKey":"fixture", "addressRevision":1, "expiresAt":"",
+                "limits":{"maxFrameBytes":4096,"maxStreams":2,"maxPendingRequests":8}
+            }))
+            .unwrap(),
+            deadline: Instant::now() + Duration::from_secs(60),
+        });
+        host.gate.store(true, Ordering::SeqCst);
+        let (sender, endpoints) = watch::channel(GatewayEndpointState::Pending);
+        host.start_publisher(
+            host.client().unwrap(),
+            endpoints,
+            0,
+            action,
+            reservation.cancel.clone(),
+        );
+        let state = host.state.lock().await;
+        // Reproduce the gateway observer's notification and cancellation before
+        // either publisher can run. No scheduler delay or network is required.
+        sender.send_replace(GatewayEndpointState::Unavailable { revision: 2 });
+        reservation.cancel.cancel();
+        tokio::time::timeout(Duration::from_secs(1), async {
+            while host.gate.load(Ordering::SeqCst) {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+        let reason = host
+            .remote_control
+            .lock()
+            .unwrap()
+            .close_reason
+            .map(AutomaticCloseReason::code);
+        // Release the async lock before asserting, allowing clean shutdown on failure.
+        drop(state);
+        host.disable().await.unwrap();
+        assert_eq!(reason, Some("GATEWAY_ENDPOINT_UNAVAILABLE"));
+        assert_eq!(
+            host.view().await.error,
+            Some("GATEWAY_ENDPOINT_UNAVAILABLE")
+        );
+    }
     #[tokio::test]
     async fn actual_watchdog_expiry_closes_without_browser_poll_and_preserves_reason() {
         let host = Host::new(BuildConfig::default(), None).await.unwrap();

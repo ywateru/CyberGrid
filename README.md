@@ -1,6 +1,6 @@
 # CyberGrid
 
-> 项目 v0.9.0：Rust SDK 0.4.0 新增共享 Peer 多端口映射、调用级 deadline / 取消与结构化诊断。JS 0.2.0 / Lab 0.4.0 / server 0.2.0 / RAM-only 样例 0.1.0 保留独立版本。完整源码包保留模块相对依赖；外部 Noise adapter 不随包分发。真机同步与长时间运行验收仍单独记录。
+> 项目 v0.9.0：Rust SDK 0.4.0 新增共享 Peer 多端口映射、调用级 deadline / 取消与结构化诊断。JS 0.2.0 / Lab 0.4.0 / server 0.2.0 / RAM-only 样例 0.1.1 保留独立版本。完整源码包保留模块相对依赖；外部 Noise adapter 不随包分发。真机同步与长时间运行验收仍单独记录。
 
 CyberGrid 用于同一账号、同一应用的终端发现和 TCP 端口互通。用户与应用由 Logto 管理；中央使用 Redis 保存有有效期的会话、在线状态、端口和连接信令，不保存或转发应用数据。
 

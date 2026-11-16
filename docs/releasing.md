@@ -1,6 +1,6 @@
 # Building and publishing a release
 
-CyberGrid uses a project release tag, `v0.9.0`, while the components retain their own versions: Go SDK/CLI 0.4.0, Rust SDK 0.4.0, CyberGrid Lab 0.4.0, JS SDK 0.2.0, Node server 0.2.0 and RAM-only workspace 0.1.0. Publishing source does not grant an additional open-source license. See the root and component `LICENSE` files; third-party grants remain separately effective.
+CyberGrid uses a project release tag, `v0.9.0`, while the components retain their own versions: Go SDK/CLI 0.4.0, Rust SDK 0.4.0, CyberGrid Lab 0.4.0, JS SDK 0.2.0, Node server 0.2.0 and RAM-only workspace 0.1.1. Publishing source does not grant an additional open-source license. See the root and component `LICENSE` files; third-party grants remain separately effective.
 
 The v0.6.0 coordinator and Lab use ordinary Logto Native applications with Device Flow disabled. Deploy the matching coordinator with the client release. Historical device-code CLI login does not work with this coordinator; it remains only for older compatible services. Existing releases are immutable.
 
