@@ -2834,3 +2834,6 @@ async fn known_first_publication_manual_token_retry_preserves_committed_identity
     assert!(c.active().await.is_ok());
     c.close().await.unwrap();
 }
+
+#[path = "session_tests.rs"]
+mod session_tests;

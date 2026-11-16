@@ -1,6 +1,6 @@
 # CyberGrid
 
-> 目标 v0.8.0 正在准备：Rust 0.3.0 / JS 0.2.0 / Lab 0.4.0 / server 0.2.0 / RAM-only 样例 0.1.0。完整仓库源码包将保留 SDK、服务和样例的相对依赖；外部 Noise adapter 不随包分发。该版本尚未发布，以下下载仍为不可变 v0.7.0，完整样例与生产验收仍单独记录。
+> 项目 v0.9.0：Rust SDK 0.4.0 新增共享 Peer 多端口映射、调用级 deadline / 取消与结构化诊断。JS 0.2.0 / Lab 0.4.0 / server 0.2.0 / RAM-only 样例 0.1.0 保留独立版本。完整源码包保留模块相对依赖；外部 Noise adapter 不随包分发。真机同步与长时间运行验收仍单独记录。
 
 CyberGrid 用于同一账号、同一应用的终端发现和 TCP 端口互通。用户与应用由 Logto 管理；中央使用 Redis 保存有有效期的会话、在线状态、端口和连接信令，不保存或转发应用数据。
 
@@ -30,10 +30,10 @@ docker compose up --build -d
 
 | 模块 | 版本 | 用途 |
 | --- | --- | --- |
-| [Rust SDK](sdk-rust/README.md) | 0.2.0 | 主要开发方向，原生 Rust API，与 Go 互通 |
+| [Rust SDK](sdk-rust/README.md) | 0.4.0 | 主要开发方向，原生 Rust API，与 Go 互通 |
 | [Go SDK／CLI](sdk/README.md) | 0.4.0 | 保持兼容，端口声明、设备发现、TCP 映射、自动协调恢复 |
-| [JS／TypeScript SDK](sdk-js/README.md) | 0.1.0（项目 v0.7.0） | Logto 登录后只读查询设备与端口隧道地址 |
-| [CyberGrid Lab](apps/tauri-test/README.md) | 0.3.0（项目 v0.7.0） | Tauri 2 macOS／Android 测试程序，官方 SDK 网页登录 |
+| [JS／TypeScript SDK](sdk-js/README.md) | 0.2.0 | Logto 登录后只读查询设备与端口隧道地址 |
+| [CyberGrid Lab](apps/tauri-test/README.md) | 0.4.0 | Tauri 2 macOS／Android 测试程序，官方 SDK 网页登录 |
 | [协调服务](server/README.md) | memory-v1 协议 | Logto 身份、Redis 共享设备与信令、只读管理后台 |
 
 后续 SDK 功能以 Rust 为主要实现。项目 v0.7.0 支持 WebRTC → iroh 直连 → Cloudflare 匿名隧道的三级连接，也可配置 WebRTC/iroh 并行直连；iroh 禁用中继，业务流仍由终端相互认证并加密。另有 [只读 JS SDK](sdk-js/README.md)，可在前端 Logto 登录后查看设备和端口主动申报的 Cloudflare 地址。已发布的 v0.6.0 下载包仍为原有两级连接，Go SDK 保持兼容。连接边界见 [架构说明](docs/architecture.md#rust-主-sdk-的连接顺序)。

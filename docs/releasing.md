@@ -1,6 +1,6 @@
 # Building and publishing a release
 
-CyberGrid uses a project release tag, target `v0.8.0` (prepared, not yet published), while the components retain their own versions: Go SDK/CLI 0.4.0, Rust SDK 0.3.0, CyberGrid Lab 0.4.0, JS SDK 0.2.0, Node server 0.2.0 and RAM-only workspace 0.1.0. Publishing source does not grant an additional open-source license. See the root and component `LICENSE` files; third-party grants remain separately effective.
+CyberGrid uses a project release tag, `v0.9.0`, while the components retain their own versions: Go SDK/CLI 0.4.0, Rust SDK 0.4.0, CyberGrid Lab 0.4.0, JS SDK 0.2.0, Node server 0.2.0 and RAM-only workspace 0.1.0. Publishing source does not grant an additional open-source license. See the root and component `LICENSE` files; third-party grants remain separately effective.
 
 The v0.6.0 coordinator and Lab use ordinary Logto Native applications with Device Flow disabled. Deploy the matching coordinator with the client release. Historical device-code CLI login does not work with this coordinator; it remains only for older compatible services. Existing releases are immutable.
 
@@ -32,10 +32,10 @@ From the reviewed, clean repository:
 # Push only the reviewed public snapshot commit based on the published baseline.
 # Do not push the private local development history.
 git push origin main
-gh workflow run release.yml --ref main -f release_tag=v0.8.0
+gh workflow run release.yml --ref main -f release_tag=v0.9.0
 ```
 
-`v0.8.0` is the proposed target; recheck it is unused before dispatch: choose a new, unused project tag after review. Dispatch from the exact reviewed source revision. The publishing job creates the project tag only after all required builds have passed, and binds the Release to that job's `GITHUB_SHA`. Do not create or move a release tag during build iteration. Existing tags remain unchanged. The Go submodule uses its independent `sdk/v0.4.0` tag; create a new submodule tag only for a new Go SDK version.
+For each release, choose a new, unused project tag and recheck it before dispatch. Dispatch from the exact reviewed source revision. The publishing job creates the project tag only after all required builds have passed, and binds the Release to that job's `GITHUB_SHA`. Do not create or move a release tag during build iteration. Existing tags remain unchanged. The Go submodule uses its independent `sdk/v0.4.0` tag; create a new submodule tag only for a new Go SDK version.
 
 Check that all required jobs succeeded and the Release is published at [GitHub Releases](https://github.com/ywateru/CyberGrid/releases). Download `SHA256SUMS` with the desired asset and verify it:
 
@@ -66,7 +66,7 @@ REQUIRE_REDIS=1 npm --prefix sdk-js run test:bridge-integration
 python3 scripts/release/package.py sources
 python3 scripts/release/package.py macos --app '/absolute/path/to/CyberGrid Lab.app' --go-binary sdk/bin/cybergrid-macos
 python3 scripts/release/package.py android --apk /absolute/path/to/app-universal-debug.apk --go-binary sdk/bin/cybergrid-android-arm64
-RELEASE_TAG=v0.8.0 python3 scripts/release/package.py finalize
+RELEASE_TAG=v0.9.0 python3 scripts/release/package.py finalize
 ```
 
 Output is under `dist/release/`, which is not committed. `finalize` requires all three platform/source job metadata files. Source archives contain the offline SDK provider resources and licenses. Platform packages include full notices; the macOS CLI embeds its provider, while Android requires the OS-installed native library directory.
@@ -85,11 +85,11 @@ Before a final release freeze, review the explicit `scripts/release/source-polic
 
 Unpublished local history may contain reports later redacted in the current tree. Do not push that history on the strength of a current-tree scan. Preserve the private original freeze/evidence and, when necessary, create a reviewed public snapshot commit from the published baseline; record the local commit, exported tree and public commit mapping and verify actual public blobs. Do not rewrite existing published tags/history. Task012's intermediate snapshot excludes later task010 work: regenerate the allowlist, export, privacy/license checks and package hashes after the final sample freeze.
 
-The standalone Rust source archive lacks repository Node/Redis prerequisites. Its default ignored capability tests are an explicitly incomplete repository check; the full repository gate above must run them. `scripts/release/RELEASE-NOTES.md` prepares v0.8.0 and its independently versioned components; it is not evidence that the release exists or task010 is complete. Source changes in static products, finite admission, gates or browser adapters must not be presented as already present in immutable v0.7.0 downloads.
+The standalone Rust source archive lacks repository Node/Redis prerequisites. Its default ignored capability tests are an explicitly incomplete repository check; the full repository gate above must run them. `scripts/release/RELEASE-NOTES.md` describes v0.9.0 and its independently versioned components; check GitHub Releases for publication status. Release notes do not declare task010 complete. Source changes in static products, finite admission, gates or browser adapters must not be presented as already present in immutable v0.7.0 downloads.
 
 ## Complete repository source
 
-The prepared `CyberGrid-0.8.0-source.tar.gz` and `cybergrid-source-manifest.json` include only tracked inputs accepted by the explicit public policy. The embedded `SOURCE-MANIFEST.json` records every source hash and the actual public commit; the external manifest has identical bytes. This repository layout preserves sample relative imports into the actual SDKs and server. It includes `examples/ram-only-workspace/web/.env.example` as an exact public exception; other environment files remain excluded. No separate sample ZIP, private adapter or external AGPL implementation is included. The archive is source, not a preconfigured production deployment or complete real-world sample acceptance.
+The `CyberGrid-0.9.0-source.tar.gz` and `cybergrid-source-manifest.json` include only tracked inputs accepted by the explicit public policy. The embedded `SOURCE-MANIFEST.json` records every source hash and the actual public commit; the external manifest has identical bytes. This repository layout preserves sample relative imports into the actual SDKs and server. It includes `examples/ram-only-workspace/web/.env.example` as an exact public exception; other environment files remain excluded. No separate sample ZIP, private adapter or external AGPL implementation is included. The archive is source, not a preconfigured production deployment or complete real-world sample acceptance.
 
 After extracting the archive, install locked server, sdk-js, desktop and Web dependencies, build the server/JS SDK, then execute the sample commands below with actual Redis available. These commands are repository integration checks, not cloud/phone/long-run evidence:
 
@@ -109,4 +109,4 @@ npm --prefix examples/ram-only-workspace/web run build
 cargo test --locked --manifest-path examples/ram-only-workspace/Cargo.toml --workspace -- --include-ignored
 ```
 
-`finalize` verifies the exact version-derived asset set, including the complete source archive/manifest, and hashes each actual asset; it does not infer success from an old asset count. It refuses a release tag different from the prepared project version. The final publishing gate still requires integration-010 acceptance and independent review.
+`finalize` verifies the exact version-derived asset set, including the complete source archive/manifest, and hashes each actual asset; it does not infer success from an old asset count. It refuses a release tag different from the prepared project version. Publishing these test artifacts does not declare integration-010 cloud/phone/long-run acceptance complete.

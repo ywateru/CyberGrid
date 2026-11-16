@@ -96,22 +96,49 @@ impl Client {
             }
         });
     }
+    #[cfg(test)]
     pub(crate) async fn dial_tunnel(self: &Arc<Self>, d: &Device) -> Result<Arc<Peer>> {
-        let rt = self.active().await?;
+        let fence = crate::peer::DialFence::single(
+            self.closed_token().child_token(),
+            self.active().await?.generation,
+        );
+        self.dial_tunnel_fenced(d, &fence).await
+    }
+    pub(crate) async fn dial_tunnel_fenced(
+        self: &Arc<Self>,
+        d: &Device,
+        fence: &crate::peer::DialFence,
+    ) -> Result<Arc<Peer>> {
         let url = d
             .tunnel_url
             .as_deref()
             .ok_or_else(|| protocol("remote tunnel not ready"))?;
         self.validate_endpoint(url, true).await?;
         let endpoint = device_websocket_url(url)?;
-        self.dial_ws_endpoint(d, &endpoint, rt.cancel.child_token())
-            .await
+        self.dial_ws_endpoint_fenced(
+            d,
+            &endpoint,
+            self.active().await?.cancel.child_token(),
+            Some(fence),
+        )
+        .await
     }
+    #[cfg(test)]
     pub(crate) async fn dial_ws_endpoint(
         self: &Arc<Self>,
         d: &Device,
         endpoint: &str,
         cancel: CancellationToken,
+    ) -> Result<Arc<Peer>> {
+        self.dial_ws_endpoint_fenced(d, endpoint, cancel, None)
+            .await
+    }
+    async fn dial_ws_endpoint_fenced(
+        self: &Arc<Self>,
+        d: &Device,
+        endpoint: &str,
+        cancel: CancellationToken,
+        fence: Option<&crate::peer::DialFence>,
     ) -> Result<Arc<Peer>> {
         use tungstenite::client::IntoClientRequest;
         let guard = cancel.clone().drop_guard();
@@ -154,7 +181,7 @@ impl Client {
             Some(&d.id),
             None,
         );
-        let result = tokio::select! {_=cancel.cancelled()=>Err(Error::Cancelled),r=self.secure_client(raw,d,"cloudflare-tunnel")=>r};
+        let result = tokio::select! {_=cancel.cancelled()=>Err(Error::Cancelled),r=self.secure_client_fenced(raw,d,"cloudflare-tunnel",fence)=>r};
         if result.is_ok() {
             guard.disarm();
         }

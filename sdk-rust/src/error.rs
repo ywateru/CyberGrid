@@ -3,6 +3,10 @@ use thiserror::Error;
 /// Errors intentionally omit provider response bodies and all credentials.
 #[derive(Debug, Error)]
 pub enum Error {
+    #[error("operation failed: {diagnostic:?}")]
+    Operation {
+        diagnostic: Box<crate::DiagnosticSnapshot>,
+    },
     #[error("invalid configuration: {0}")]
     Config(String),
     #[error("CyberGrid API {code} ({status})")]
@@ -36,6 +40,13 @@ pub enum Error {
 }
 pub type Result<T> = std::result::Result<T, Error>;
 impl Error {
+    /// Fixed local context for failures of the new per-operation APIs.
+    pub fn diagnostic(&self) -> Option<&crate::DiagnosticSnapshot> {
+        match self {
+            Self::Operation { diagnostic } => Some(diagnostic),
+            _ => None,
+        }
+    }
     pub(crate) fn fatal(&self) -> bool {
         matches!(
             self,

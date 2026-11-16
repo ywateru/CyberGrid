@@ -262,45 +262,54 @@ impl Client {
         fence: &crate::peer::DialFence,
     ) -> Result<Arc<Peer>> {
         let allocated = std::sync::Mutex::new(None);
-        let operation = tokio::time::timeout(self.cfg.direct_timeout, async {
-            let a = self
-                .new_attempt(
-                    uuid::Uuid::new_v4().simple().to_string(),
-                    d.id.clone(),
-                    true,
-                    Some(&allocated),
+        let operation = tokio::time::timeout(
+            fence.timeout.unwrap_or(self.cfg.direct_timeout),
+            async {
+                let a = self
+                    .new_attempt(
+                        uuid::Uuid::new_v4().simple().to_string(),
+                        d.id.clone(),
+                        true,
+                        Some(&allocated),
+                    )
+                    .await?;
+                let _cleanup = AttemptCleanup::new(a.clone());
+                let offer =
+                    a.pc.create_offer(None)
+                        .await
+                        .map_err(|_| transport("create offer failed"))?;
+                a.pc.set_local_description(offer.clone())
+                    .await
+                    .map_err(|_| transport("local offer rejected"))?;
+                self.send_signal(
+                    &a.remote,
+                    &a.id,
+                    "offer",
+                    serde_json::to_value(offer).map_err(|_| protocol("cannot encode offer"))?,
                 )
                 .await?;
-            let _cleanup = AttemptCleanup::new(a.clone());
-            let offer =
-                a.pc.create_offer(None)
-                    .await
-                    .map_err(|_| transport("create offer failed"))?;
-            a.pc.set_local_description(offer.clone())
-                .await
-                .map_err(|_| transport("local offer rejected"))?;
-            self.send_signal(
-                &a.remote,
-                &a.id,
-                "offer",
-                serde_json::to_value(offer).map_err(|_| protocol("cannot encode offer"))?,
-            )
-            .await?;
-            a.signal_ready.send_replace(true);
-            let raw = tokio::select! {_=a.cancel.cancelled()=>return Err(transport("WebRTC connection closed")),r=async{a.ready_rx.lock().await.recv().await}=>r.ok_or_else(||transport("DataChannel did not open"))?};
-            let p = self
-                .secure_client_fenced(raw, d, "webrtc-direct", Some(fence))
-                .await?;
-            *p.rtc.lock().await = Some(a.clone());
-            a.connected.store(true, Ordering::SeqCst);
-            Ok(p)
-        });
+                a.signal_ready.send_replace(true);
+                let raw = tokio::select! {_=a.cancel.cancelled()=>return Err(transport("WebRTC connection closed")),r=async{a.ready_rx.lock().await.recv().await}=>r.ok_or_else(||transport("DataChannel did not open"))?};
+                let p = self
+                    .secure_client_fenced(raw, d, "webrtc-direct", Some(fence))
+                    .await?;
+                *p.rtc.lock().await = Some(a.clone());
+                a.connected.store(true, Ordering::SeqCst);
+                Ok(p)
+            },
+        );
         let result = tokio::select! { _ = fence.cancel.cancelled() => Err(Error::Cancelled), result = operation => result.map_err(|_|Error::Timeout("WebRTC direct")).and_then(|v| v) };
         if result.is_err() {
             let attempt = allocated.lock().unwrap().take();
             if let Some(a) = attempt {
                 a.close().await;
             }
+        }
+        if let Some(d) = &fence.diagnostic {
+            if let Err(error) = &result {
+                d.stop(crate::CloseReason::from_error(error));
+            }
+            d.complete();
         }
         result
     }

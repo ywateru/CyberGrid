@@ -201,6 +201,7 @@ impl ClientCertVerifier for Pins {
     }
 }
 impl Client {
+    #[cfg(test)]
     pub(crate) async fn secure_client(
         self: &Arc<Self>,
         raw: BoxIo,
@@ -217,6 +218,9 @@ impl Client {
         fence: Option<&crate::peer::DialFence>,
     ) -> Result<Arc<Peer>> {
         let rt = self.active().await?;
+        if let Some(d) = fence.and_then(|f| f.diagnostic.as_ref()) {
+            d.stage(crate::DiagnosticStage::Authentication, None);
+        }
         if fence.is_some_and(|f| f.generation != rt.generation || f.cancel.is_cancelled()) {
             return Err(Error::Cancelled);
         }
@@ -243,7 +247,12 @@ impl Client {
                         .map_err(|_| protocol("invalid TLS name"))?, raw)) => tls,
         }
         .map_err(|_| Error::Timeout("peer TLS handshake"))?
-        .map_err(|_| transport("peer TLS authentication rejected"))?;
+        .map_err(|_| {
+            if let Some(d) = fence.and_then(|f| f.diagnostic.as_ref()) {
+                d.stop(crate::CloseReason::Authentication);
+            }
+            transport("peer TLS authentication rejected")
+        })?;
         let cert = tls
             .get_ref()
             .1

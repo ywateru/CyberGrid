@@ -30,3 +30,5 @@ Rust 端口声明可附带独立的 `tunnel_url`，也可在保留端口声明�
 Node 重启或 Function 冷启动时 Redis 状态保留；Redis namespace 被重置或租约失效后，SDK重新注册、重发完整端口快照，原映射监听保留意图并等待当前代际的新连接。关闭操作取消该意图并停止provider／监听；中断的业务流不自动重放。业务消息应使用自己的ack、去重和同步机制。
 
 Android测试使用仓库的 [android-adb.py](../apps/tauri-test/tools/android-adb.py)，通过固定App私有命令队列调用与GUI相同的真实SDK逻辑。它不接受任意shell、凭据、证书或文件路径；登录受理、托管授权完成、SDK Ready和端到端数据确认是不同状态。发生超时或结果未知时先查status，不盲目重放业务命令。
+
+Rust 源码新增显式共享 Peer 多端口映射、调用级 deadline／取消和结构化诊断；旧 `Client::map()` 继续独占连接并保持原恢复语义。接口、预算边界、所有权、接收背压及验证范围见 [多端口会话](peer-sessions.md)。此改动尚未随发布包交付。

@@ -3,10 +3,12 @@ mod auth;
 mod capabilities;
 mod client;
 mod credentials;
+mod diagnostics;
 mod endpoints;
 mod error;
 mod iroh_direct;
 mod mux;
+mod options;
 mod peer;
 mod provider;
 mod rtc;
@@ -21,11 +23,15 @@ pub use auth::{
 };
 pub use client::{AuthFuture, AuthProvider, AuthRequestReason, AuthTokenRequest, Client};
 pub use credentials::CredentialStore;
+pub use diagnostics::{
+    CloseReason, DiagnosticPhase, DiagnosticSnapshot, DiagnosticStage, Transport,
+};
 pub use endpoints::{
     BridgeLimits, BrowserBridge, DirectorySnapshot, EndpointPolicy, EndpointProvider,
 };
 pub use error::{Error, Result};
-pub use peer::{Mapping, Peer};
+pub use options::{ConnectOptions, OpenOptions, OperationOptions};
+pub use peer::{Mapping, Peer, PeerStream};
 pub use state::{
     BusinessAuthorization, CoordinatorRevocation, LayerState, RemoteDisableOutcome, StatePhase,
     StateReason, StateSnapshot,

@@ -259,7 +259,14 @@ impl Client {
             guard.disarm();
             Ok(peer)
         };
-        tokio::select! { _ = rt.cancel.cancelled() => Err(Error::Cancelled), _ = fence.cancel.cancelled() => Err(Error::Cancelled), result = tokio::time::timeout(self.cfg.iroh_timeout, operation) => result.map_err(|_| Error::Timeout("direct iroh handshake"))? }
+        let result = tokio::select! { _ = rt.cancel.cancelled() => Err(Error::Cancelled), _ = fence.cancel.cancelled() => Err(Error::Cancelled), result = tokio::time::timeout(fence.timeout.unwrap_or(self.cfg.iroh_timeout), operation) => result.map_err(|_| Error::Timeout("direct iroh handshake")).and_then(|r| r) };
+        if let Some(d) = &fence.diagnostic {
+            if let Err(error) = &result {
+                d.stop(crate::CloseReason::from_error(error));
+            }
+            d.complete();
+        }
+        result
     }
 }
 struct ConnectionGuard(Option<Connection>);

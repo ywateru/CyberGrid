@@ -1,6 +1,6 @@
-# CyberGrid Rust SDK 0.3.0 (prepared for v0.8.0)
+# CyberGrid Rust SDK 0.4.0 (CyberGrid v0.9.0)
 
-Version 0.3.0 prepares the explicit remote gate, context-aware authorization and finite-admission APIs. It is not yet a published download; v0.7.0 retains Rust 0.2.0. Use the complete repository archive for sample/Node/Redis integration prerequisites. Final integration-010 cloud, phone and long-run gates remain separate.
+Version 0.4.0 adds shared peer mappings, per-call deadlines/cancellation and typed operation diagnostics to the remote gate and finite-admission APIs introduced in 0.3.0. Download the matching CyberGrid v0.9.0 archives; older release assets remain unchanged. Use the complete repository archive for sample/Node/Redis integration prerequisites. Final integration-010 cloud, phone and long-run gates remain separate.
 
 Native Rust device discovery and TCP port mapping for macOS and Android. Rust is the primary SDK for new development. Go implements the legacy protocol and cannot register against a coordinator that requires finite-v2 admission. The control plane manages Logto login, device metadata, heartbeats and signaling. The current source tries WebRTC, then direct iroh QUIC, then an authenticated Cloudflare Quick Tunnel. The CyberGrid server never proxies application bytes. iroh relays are disabled; Cloudflare carries only the final fallback connection, with endpoint TLS inside the WebSocket stream.
 
@@ -10,11 +10,11 @@ This crate implements HTTP v1 with the `memory-v1` coordination extension and ex
 
 ## Add to an application
 
-For the downloaded source archive, extract it beside your application's directory. With `my-app/Cargo.toml` and `cybergrid-sdk-rust-0.3.0/Cargo.toml` in sibling directories, put this in `my-app/Cargo.toml`:
+For the downloaded source archive, extract it beside your application's directory. With `my-app/Cargo.toml` and `cybergrid-sdk-rust-0.4.0/Cargo.toml` in sibling directories, put this in `my-app/Cargo.toml`:
 
 ```toml
 [dependencies]
-cybergrid-sdk = { path = "../cybergrid-sdk-rust-0.3.0" }
+cybergrid-sdk = { path = "../cybergrid-sdk-rust-0.4.0" }
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -139,6 +139,14 @@ The fixed public `endpointPolicy` includes a deterministic hash and a bounded li
 
 `update_device_tunnel_url(Some("https://device.example.test:8443"))` declares a host-operated ingress only after that exact origin and `/` are allowed by trusted policy. It must forward the SDK's fixed `/connect` to its local listener. Dialing derives **`wss://device.example.test:8443/connect`**, retaining the entire authority, including nondefault port or bracketed IPv6. `None` withdraws that explicit override (an enabled bundled provider may still supply its own Quick Tunnel). This never aliases a business HTTP port or browser bridge. The existing WebSocket transport still requires inner device mTLS and current same-owner/product authentication.
 
+## Shared peers and per-call control (Rust 0.4.0)
+
+Use one authenticated `Arc<Peer>` for several `peer.map(port, loopback)` mappings or `peer.dial_with_options(port, options)` streams. Closing or dropping one shared mapping does not close another; `peer.close().await` stops its listeners/streams and joins local tasks. Explicit peers do not reconnect across generations. The legacy `Client::map` retains exclusive ownership and listener recovery.
+
+`connect_with_options` adds an absolute monotonic deadline, cancellation, per-attempt direct strategy/timeouts and a diagnostic-only forced transport. `OpenOptions` bounds port setup without expiring a ready stream. New `PeerStream`, Peer and Mapping expose `snapshot()` / `watch_state()`; `subscribe_diagnostics()` and bounded `diagnostics_snapshot()` expose fixed, identity-free reasons and local attempt/session/mapping/stream IDs. New option-call failures carry `Error::Operation`; use `error.diagnostic()` rather than matching message text.
+
+See [the API contract, complete example and validation limits](../docs/peer-sessions.md). These source additions do not establish that the reported CyberNote phone synchronization failure is fixed, and are not yet in a published archive.
+
 ## Transport and provider configuration
 
 Defaults: server `https://cybergrid.aixgg.com`, `direct_strategy: DirectStrategy::Sequential`, WebRTC direct timeout 12 seconds, `iroh_enabled: true`, `iroh_timeout: 8 seconds`, Cloudflare fallback timeout 35 seconds, signal long-poll 15 seconds (with a 1-second minimum spacing); Google and Cloudflare STUN for WebRTC; no interface filter. Only `stun:` URLs are accepted; TURN is disabled. `interface_name` can select the real network interface when testing. Shortening `direct_timeout` alone does not force Cloudflare: iroh can still connect. Set `iroh_enabled: false` as well when explicitly testing the final fallback.
@@ -188,11 +196,11 @@ The [read-only JS SDK](../sdk-js/README.md) can retrieve the explicitly declared
 
 Previously validated release toolchain: Rust 1.97.1, macOS arm64, Android arm64 API 28 with NDK 27.2.12479018. iroh 1.4.1 raises the current source's declared Rust minimum to 1.91; that minimum and new platform behavior require their own checks and are not implied by the v0.6.0 release results. Cargo.lock is included; use `--locked`. Android requires its Rust target and NDK clang/linker environment. The SDK has no Windows implementation for the provided Unix credential store.
 
-For the downloaded archive, run these commands from the directory containing `cybergrid-sdk-rust-0.3.0-source.tar.gz`. The archive has one top-level directory, `cybergrid-sdk-rust-0.3.0/`, which directly contains Cargo.toml, Cargo.lock, src/, examples/ and scripts/:
+For the downloaded archive, run these commands from the directory containing `cybergrid-sdk-rust-0.4.0-source.tar.gz`. The archive has one top-level directory, `cybergrid-sdk-rust-0.4.0/`, which directly contains Cargo.toml, Cargo.lock, src/, examples/ and scripts/:
 
 ```sh
-tar -xzf cybergrid-sdk-rust-0.3.0-source.tar.gz
-cd cybergrid-sdk-rust-0.3.0
+tar -xzf cybergrid-sdk-rust-0.4.0-source.tar.gz
+cd cybergrid-sdk-rust-0.4.0
 cargo test --locked --lib
 cargo clippy --locked --all-targets -- -D warnings
 cargo build --locked --example lab

@@ -1,6 +1,6 @@
 [package]
 name = "cybergrid-sdk"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 rust-version = "1.91"
 description = "Native Rust CyberGrid device discovery and authenticated TCP mapping SDK"
@@ -34,6 +34,7 @@ webrtc = "0.14"
 x509-parser = "0.18"
 
 [dev-dependencies]
+tokio = { version = "1", features = ["test-util"] }
 axum = "0.8"
 
 [profile.release]

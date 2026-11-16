@@ -104,7 +104,9 @@ pub struct Client {
     pub(crate) nonce: String,
     pub(crate) session: RwLock<Option<Session>>,
     pub(crate) runtime: RwLock<Option<Arc<Runtime>>>,
+    terminal_reason: std::sync::Mutex<Option<crate::CloseReason>>,
     events: broadcast::Sender<Event>,
+    pub(crate) diagnostics: crate::diagnostics::Diagnostics,
     state: watch::Sender<StateSnapshot>,
     mutation: Mutex<()>,
     publication: Mutex<u64>,
@@ -164,7 +166,9 @@ impl Client {
             nonce: uuid::Uuid::new_v4().to_string(),
             session: RwLock::new(None),
             runtime: RwLock::new(None),
+            terminal_reason: std::sync::Mutex::new(None),
             events,
+            diagnostics: crate::diagnostics::Diagnostics::new(),
             state,
             mutation: Mutex::new(()),
             publication: Mutex::new(0),
@@ -199,6 +203,9 @@ impl Client {
             browser_imported: Mutex::new(None),
         }))
     }
+    pub(crate) fn terminal_reason(&self) -> Option<crate::CloseReason> {
+        *self.terminal_reason.lock().unwrap()
+    }
     pub(crate) fn closed_token(&self) -> &CancellationToken {
         &self.lifetime
     }
@@ -213,6 +220,13 @@ impl Client {
     }
     pub fn config(&self) -> &Config {
         &self.cfg
+    }
+    /// Fixed, identity-free diagnostics; recover the retained 256 records after lag.
+    pub fn subscribe_diagnostics(&self) -> broadcast::Receiver<crate::DiagnosticSnapshot> {
+        self.diagnostics.subscribe()
+    }
+    pub fn diagnostics_snapshot(&self) -> Vec<crate::DiagnosticSnapshot> {
+        self.diagnostics.snapshot()
     }
     pub fn subscribe(&self) -> broadcast::Receiver<Event> {
         self.events.subscribe()
@@ -475,6 +489,10 @@ impl Client {
         });
     }
     pub(crate) async fn reject_binding(&self) {
+        self.terminal_reason
+            .lock()
+            .unwrap()
+            .get_or_insert(crate::CloseReason::Authentication);
         self.remote_enabled.store(false, Ordering::SeqCst);
         self.hard_failure.store(true, Ordering::SeqCst);
         self.closed.store(true, Ordering::SeqCst);
@@ -1701,6 +1719,10 @@ impl Client {
     /// This retires this Client, while the host's OAuth owner and local service survive.
     /// The local gate closes before the first await; cloud failure cannot reopen it.
     pub async fn disable_remote(&self) -> RemoteDisableOutcome {
+        self.terminal_reason
+            .lock()
+            .unwrap()
+            .get_or_insert(crate::CloseReason::RemoteDisabled);
         let result = self.close().await;
         RemoteDisableOutcome {
             local_closed: true,
@@ -1712,6 +1734,10 @@ impl Client {
         }
     }
     pub async fn close(&self) -> Result<()> {
+        self.terminal_reason
+            .lock()
+            .unwrap()
+            .get_or_insert(crate::CloseReason::ClientClosed);
         self.remote_enabled.store(false, Ordering::SeqCst);
         self.closed.store(true, Ordering::SeqCst);
         self.lifetime.cancel();

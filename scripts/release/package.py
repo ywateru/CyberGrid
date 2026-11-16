@@ -15,8 +15,8 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'dist' / 'release'
-PROJECT_VERSION = '0.8.0'
-VERSIONS = {'go': '0.4.0', 'rust': '0.3.0', 'lab': '0.4.0', 'js': '0.2.0', 'server': '0.2.0', 'sample': '0.1.0'}
+PROJECT_VERSION = '0.9.0'
+VERSIONS = {'go': '0.4.0', 'rust': '0.4.0', 'lab': '0.4.0', 'js': '0.2.0', 'server': '0.2.0', 'sample': '0.1.0'}
 
 
 def public_sources(*prefixes):
